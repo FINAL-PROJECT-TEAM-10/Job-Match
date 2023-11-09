@@ -40,17 +40,16 @@ def update_query(sql: str, sql_params=()) -> bool:
         return cursor.rowcount > 0
 
 
-def insert_transaction_across_tables(sql_queries: tuple[str], sql_params: tuple[tuple]):
+def update_queries_transaction(sql_queries: tuple[str], sql_params: tuple[tuple]) -> bool:
     with _get_connection() as conn:
-        insertion_indices = []
         try:
             cursor = conn.cursor()
             for i in range(len(sql_queries)):
                 cursor.execute(sql_queries[i], sql_params[i])
-                insertion_indices.append(cursor.lastrowid)
+
             conn.commit()
-            return insertion_indices
+            return True
         except MariaDBError as error:
-            print(f"Insertion cascade failed: {error}")
+            print(f"Database update failed: {error}")
             conn.rollback()
-            return insertion_indices
+            return False
