@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends, status, HTTPException
-from fastapi.security import OAuth2PasswordBearer
+
 
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
@@ -12,11 +12,13 @@ _ALGORITHM = 'HS256'
 _TOKEN_EXPIRATION_TIME_MINUTES = 1440
 
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated="auto")
-oauth_2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 
 def verify_password(text_password, hashed_password):
     return pwd_context.verify(text_password, hashed_password)
 
+
+# TODO: Hashing is not working properly, may be not interpreted by the database correctly
 def get_password_hash(password):
     return pwd_context.hash(password)
 
@@ -26,7 +28,11 @@ def get_pass_by_username_admin(username):
     SELECT password FROM admin_list WHERE username = ?
     ''', (username,))
 
-    return hashed_password
+    if hashed_password:
+        hashed_password = hashed_password[0][0].decode('utf-8')
+        return hashed_password
+    else:
+        return None
 
 def get_admin(username):
     admin_data = read_query('''
@@ -57,29 +63,5 @@ def create_access_token(data, expiration_delta: timedelta = _TOKEN_EXPIRATION_TI
 def is_authenticated(token: str):
     return jwt.decode(token, _SECRET_KEY, algorithms=[_ALGORITHM])
 
-def get_current_user(token: str = Depends(oauth_2_scheme)):
-    credential_exception = HTTPException(status_code=401,
-                                         detail='Could not validate credentials',
-                                         headers={'WWW-AUTHENTICATE': 'Bearer'})
 
-    try:
-        payload = is_authenticated(token)
-        username = payload.get("username")
-        if username is None:
-            raise credential_exception
-
-        if payload['exp'] > datetime.now():
-            if payload['group'] == 'admins':
-                return Admin.from_query_results(**payload)
-            # elif payload['group'] == 'job seekers':
-            #     if payload['blocked']:
-            #         raise HTTPException(status_code=403,
-            #                             detail='User has been blocked.')
-            #     return JobSeeker.from_query_results(**payload)
-            # elif payload['group'] == 'companies':
-            #     return Company.from_query_results(**payload)
-
-    except JWTError:
-        raise HTTPException(status_code=401,
-                            detail='Expired token.')
 

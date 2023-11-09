@@ -10,7 +10,8 @@ def _get_connection() -> Connection:
         password=my_password,
         host=my_host,
         port=3306,
-        database='job_match'
+        database='job_match',
+        ssl=True
     )
 
 

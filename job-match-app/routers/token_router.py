@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app_models.token_models import Token
-from services.authorization_service import authenticate_admin, create_access_token
+from services.authorization_services import authenticate_admin, create_access_token
 
 token_router = APIRouter(prefix='/token')
 

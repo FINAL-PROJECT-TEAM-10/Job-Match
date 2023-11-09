@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 class Admin(BaseModel):
     id: Optional[int] = None
-    group: str
+    group: str = 'admins'
     username: str
     first_name: str
     last_name: str
