@@ -8,7 +8,6 @@ from pydantic import BaseModel
 class User(BaseModel):
     id: Optional[int] = None
     username: str
-    password: str
     first_name: str
     last_name: str
     summary: Optional[str] = None
