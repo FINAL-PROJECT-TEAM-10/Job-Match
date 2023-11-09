@@ -37,3 +37,6 @@ def update_query(sql: str, sql_params=()) -> bool:
         conn.commit()
 
         return cursor.rowcount > 0
+
+
+# TODO: update_transaction
