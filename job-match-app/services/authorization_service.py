@@ -1,12 +1,9 @@
-from fastapi import FastAPI, Depends, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from fastapi import HTTPException
+from fastapi import FastAPI, Depends, status, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 
 from datetime import datetime, timedelta
-
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-
 from app_models.admin_models import Admin
 from data.database import read_query
 
@@ -33,24 +30,23 @@ def get_pass_by_username_admin(username):
 
 def get_admin(username):
     admin_data = read_query('''
-    SELECT a.id, a.username, a.first_name, a.last_name, a.picture
-    c.email, c.address, c.telephone, c.post_code
-    l.city, l.country
+    SELECT a.id, a.username, a.first_name, a.last_name, a.picture, c.email, c.address, c.telephone, c.post_code, l.city, l.country
     FROM admin_list as a, employee_contacts as c, locations as l 
     WHERE a.employee_contacts_id = c.id AND c.locations_id = l.id
-    ''')
+    AND a.username = ?
+    ''', (username,))
 
     return next((Admin.from_query_results(*row) for row in admin_data), None)
 def authenticate_admin(username: str, password: str) -> bool:
     admin = get_admin(username)
     if not admin:
         return False
-    if not verify_password(password, get_pass_by_username_admin(username))
+    if not verify_password(password, get_pass_by_username_admin(username)):
         return False
 
     return admin
 
-def create_access_token(data: dict, expiration_delta: timedelta):
+def create_access_token(data, expiration_delta: timedelta = _TOKEN_EXPIRATION_TIME_MINUTES):
     to_encode = data.copy()
     expire = datetime.now() + expiration_delta
     to_encode['exp'] = expire
@@ -76,6 +72,9 @@ def get_current_user(token: str = Depends(oauth_2_scheme)):
             if payload['group'] == 'admins':
                 return Admin.from_query_results(**payload)
             # elif payload['group'] == 'job seekers':
+            #     if payload['blocked']:
+            #         raise HTTPException(status_code=403,
+            #                             detail='User has been blocked.')
             #     return JobSeeker.from_query_results(**payload)
             # elif payload['group'] == 'companies':
             #     return Company.from_query_results(**payload)
@@ -84,5 +83,3 @@ def get_current_user(token: str = Depends(oauth_2_scheme)):
         raise HTTPException(status_code=401,
                             detail='Expired token.')
 
-# TODO Test once model is done
-def get_seeker_not_blocked(current_seeker: JobSeeker)
