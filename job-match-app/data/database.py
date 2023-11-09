@@ -1,5 +1,6 @@
 from private_details import *
 from mariadb import connect
+from mariadb import Error as MariaDBError
 from mariadb.connections import Connection
 
 def _get_connection() -> Connection:
@@ -39,4 +40,17 @@ def update_query(sql: str, sql_params=()) -> bool:
         return cursor.rowcount > 0
 
 
-# TODO: update_transaction
+def insert_transaction_across_tables(sql_queries: tuple[str], sql_params: tuple[tuple]) -> bool:
+    with _get_connection() as conn:
+        try:
+            insertion_indices = []
+            cursor = conn.cursor()
+            for i in range(len(sql_queries)):
+                cursor.execute(sql_queries[i], sql_params[i])
+                insertion_indices.append(cursor.lastrowid)
+            conn.commit()
+            return insertion_indices
+        except MariaDBError as error:
+            print(f"Insertion cascade failed: {error}")
+            conn.rollback()
+            return False

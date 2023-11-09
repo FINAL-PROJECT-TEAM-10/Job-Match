@@ -5,19 +5,19 @@ from pydantic import BaseModel
 
 class Admin(BaseModel):
     id: Optional[int] = None
-    group = 'admins'
+    group: str
     username: str
     first_name: str
     last_name: str
     summary: Optional[str] = None
     picture: Optional[str] = None
 
-    email = str
-    address = Optional[str] = None
-    phone = Optional[str] = None
-    post_code = Optional[str] = None
+    email: str
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    post_code: Optional[str] = None
 
-    location = str
+    location: str
 
     @classmethod
     def from_query_results(cls, id, username, first_name, last_name, picture,
