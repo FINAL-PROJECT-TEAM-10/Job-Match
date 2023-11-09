@@ -1,12 +1,44 @@
 from app_models.admin_models import Admin
-from data.database import insert_query, insert_transaction_across_tables
+from data.database import insert_query, insert_transaction_across_tables, read_query
+from authorization_service import get_password_hash
 
+# TODO: Perhaps take the location and other repeatable checks in a separate service
+def find_location_id(city: str, country: str):
+    location_id = read_query('''SELECT id from locations WHERE city = ? AND country = ?''',
+                  (city, country))
 
-def create_admin(new_admin: Admin):
-    admin_data = ('''
+    if location_id:
+        return location_id
+
+def create_location(city: str, country: str):
+    new_location_id = insert_query('''
+    INSERT INTO locations (city, country)
+    VALUES (?,?)
+    ''', (city, country))
+
+    return new_location_id
+
+def create_admin(new_admin: Admin, password):
+    location_id = find_location_id(new_admin.city, new_admin.country)
+    if not location_id:
+        location_id = create_location(new_admin.city, new_admin.country)
+
+    password = get_password_hash(password)
+
+    contacts_id = insert_query('''
+    INSERT INTO employee_contacts
+    (email, address, telephone, post_code, locations_id)
+    VALUES (?,?,?,?,?)
+    ''', (new_admin.email, new_admin.address, new_admin.phone, new_admin.post_code,
+                    location_id))
+
+    admin_id = insert_query('''
     INSERT INTO admin_list
-    (username, password, role, locked, registration_date)
+    (username, password, first_name, last_name, picture, employee_contacts_id)
     VALUES (?,?,?,?,?,?)
-    ''')
+    ''', new_admin.username, password, new_admin.first_name, new_admin.last_name,
+                            new_admin.picture, contacts_id)
 
-    insert_transaction_across_tables()
+    new_admin['id'] = admin_id
+
+    return new_admin

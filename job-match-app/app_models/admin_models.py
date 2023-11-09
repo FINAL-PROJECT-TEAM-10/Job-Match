@@ -17,7 +17,8 @@ class Admin(BaseModel):
     phone: Optional[str] = None
     post_code: Optional[str] = None
 
-    location: str
+    city: str
+    country: str
 
     @classmethod
     def from_query_results(cls, id, username, first_name, last_name, picture,
@@ -29,5 +30,5 @@ class Admin(BaseModel):
             username=username, first_name=first_name, last_name=last_name,
             picture=picture,
             email=email, address=address, phone=telephone, post_code=post_code,
-            location=f'{city}, {country}'
+            city=city, country=country
         )
