@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from app_models.admin_models import Admin
+from app_models.company_models import Company
+from app_models.job_seeker_models import JobSeeker
 from data.database import read_query
 from services import admin_services, job_seeker_services, company_services
 
@@ -66,7 +68,7 @@ def authenticate_admin(username: str, password: str) -> bool | Admin:
     return admin
 
 
-def authenticate_seeker(username: str, password: str) -> bool | Job_Seeker:
+def authenticate_seeker(username: str, password: str) -> bool | JobSeeker:
     seeker = job_seeker_services.get_seeker(username)
     if not seeker:
         return False
@@ -94,6 +96,10 @@ def create_access_token(user_data, expiration_delta: timedelta = _TOKEN_EXPIRATI
         "email": user_data.email
     }
     expire = datetime.now() + expiration_delta
+
+    if to_encode['group'] != 'admins':
+        to_encode.update({'blocked': user_data.blocked})
+
     to_encode.update({'exp': expire})
 
     encoded_jwt = jwt.encode(to_encode, _SECRET_KEY, algorithm=_ALGORITHM)

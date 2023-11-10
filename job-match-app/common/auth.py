@@ -8,15 +8,13 @@ from pydantic import BaseModel
 from app_models.admin_models import Admin
 from services.authorization_services import is_authenticated
 
-# TODO Transform comments for job seekers and companies
-
 oauth_2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 # TODO: Currently the token verifies against the database.
-# If we want to go for statelessness the access token should not verify each time
-# against the database. Instead there should be a whitelist/blacklist that could
-# be in memory. Additional functionality could be adding refresh tokens.
+#  If we want to go for statelessness the access token should not verify each time
+#  against the database. Instead there should be a whitelist/blacklist that could
+#  be in memory. Additional functionality could be adding refresh tokens.
 
 def get_current_user(token: str = Depends(oauth_2_scheme)):
     credential_exception = HTTPException(status_code=401,
@@ -32,13 +30,13 @@ def get_current_user(token: str = Depends(oauth_2_scheme)):
         if payload['exp'] > time():
             if payload['group'] == 'admins':
                 return payload
-            # elif payload['group'] == 'job seekers':
-            #     if payload['blocked']:
-            #         raise HTTPException(status_code=403,
-            #                             detail='User has been blocked.')
-            #     return JobSeeker.from_query_results(**payload)
-            # elif payload['group'] == 'companies':
-            #     return Company.from_query_results(**payload)
+            elif payload['group'] == 'seekers':
+                if payload['blocked']:
+                    raise HTTPException(status_code=403,
+                                        detail='User has been blocked.')
+                return payload
+            elif payload['group'] == 'companies':
+                return payload
         else:
             raise ExpiredSignatureError
     except ExpiredSignatureError:

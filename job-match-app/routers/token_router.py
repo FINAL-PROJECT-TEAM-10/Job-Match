@@ -1,6 +1,3 @@
-# TODO Unsure of composition, might refactor later
-from datetime import timedelta
-
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -23,6 +20,6 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
                                     detail='Incorrect username or password.',
                                     headers={'WWW-AUTHENTICATE': 'Bearer'})
 
-    access_token = create_access_token(admin)
+    access_token = create_access_token(user)
 
     return {"access_token": access_token, "token_type": "bearer"}
