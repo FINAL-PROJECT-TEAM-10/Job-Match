@@ -30,3 +30,12 @@ def get_all_seekers():
         result.append(data_dict)
 
     return result
+
+
+@job_seekers_router.get('/personal_info')
+def view_proffesional(job_seeker_username: str = Query()):
+
+    current_job_seeker_info = job_seeker_services.job_seeker_info_username(job_seeker_username)
+
+
+    return current_job_seeker_info
