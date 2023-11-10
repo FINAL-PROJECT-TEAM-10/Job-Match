@@ -1,8 +1,8 @@
-from datetime import datetime
+from time import time
 
 from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError
+from jose import JWTError, ExpiredSignatureError
 
 from app_models.admin_models import Admin
 from services.authorization_services import is_authenticated
@@ -24,9 +24,9 @@ def get_current_user(token: str = Depends(oauth_2_scheme)):
         if username is None:
             raise credential_exception
 
-        if payload['exp'] > datetime.now():
+        if payload['exp'] > time():
             if payload['group'] == 'admins':
-                return Admin.from_query_results(**payload)
+                return payload
             # elif payload['group'] == 'job seekers':
             #     if payload['blocked']:
             #         raise HTTPException(status_code=403,
@@ -34,18 +34,8 @@ def get_current_user(token: str = Depends(oauth_2_scheme)):
             #     return JobSeeker.from_query_results(**payload)
             # elif payload['group'] == 'companies':
             #     return Company.from_query_results(**payload)
-
-    except JWTError:
+        else:
+            raise ExpiredSignatureError
+    except ExpiredSignatureError:
         raise HTTPException(status_code=401,
                             detail='Expired token.')
-
-
-class ExpiredException(BaseException):
-    '''
-    Exception that determines if a token has expired.
-    Logic necessary to bypass general exceptions.
-    '''
-
-    def __init__(self):
-        super().__init__()
-        self.message = ('Exception that determines if a token has expired.')
