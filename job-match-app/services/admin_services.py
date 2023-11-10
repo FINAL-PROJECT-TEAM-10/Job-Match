@@ -1,6 +1,6 @@
 from app_models.admin_models import Admin
 from data.database import insert_query, read_query
-from services.authorization_services import get_password_hash
+
 
 
 # TODO: Perhaps take the location and other repeatable checks in a separate service
@@ -38,6 +38,7 @@ def get_admin(username) -> None | Admin:
 
 
 def create_admin(new_admin: Admin, password):
+    from services.authorization_services import get_password_hash
     location_id = find_location_id(new_admin.city, new_admin.country)
     if not location_id:
         location_id = create_location(new_admin.city, new_admin.country)
