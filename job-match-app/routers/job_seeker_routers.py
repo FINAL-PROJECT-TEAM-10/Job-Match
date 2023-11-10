@@ -35,7 +35,23 @@ def get_all_seekers():
 @job_seekers_router.get('/personal_info')
 def view_proffesional(job_seeker_username: str = Query()):
 
+    if not job_seeker_services.check_seeker_exists(job_seeker_username):
+        return JSONResponse(status_code=404, content='No seeker found in the system!')
+
     current_job_seeker_info = job_seeker_services.job_seeker_info_username(job_seeker_username)
 
-
     return current_job_seeker_info
+
+
+@job_seekers_router.put('/personal_info/edit')
+def edit_proffesional_info(job_seeker_username: str = Query(),
+                           summary: str = Query(None),
+                           city: str = Query(None),
+                           status: str =  Query(enum=['Active', 'Busy'])):
+    
+
+    if not job_seeker_services.check_seeker_exists(job_seeker_username):
+        return JSONResponse(status_code=404, content='No seeker found in the system!')
+    
+    return job_seeker_services.edit_info(job_seeker_username, summary,city,status)
+    
