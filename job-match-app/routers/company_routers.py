@@ -13,15 +13,15 @@ def view_all_companies():
 
     for data in get_companies:
         get_companies_info = company_services.read_company_adress(data[0])
-        get_companies_location = company_services.read_company_location(data[0])
+        get_companies_location = company_services.read_company_location(get_companies_info[0][5])
         data_dict = {
             "Company Name": data[1],
             "Email": get_companies_info[0][1],
             "Work Adress": get_companies_info[0][2],
             "Telephone": get_companies_info[0][3],
-            "Country": get_companies_location[0][0],
             "City": get_companies_location[0][1],
-            "City Postal Code": get_companies_info[0][4]
+            "City Postal Code": get_companies_info[0][4],
+            "Country": get_companies_location[0][0]
         }
          
         result.append(data_dict)

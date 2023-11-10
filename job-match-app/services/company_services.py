@@ -12,7 +12,7 @@ def read_company_adress(id: int):
     return data
 
 def read_company_location(location: str):
-    data = read_query('SELECT l.country, l.city, cc.email, cc.address, cc.telephone, cc.post_code FROM locations l INNER JOIN company_contacts cc ON l.id = cc.locations_id;',(location,))
+    data = read_query('SELECT city,country FROM locations WHERE id = ?',(location,))
     return data
 
 def read_company_information(company: str):
