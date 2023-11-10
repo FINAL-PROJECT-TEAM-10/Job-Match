@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Query, Body,Header, HTTPException
 from fastapi.responses import JSONResponse
 from services import job_seeker_services
+from app_models.job_seeker_models import *
 
 job_seekers_router = APIRouter(prefix='/job_seekers',tags={'Job seekers'})
 
@@ -35,10 +36,13 @@ def get_all_seekers():
 @job_seekers_router.get('/personal_info')
 def view_proffesional(job_seeker_username: str = Query()):
 
-    if not job_seeker_services.check_seeker_exists(job_seeker_username):
+    job_seeker = JobSeekerOptionalInfo()
+    job_seeker.username = job_seeker_username
+
+    if not job_seeker_services.check_seeker_exists(job_seeker.username):
         return JSONResponse(status_code=404, content='No seeker found in the system!')
 
-    current_job_seeker_info = job_seeker_services.job_seeker_info_username(job_seeker_username)
+    current_job_seeker_info = job_seeker_services.job_seeker_info_username(job_seeker.username)
 
     return current_job_seeker_info
 
@@ -49,9 +53,18 @@ def edit_proffesional_info(job_seeker_username: str = Query(),
                            city: str = Query(None),
                            status: str =  Query(enum=['Active', 'Busy'])):
     
+    db_seeker = job_seeker_services.get_job_seeker_info(job_seeker_username)
+    job_seeker = JobSeekerOptionalInfo()
+    contacts = job_seeker_services.location_id_from_contacts(db_seeker[0][10])
+    db_location = job_seeker_services.location_finder(contacts)
+    job_seeker.username = job_seeker_username
+    job_seeker.summary = summary or db_seeker[0][5]
+    job_seeker.city = city or db_location[0][0]
+    job_seeker.status = status
+    
 
-    if not job_seeker_services.check_seeker_exists(job_seeker_username):
+    if not job_seeker_services.check_seeker_exists(job_seeker.username):
         return JSONResponse(status_code=404, content='No seeker found in the system!')
     
-    return job_seeker_services.edit_info(job_seeker_username, summary,city,status)
+    return job_seeker_services.edit_info(job_seeker.username, job_seeker.summary,job_seeker.city,job_seeker.status)
     

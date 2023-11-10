@@ -51,15 +51,11 @@ def check_seeker_exists(username: str):
 
 def edit_info(username: str, summary: str, city: str, status: str):
 
-    current_data = read_query('SELECT summary, busy, employee_contacts_id FROM job_seekers WHERE username = ?', (username,))
-    existing_summary = current_data[0][0]
-    existing_status = current_data[0][1]
-    existing_contacts = current_data[0][2]
-    existing_location_id = location_id_from_contacts(existing_contacts)
-    existing_location = location_finder(existing_location_id)
-    location = existing_location[0]
     converted_status = convert_status(status)
+    update_query('UPDATE job_seekers SET summary = ?, busy = ? WHERE username = ?', (summary, converted_status, username))
 
-    if summary and city and status:
-        update_query('UPDATE job_seekers SET summary = ?, busy = ? WHERE username = ?', (summary, converted_status, username))
+def get_job_seeker_info(username: str):
 
+    data = read_query('SELECT * FROM job_seekers WHERE username = ?', (username,))
+
+    return data
