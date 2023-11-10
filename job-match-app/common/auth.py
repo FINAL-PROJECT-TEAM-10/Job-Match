@@ -3,14 +3,15 @@ from time import time
 from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, ExpiredSignatureError
+from pydantic import BaseModel
 
 from app_models.admin_models import Admin
 from services.authorization_services import is_authenticated
 
-
 # TODO Transform comments for job seekers and companies
 
 oauth_2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 
 # TODO: Currently the token verifies against the database.
 # If we want to go for statelessness the access token should not verify each time
@@ -43,3 +44,11 @@ def get_current_user(token: str = Depends(oauth_2_scheme)):
     except ExpiredSignatureError:
         raise HTTPException(status_code=401,
                             detail='Expired token.')
+
+
+# For info purposes
+class TokenInfo(BaseModel):
+    id: int
+    group: str
+    username: str
+    email: str

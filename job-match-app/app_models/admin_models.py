@@ -32,3 +32,4 @@ class Admin(BaseModel):
             email=email, address=address, phone=telephone, post_code=post_code,
             city=city, country=country
         )
+

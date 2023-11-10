@@ -6,7 +6,7 @@ from services.authorization_services import get_password_hash
 # TODO: Perhaps take the location and other repeatable checks in a separate service
 def find_location_id(city: str, country: str):
     location_id = read_query('''SELECT id from locations WHERE city = ? AND country = ?''',
-                             (city, country))[0][0]
+                             (city, country))
 
     if location_id:
         return location_id
