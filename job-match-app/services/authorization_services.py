@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Depends, status, HTTPException
 
-
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -9,7 +8,7 @@ from data.database import read_query
 
 _SECRET_KEY = '2d776838352e75a9f95de915c269c8ce45b12de47f720213c5f71c4e25618c25'
 _ALGORITHM = 'HS256'
-_TOKEN_EXPIRATION_TIME_MINUTES = 1440
+_TOKEN_EXPIRATION_TIME_MINUTES = timedelta(minutes=1440)
 
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated="auto")
 
@@ -24,15 +23,16 @@ def get_password_hash(password):
 
 
 def get_pass_by_username_admin(username):
-    hashed_password = read_query ('''
+    hashed_password = read_query('''
     SELECT password FROM admin_list WHERE username = ?
     ''', (username,))
 
     if hashed_password:
-        hashed_password = hashed_password[0][0].decode('utf-8')
+        hashed_password = hashed_password[0][0]
         return hashed_password
     else:
         return None
+
 
 def get_admin(username):
     admin_data = read_query('''
@@ -43,7 +43,9 @@ def get_admin(username):
     ''', (username,))
 
     return next((Admin.from_query_results(*row) for row in admin_data), None)
-def authenticate_admin(username: str, password: str) -> bool:
+
+
+def authenticate_admin(username: str, password: str) -> bool | Admin:
     admin = get_admin(username)
     if not admin:
         return False
@@ -52,16 +54,20 @@ def authenticate_admin(username: str, password: str) -> bool:
 
     return admin
 
+
 def create_access_token(data, expiration_delta: timedelta = _TOKEN_EXPIRATION_TIME_MINUTES):
-    to_encode = data.copy()
+    to_encode = {
+        "id": data.id,
+        "group": data.group,
+        "username": data.username,
+        "email": data.email
+    }
     expire = datetime.now() + expiration_delta
-    to_encode['exp'] = expire
+    to_encode.update({'exp': expire})
 
     encoded_jwt = jwt.encode(to_encode, _SECRET_KEY, algorithm=_ALGORITHM)
     return encoded_jwt
 
+
 def is_authenticated(token: str):
     return jwt.decode(token, _SECRET_KEY, algorithms=[_ALGORITHM])
-
-
-

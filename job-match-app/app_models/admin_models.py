@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -24,7 +25,6 @@ class Admin(BaseModel):
     def from_query_results(cls, id, username, first_name, last_name, picture,
                            email, address, telephone, post_code,
                            city, country):
-
         return cls(
             id=id, group='admins',
             username=username, first_name=first_name, last_name=last_name,

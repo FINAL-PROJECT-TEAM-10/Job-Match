@@ -16,6 +16,7 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
         raise HTTPException(status_code=401,
                             detail='Incorrect username or password.',
                             headers={'WWW-AUTHENTICATE': 'Bearer'})
+
     access_token = create_access_token(admin)
 
     return {"access_token": access_token, "token_type": "bearer"}
