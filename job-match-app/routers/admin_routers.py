@@ -13,6 +13,8 @@ admin_router = APIRouter(prefix='/admin')
 def get_self(current_user: Admin = Depends(get_current_user)):
     return current_user
 
+# TODO: Fix registration
+
 @admin_router.post('/register')
 def add_admin(new_admin = Depends(get_current_user)):
     if admin_services.admin_exists(new_admin):
