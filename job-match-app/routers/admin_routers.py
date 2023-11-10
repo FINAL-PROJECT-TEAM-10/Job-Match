@@ -56,3 +56,4 @@ def add_admin(registration_details: Admin, password: Annotated[str, Body()], cur
     new_admin = admin_services.create_admin(registration_details, password)
     return JSONResponse(status_code=201,
                         content=new_admin.json())
+

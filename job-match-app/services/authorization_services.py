@@ -1,10 +1,9 @@
-from fastapi import FastAPI, Depends, status, HTTPException
-
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from app_models.admin_models import Admin
 from data.database import read_query
+from services import admin_services, job_seeker_services, company_services
 
 _SECRET_KEY = '2d776838352e75a9f95de915c269c8ce45b12de47f720213c5f71c4e25618c25'
 _ALGORITHM = 'HS256'
@@ -17,12 +16,11 @@ def verify_password(text_password, hashed_password):
     return pwd_context.verify(text_password, hashed_password)
 
 
-# TODO: Hashing is not working properly, may be not interpreted by the database correctly
 def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def get_pass_by_username_admin(username):
+def _get_pass_by_username_admin(username):
     hashed_password = read_query('''
     SELECT password FROM admin_list WHERE username = ?
     ''', (username,))
@@ -34,33 +32,66 @@ def get_pass_by_username_admin(username):
         return None
 
 
-def get_admin(username):
-    admin_data = read_query('''
-    SELECT a.id, a.username, a.first_name, a.last_name, a.picture, c.email, c.address, c.telephone, c.post_code, l.city, l.country
-    FROM admin_list as a, employee_contacts as c, locations as l 
-    WHERE a.employee_contacts_id = c.id AND c.locations_id = l.id
-    AND a.username = ?
+def _get_pass_by_username_seeker(username):
+    hashed_password = read_query('''
+    SELECT password FROM job_seekers WHERE username = ?
     ''', (username,))
 
-    return next((Admin.from_query_results(*row) for row in admin_data), None)
+    if hashed_password:
+        hashed_password = hashed_password[0][0]
+        return hashed_password
+    else:
+        return None
+
+
+def _get_pass_by_username_company(username):
+    hashed_password = read_query('''
+    SELECT password FROM companies WHERE username = ?
+    ''', (username,))
+
+    if hashed_password:
+        hashed_password = hashed_password[0][0]
+        return hashed_password
+    else:
+        return None
 
 
 def authenticate_admin(username: str, password: str) -> bool | Admin:
-    admin = get_admin(username)
+    admin = admin_services.get_admin(username)
     if not admin:
         return False
-    if not verify_password(password, get_pass_by_username_admin(username)):
+    if not verify_password(password, _get_pass_by_username_admin(username)):
         return False
 
     return admin
 
 
-def create_access_token(data, expiration_delta: timedelta = _TOKEN_EXPIRATION_TIME_MINUTES):
+def authenticate_seeker(username: str, password: str) -> bool | Job_Seeker:
+    seeker = job_seeker_services.get_seeker(username)
+    if not seeker:
+        return False
+    if not verify_password(password, _get_pass_by_username_seeker(username)):
+        return False
+
+    return seeker
+
+
+def authenticate_company(username: str, password: str) -> bool | Company:
+    company = company_services.get_company(username)
+    if not company:
+        return False
+    if not verify_password(password, _get_pass_by_username_company(username)):
+        return False
+
+    return company
+
+
+def create_access_token(user_data, expiration_delta: timedelta = _TOKEN_EXPIRATION_TIME_MINUTES):
     to_encode = {
-        "id": data.id,
-        "group": data.group,
-        "username": data.username,
-        "email": data.email
+        "id": user_data.id,
+        "group": user_data.group,
+        "username": user_data.username,
+        "email": user_data.email
     }
     expire = datetime.now() + expiration_delta
     to_encode.update({'exp': expire})
