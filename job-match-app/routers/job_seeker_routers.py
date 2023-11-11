@@ -9,7 +9,11 @@ job_seekers_router = APIRouter(prefix='/job_seekers',tags={'Job seekers'})
 
 
 @job_seekers_router.get('/', description= 'All functions for job seekers')
-def get_all_seekers():
+def get_all_seekers(current_user_payload=Depends(get_current_user)):
+
+    if current_user_payload['group'] != 'seekers':
+        return JSONResponse(status_code=403,
+                            content='Only seekers and admins can register other seekers')
 
 
     get_seekers = job_seeker_services.read_seekers()
@@ -18,28 +22,33 @@ def get_all_seekers():
 
     for data in get_seekers:
         seeker_contacts = job_seeker_services.contacts_info_for_seeker(data[10])
-        seeker_location = job_seeker_services.location_finder(seeker_contacts[0][4])
+        seeker_location = job_seeker_services.location_finder(seeker_contacts[0][3])
         data_dict = {
             "Username": data[1],
             "Email": seeker_contacts [0][0],
             'Adress': seeker_contacts[0][1],
             'Telephone': seeker_contacts[0][2],
             'City': seeker_location[0][0],
-            'Post Code': seeker_contacts[0][3],
             'Country': seeker_location[0][1],
 
         }
 
         result.append(data_dict)
+    
 
     return result
 
 
 @job_seekers_router.get('/personal_info')
-def view_proffesional(job_seeker_username: str = Query()):
-
+def view_proffesional(current_user_payload=Depends(get_current_user)):
+    
+    if current_user_payload['group'] != 'seekers':
+        return JSONResponse(status_code=403,
+                            content='Only seekers can get personal info them')
+    
+    username = current_user_payload.get('username')
     job_seeker = JobSeekerOptionalInfo()
-    job_seeker.username = job_seeker_username
+    job_seeker.username = username
 
     if not job_seeker_services.check_seeker_exists(job_seeker.username):
         return JSONResponse(status_code=404, content='No seeker found in the system!')
@@ -50,16 +59,22 @@ def view_proffesional(job_seeker_username: str = Query()):
 
 
 @job_seekers_router.put('/personal_info/edit')
-def edit_proffesional_info(job_seeker_username: str = Query(),
-                           summary: str = Query(None),
+def edit_proffesional_info(summary: str = Query(None),
                            city: str = Query(None),
-                           status: str =  Query(enum=['Active', 'Busy'])):
+                           status: str =  Query(enum=['Active', 'Busy']),
+                           current_user_payload=Depends(get_current_user)):
     
-    db_seeker = job_seeker_services.get_job_seeker_info(job_seeker_username)
+    if current_user_payload['group'] != 'seekers':
+        return JSONResponse(status_code=403,
+                            content='Only seekers can edit their info')
+    
+    username = current_user_payload.get('username')
+    
+    db_seeker = job_seeker_services.get_job_seeker_info(username)
     job_seeker = JobSeekerOptionalInfo()
     contacts = job_seeker_services.location_id_from_contacts(db_seeker[0][10])
     db_location = job_seeker_services.location_finder(contacts)
-    job_seeker.username = job_seeker_username
+    job_seeker.username = username
     job_seeker.summary = summary or db_seeker[0][5]
     job_seeker.city = city or db_location[0][0]
     job_seeker.status = status

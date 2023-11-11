@@ -14,7 +14,7 @@ def read_seekers():
 
 def contacts_info_for_seeker(contact_id: int):
 
-    data = read_query('SELECT email, address, telephone, post_code, locations_id FROM employee_contacts WHERE id = ?', (contact_id,))
+    data = read_query('SELECT email, address, telephone, locations_id FROM employee_contacts WHERE id = ?', (contact_id,))
 
 
     return data
@@ -56,6 +56,8 @@ def edit_info(username: str, summary: str, city: str, status: str):
 
     converted_status = convert_status(status)
     update_query('UPDATE job_seekers SET summary = ?, busy = ? WHERE username = ?', (summary, converted_status, username))
+
+    return JSONResponse(status_code=200, content='You successfully edited your personal info')
 
 def get_job_seeker_info(username: str):
 
