@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Query, Body,Header, HTTPException
+from fastapi import APIRouter, Query, Body,Header, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from services import job_seeker_services
 from app_models.job_seeker_models import *
+from typing import Annotated
+from common.auth import get_current_user
 
 job_seekers_router = APIRouter(prefix='/job_seekers',tags={'Job seekers'})
 
@@ -67,4 +69,31 @@ def edit_proffesional_info(job_seeker_username: str = Query(),
         return JSONResponse(status_code=404, content='No seeker found in the system!')
     
     return job_seeker_services.edit_info(job_seeker.username, job_seeker.summary,job_seeker.city,job_seeker.status)
+
+@job_seekers_router.post('/register')
+def add_seeker(seeker_username: str = Query(),
+              seeker_password: str = Query(),
+              seeker_first_name: str = Query(), 
+              seeker_last_name: str = Query(),
+              seeker_email_adress: str = Query(),
+              seeker_city: str = Query(),
+              seeker_country: str = Query()):
+    
+    current_seeker = JobSeekerOptionalInfo()
+    current_seeker.username = seeker_username
+    current_seeker.password = seeker_password
+    current_seeker.first_name = seeker_first_name
+    current_seeker.last_name = seeker_last_name
+    current_seeker.email = seeker_email_adress
+    current_seeker.city = seeker_city
+    current_seeker.country = seeker_country
+    
+
+    if job_seeker_services.check_seeker_exists(current_seeker.username):
+        return JSONResponse(status_code=409,
+                            content=f'Seeker with username {current_seeker.username} already exists.')
+
+    new_seeker = job_seeker_services.create_seeker(current_seeker.username, current_seeker.password, current_seeker.first_name, current_seeker.last_name,
+                                                   current_seeker.email, current_seeker.city, current_seeker.country)
+    return new_seeker
     

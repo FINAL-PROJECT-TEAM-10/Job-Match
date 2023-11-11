@@ -22,6 +22,9 @@ class JobSeekerOptionalInfo:
     summary: Optional[str] = None
     status: Optional[str] = None
     city: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None
+    country: Optional[str] = None
 
     @classmethod
     def from_query_result(cls, username, first_name,last_name, summary,status):
@@ -44,7 +47,7 @@ class JobSeeker(BaseModel):
     first_name: str
     email: str
     last_name: str
-    summary: str
+    summary: Optional[str] = None
     blocked: Optional[bool] = 0
 
     @classmethod

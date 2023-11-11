@@ -2,8 +2,10 @@ from data.database import read_query, insert_query, update_query
 from fastapi import Response
 from fastapi.responses import JSONResponse
 from common.job_seeker_status_check import recognize_status, convert_status
-from app_models.job_seeker_models import JobSeekerInfo
+from app_models.job_seeker_models import JobSeekerInfo, JobSeekerOptionalInfo
 from app_models.job_seeker_models import JobSeeker
+from services.authorization_services import get_password_hash
+from services import admin_services
 
 def read_seekers():
 
@@ -71,3 +73,35 @@ def get_seeker(username) -> None | JobSeeker:
         ''', (username,))
 
     return next((JobSeeker.from_query_results(*row) for row in seeker_data), None)
+
+
+def create_seeker(username, password, first_name, last_name, email, city, country):
+
+
+    location_id = admin_services.find_location_id(city, country)
+
+    if not location_id:
+        location_id = admin_services.create_location(city, country)
+
+    password = get_password_hash(password)
+    adress = ' '
+    telephone = ' '
+    busy = False
+    blocked = False
+    approved = 0
+
+    new_contact = insert_query('''
+    INSERT INTO employee_contacts
+    (email, address, telephone,locations_id)
+    VALUES (?,?,?,?)
+''', (email, adress, telephone, location_id)
+    )
+
+    new_seeker = insert_query('''
+    INSERT INTO job_seekers
+    (username, password, first_name, last_name, busy, blocked, approved, employee_contacts_id)
+    VALUES (?,?,?,?,?,?,?,?)
+    ''', (username, password, first_name, last_name, busy, blocked, approved, new_contact)
+                              )
+    
+    return JSONResponse(status_code=200, content='Seeker was created')

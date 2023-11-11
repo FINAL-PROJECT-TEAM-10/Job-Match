@@ -9,7 +9,7 @@ def find_location_id(city: str, country: str):
                              (city, country))
 
     if location_id:
-        return location_id
+        return location_id[0][0]
 
 
 def create_location(city: str, country: str):
@@ -28,7 +28,7 @@ def admin_exists(admin: Admin) -> bool:
 
 def get_admin(username) -> None | Admin:
     admin_data = read_query('''
-    SELECT a.id, a.username, a.first_name, a.last_name, a.picture, c.email, c.address, c.telephone, c.post_code, l.city, l.country
+    SELECT a.id, a.username, a.first_name, a.last_name, a.picture, c.email, c.address, c.telephone, l.city, l.country
     FROM admin_list as a, employee_contacts as c, locations as l 
     WHERE a.employee_contacts_id = c.id AND c.locations_id = l.id
     AND a.username = ?
@@ -48,9 +48,9 @@ def create_admin(new_admin: Admin, password):
 
     contacts_id = insert_query('''
     INSERT INTO employee_contacts
-    (email, address, telephone, post_code, locations_id)
-    VALUES (?,?,?,?,?)
-    ''', (new_admin.email, new_admin.address, new_admin.phone, new_admin.post_code,
+    (email, address, telephone, locations_id)
+    VALUES (?,?,?,?)
+    ''', (new_admin.email, new_admin.address, new_admin.phone,
           location_id))
 
     admin_id = insert_query('''

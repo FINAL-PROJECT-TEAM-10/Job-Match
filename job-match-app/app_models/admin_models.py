@@ -16,20 +16,19 @@ class Admin(BaseModel):
     email: str
     address: Optional[str] = None
     phone: Optional[str] = None
-    post_code: Optional[str] = None
 
     city: str
     country: str
 
     @classmethod
     def from_query_results(cls, id, username, first_name, last_name, picture,
-                           email, address, telephone, post_code,
+                           email, address, telephone,
                            city, country):
         return cls(
             id=id, group='admins',
             username=username, first_name=first_name, last_name=last_name,
             picture=picture,
-            email=email, address=address, phone=telephone, post_code=post_code,
+            email=email, address=address, phone=telephone,
             city=city, country=country
         )
 
