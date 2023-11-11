@@ -13,8 +13,8 @@ def read_company_adress(id: int):
     data = read_query('SELECT * FROM company_contacts WHERE company_id = ?',(id,))
     return data
 
-def read_company_location(location: str):
-    data = read_query('SELECT city,country FROM locations WHERE id = ?',(location,))
+def read_company_location(location_id: int):
+    data = read_query('SELECT city,country FROM locations WHERE id = ?',(location_id,))
     return data
 
 def read_company_information(company: str):

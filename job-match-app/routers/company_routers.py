@@ -8,22 +8,24 @@ from common.auth import get_current_user
 companies_router = APIRouter(prefix='/companies',tags={'Everything available for Companies'})
 
 @companies_router.get('/', description= 'You can view every company from here')
-def view_all_companies():
-
+def view_all_companies(current_user_payload=Depends(get_current_user)):
+    if current_user_payload['group'] != 'companies':
+        return JSONResponse(status_code=403,
+                            content='This option is only available for Companies')
+    
     get_companies = company_services.read_companies()
     result = []
 
     for data in get_companies:
         get_companies_info = company_services.read_company_adress(data[0])
-        get_companies_location = company_services.read_company_location(get_companies_info[0][5])
+        get_companies_location = company_services.read_company_location(get_companies_info[0][4])
         data_dict = {
             "Company Name": data[1],
             "Email": get_companies_info[0][1],
             "Work Adress": get_companies_info[0][2],
             "Telephone": get_companies_info[0][3],
-            "City": get_companies_location[0][1],
-            "City Postal Code": get_companies_info[0][4],
-            "Country": get_companies_location[0][0]
+            "City": get_companies_location[0][0],
+            "Country": get_companies_location[0][1]
         }
          
         result.append(data_dict)
@@ -45,10 +47,12 @@ def company_registration(Company_Name: str = Query(), Password: str = Query(),
     return create_company
 
 
-
 @companies_router.get('/information')
-def your_company_information(company: str):
-
+def your_company_information(company: str,current_user_payload=Depends(get_current_user)):
+    
+    if current_user_payload['group'] != 'companies':
+            return JSONResponse(status_code=403,
+                                content='This option is only available for Companies')  
     company_info = company_services.read_company_information(company)
     
     return Company(company_name=company_info.company_name,email = company_info.company_name, work_adress = company_info.company_name, 
