@@ -3,6 +3,7 @@ from fastapi import Response
 from fastapi.responses import JSONResponse
 from common.job_seeker_status_check import recognize_status, convert_status
 from app_models.job_seeker_models import JobSeekerInfo
+from app_models.job_seeker_models import JobSeeker
 
 def read_seekers():
 
@@ -59,3 +60,14 @@ def get_job_seeker_info(username: str):
     data = read_query('SELECT * FROM job_seekers WHERE username = ?', (username,))
 
     return data
+
+
+# TODO: Consider having a more encompassing get function
+def get_seeker(username) -> None | JobSeeker:
+    seeker_data = read_query('''
+        SELECT js.id, js.username, ec.email, js.first_name, js.last_name, js.summary, js.blocked
+        FROM job_seekers as js, employee_contacts as ec
+        WHERE js.employee_contacts_id = ec.id AND js.username = ?
+        ''', (username,))
+
+    return next((JobSeeker.from_query_results(*row) for row in seeker_data), None)
