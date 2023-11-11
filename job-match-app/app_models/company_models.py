@@ -1,20 +1,29 @@
+# From Bobby's Branch
+from typing import Optional
+
 from pydantic import BaseModel
 
+
 class Company(BaseModel):
-    company_name: str
+    id: Optional[int] = None
+    group: str = 'companies'
+    username: str
     email: str
-    work_adress: str
-    telephone: int
+    work_address: str
+    telephone: str
     country: str
     city: str
+    blocked: Optional[bool] = 0
 
     @classmethod
-    def from_company_result(cls,company_name,email,work_adress,telephone,country,city):
-        return cls(
-            company_name = company_name,
-            email = email,
-            work_adress = work_adress,
-            telephone = telephone,
-            country = country,
-            city = city
-        )
+    def from_query_result(cls, id, username, email,
+                            work_address, telephone, country, city, blocked):
+        return cls(id=id,
+                   username=username,
+                   email=email,
+                   work_address=work_address,
+                   telephone=telephone,
+                   country=country,
+                   city=city,
+                   blocked=blocked,
+                   group='companies')
