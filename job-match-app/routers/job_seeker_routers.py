@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Query, Body,Header, HTTPException, Depends
+from fastapi import APIRouter, Query,HTTPException, Depends
 from fastapi.responses import JSONResponse
 from services import job_seeker_services
 from app_models.job_seeker_models import *
 from typing import Annotated
 from common.auth import get_current_user
+from common.country_validators import validate_location
 
 job_seekers_router = APIRouter(prefix='/job_seekers',tags={'Job seekers'})
 
@@ -11,9 +12,9 @@ job_seekers_router = APIRouter(prefix='/job_seekers',tags={'Job seekers'})
 @job_seekers_router.get('/', description= 'All functions for job seekers')
 def get_all_seekers(current_user_payload=Depends(get_current_user)):
 
-    if current_user_payload['group'] != 'seekers':
+    if current_user_payload['group'] != 'admins':
         return JSONResponse(status_code=403,
-                            content='Only seekers and admins can register other seekers')
+                            content='Only  admins can view all seekers')
 
 
     get_seekers = job_seeker_services.read_seekers()
@@ -93,6 +94,9 @@ def add_seeker(seeker_username: str = Query(),
               seeker_email_adress: str = Query(),
               seeker_city: str = Query(),
               seeker_country: str = Query()):
+    
+    validate_location(seeker_city, seeker_country)
+
     
     current_seeker = JobSeekerOptionalInfo()
     current_seeker.username = seeker_username
