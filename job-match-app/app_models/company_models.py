@@ -1,4 +1,3 @@
-# From Bobby's Branch
 from typing import Optional
 
 from pydantic import BaseModel

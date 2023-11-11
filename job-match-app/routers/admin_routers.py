@@ -8,7 +8,7 @@ from app_models.admin_models import Admin
 from common.auth import get_current_user, TokenInfo
 from services import admin_services
 
-admin_router = APIRouter(prefix='/admin')
+admin_router = APIRouter(prefix='/admin',tags={'Only for Admins'})
 
 
 @admin_router.get('/info', response_model=TokenInfo,

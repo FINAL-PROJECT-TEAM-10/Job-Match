@@ -4,10 +4,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app_models.token_models import Token
 from services.authorization_services import authenticate_admin, authenticate_seeker, authenticate_company, create_access_token
 
-token_router = APIRouter(prefix='/token')
+token_router = APIRouter(prefix='/token',tags={'Get token upon registration'})
 
 
-@token_router.post('/', response_model=Token, tags=['token'])
+@token_router.post('/', response_model=Token)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = authenticate_admin(form_data.username, form_data.password)
     if not user:

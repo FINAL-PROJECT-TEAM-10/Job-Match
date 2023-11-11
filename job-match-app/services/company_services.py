@@ -2,6 +2,8 @@ from data.database import read_query, insert_query, update_query
 from fastapi import Response
 from fastapi.responses import JSONResponse
 from app_models.company_models import Company
+from services import admin_services
+from services.authorization_services import get_password_hash
 
 def read_companies():
     data = read_query('SELECT * FROM companies')
@@ -30,3 +32,37 @@ def get_company(username) -> None | Company:
         ''', (username,))
 
     return next((Company.from_query_result(*row) for row in company_data), None)
+
+def check_company_exist(name: str):
+    data = read_query('SELECT username FROM companies WHERE username = ?',(name,))
+    return bool(data)
+
+
+def find_company_id_byusername(nickname: str):
+    data = read_query('SELECT id FROM companies WHERE username = ?',(nickname,))
+    return data[0][0]
+
+def create_company(Company_Name, Password, Company_City, Company_Country,Company_Adress,Telephone_Number, Email_Adress):
+    
+    location_id = admin_services.find_location_id(Company_City,Company_Country)
+    
+    if not location_id:
+        location_id = admin_services.create_location(Company_City,Company_Country)
+
+    password = get_password_hash(Password)
+
+    create_new_company = insert_query('''
+        INSERT INTO companies
+        (username,password)
+        VALUES (?,?)
+        ''', (Company_Name, password,))
+
+    company_id = find_company_id_byusername(Company_Name)
+
+    create_new_company_contact = insert_query('''
+    INSERT INTO company_contacts
+    (email, address, telephone, locations_id,company_id)
+    VALUES (?,?,?,?,?)
+    ''', (Email_Adress, Company_Adress,Telephone_Number, location_id,company_id,))
+
+    return JSONResponse(status_code=200,content='Your company has been created')
