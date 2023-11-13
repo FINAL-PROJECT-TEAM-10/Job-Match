@@ -1,5 +1,5 @@
 from data.database import read_query, insert_query, update_query
-from datetime import date
+from datetime import date,datetime
 from app_models.job_ads_models import Job_ad
 
 def find_company(name_of_company):
@@ -11,15 +11,14 @@ def find_name_by_id(id: int):
     data = read_query('SELECT username from companies WHERE id = ?',(id,))
     return data[0][0]
 
-def create_job_add(description: str, min_salary: int, max_salary: int, status: str, date_posted: date, name_of_company: str) -> Job_ad:
+def create_job_add(description: str, min_salary: int, max_salary: int, status: str,company_id: int) -> Job_ad:
 
-    get_company = find_company(name_of_company)
-    the_company_name = find_name_by_id(get_company[0][0])
+    date_posted = datetime.now()
     
     create_job = insert_query('INSERT INTO job_ads(description,min_salary,max_salary,status,date_posted,companies_id) VALUES (?,?,?,?,?,?)', 
-                              (description,min_salary,max_salary,status,date_posted,get_company[0][0],))
+                              (description,min_salary,max_salary,status,date_posted,company_id,))
     
-    return Job_ad(description=description, min_salary=min_salary, max_salary=max_salary, date_posted=date_posted, status = status, name_of_company = the_company_name)
+    return Job_ad(description=description, min_salary=min_salary, max_salary=max_salary, date_posted=date_posted, status = status)
 
 def check_company_exist(name: str):
     data = read_query('SELECT username FROM companies WHERE username = ?',(name,))
@@ -39,3 +38,10 @@ def view_job_ads_by_id(ads_id: int):
         return ads
     else:
         return None
+
+
+def get_current_active_job_ads(company_id: int):
+
+    data = read_query('SELECT * FROM job_ads WHERE companies_id = ? AND status = "active"',(company_id,))
+
+    return len(data)
