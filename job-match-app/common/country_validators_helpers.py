@@ -1,6 +1,5 @@
 from fastapi import HTTPException
 from opencage.geocoder import OpenCageGeocode
-from fastapi.responses import JSONResponse
 
 
 OPENCAGE_API_KEY = "c5da8ed7653f4b4babc9794a3eb445b0"

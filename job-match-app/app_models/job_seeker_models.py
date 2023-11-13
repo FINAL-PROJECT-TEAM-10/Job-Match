@@ -76,4 +76,3 @@ class JobSeeker(BaseModel):
 #     post_code = Optional[str] = None
 #
 #     location = str
-

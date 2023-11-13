@@ -1,12 +1,13 @@
 from data.database import read_query, insert_query, update_query
-from fastapi import Response
 from fastapi.responses import JSONResponse
 from common.job_seeker_status_check import recognize_status, convert_status
-from app_models.job_seeker_models import JobSeekerInfo, JobSeekerOptionalInfo
+from app_models.job_seeker_models import JobSeekerInfo
 from app_models.job_seeker_models import JobSeeker
+from app_models.cv_models import CvCreation
 from services.authorization_services import get_password_hash
 from services import admin_services
 from common.country_validators_helpers import find_country_by_city
+from datetime import datetime
 
 def read_seekers():
 
@@ -43,6 +44,9 @@ def job_seeker_info_username(username: str):
     location_seeker = location_finder(location_id_contacts)
     summary = job_seeker[0][0]
     location = location_seeker[0][0]
+
+    if not summary:
+        summary = 'No summary'
 
     return JobSeekerInfo(summary=summary, location=location, status=status)
 
@@ -146,3 +150,26 @@ def create_seeker(username, password, first_name, last_name, email, city, countr
                               )
     
     return JSONResponse(status_code=200, content='Seeker was created')
+
+
+def create_cv(description: str, min_salary: int, max_salary: int, status: str, job_seeker_id: int):
+
+    date_posted = datetime.now()
+
+    cv = insert_query('''INSERT INTO mini_cvs (min_salary, max_salary, description, status, date_posted, job_seekers_id)
+                        VALUES (?,?,?,?,?,?)
+                      ''', (min_salary, max_salary, description, status, date_posted, job_seeker_id))
+    
+
+    return CvCreation(description=description, min_salary=min_salary, max_salary=max_salary,status=status, date_posted=date_posted)
+
+
+def view_personal_cvs(seeker_id:int ):
+
+    data = read_query('SELECT * FROM mini_cvs WHERE job_seekers_id = ?', (seeker_id,))
+
+    if data:
+        ads = [{'Cv Description': row[3], 'Minimum Salary': row[1], 'Maximum Salary': row[2], 'Status': row[4], 'Date Posted': row[5]} for row in data]
+        return ads
+    else:
+        return JSONResponse(status_code=404, content='No cvs found!')

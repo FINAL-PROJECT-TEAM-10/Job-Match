@@ -88,6 +88,37 @@ def edit_proffesional_info(summary: str = Query(None),
     
     return job_seeker_services.edit_info(job_seeker.username, job_seeker.summary,job_seeker.city,job_seeker.status)
 
+@job_seekers_router.post('/cv')
+def create_cv(description: str = Query(),
+              min_salary: int = Query(),
+              max_salary: int = Query(),
+              current_user_payload=Depends(get_current_user)):
+    
+    if current_user_payload['group'] != 'seekers':
+        return JSONResponse(status_code=403,
+                            content='Only seekers can create cv')
+    
+    status = 'Active'
+    seeker_username = current_user_payload.get('username')
+    seeker_id = job_seeker_services.get_job_seeker_info(seeker_username)
+
+    return job_seeker_services.create_cv(description,min_salary,max_salary,status,seeker_id[0][0])
+
+
+@job_seekers_router.get('/cv')
+def view_personal_cvs(current_user_payload=Depends(get_current_user)):
+
+    # if current_user_payload['group'] != 'seekers':
+    #     return JSONResponse(status_code=403,
+    #                         content='Only seekers can view cvs')
+    
+
+    username = current_user_payload.get('username')
+    seeker_id = job_seeker_services.get_job_seeker_info(username)
+    return job_seeker_services.view_personal_cvs(seeker_id[0][0])
+
+
+
 @job_seekers_router.post('/register')
 def add_seeker(seeker_username: str = Query(),
               seeker_password: str = Query(),
