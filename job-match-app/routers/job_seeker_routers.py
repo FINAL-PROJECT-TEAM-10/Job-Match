@@ -4,7 +4,7 @@ from services import job_seeker_services
 from app_models.job_seeker_models import *
 from typing import Annotated
 from common.auth import get_current_user
-from common.country_validators import validate_location
+from common.country_validators_helpers import validate_location, validate_city
 
 job_seekers_router = APIRouter(prefix='/job_seekers',tags={'Job seekers'})
 
@@ -79,6 +79,8 @@ def edit_proffesional_info(summary: str = Query(None),
     job_seeker.summary = summary or db_seeker[0][5]
     job_seeker.city = city or db_location[0][0]
     job_seeker.status = status
+
+    validate_city(job_seeker.city)
     
 
     if not job_seeker_services.check_seeker_exists(job_seeker.username):

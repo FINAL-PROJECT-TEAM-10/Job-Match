@@ -1,5 +1,4 @@
-import requests
-from fastapi import Query,HTTPException
+from fastapi import HTTPException
 from opencage.geocoder import OpenCageGeocode
 from fastapi.responses import JSONResponse
 
@@ -22,3 +21,20 @@ def validate_location(city: str, country: str):
         raise HTTPException(status_code=400, detail="Invalid city or country")
 
     return result
+
+
+def validate_city(city: str):
+    result = geocoder.geocode(city)
+
+    if result and result[0].get('components', {}).get('_type') == 'city':
+        return True
+    else:
+        raise HTTPException(status_code=400, detail="Invalid city")
+    
+
+def find_country_by_city(city:str):
+
+    results = geocoder.geocode(city)
+
+    country = results[0]['components']['country']
+    return country

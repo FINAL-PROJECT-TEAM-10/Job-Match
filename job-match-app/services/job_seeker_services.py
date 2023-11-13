@@ -6,6 +6,7 @@ from app_models.job_seeker_models import JobSeekerInfo, JobSeekerOptionalInfo
 from app_models.job_seeker_models import JobSeeker
 from services.authorization_services import get_password_hash
 from services import admin_services
+from common.country_validators_helpers import find_country_by_city
 
 def read_seekers():
 
@@ -51,11 +52,49 @@ def check_seeker_exists(username: str):
 
     return bool(check)
 
+def find_location_by_city(city:str):
+
+    data = read_query('SELECT * FROM locations WHERE city = ?', (city,))
+    
+
+    if data:
+        return data
+    else:
+        return None
+
+def find_employee_contacts_id(username: str):
+
+    contact_id = read_query('SELECT employee_contacts_id FROM job_seekers WHERE username = ?', (username,))
+
+    return contact_id[0][0]
+
+def find_location_id_by_city_country(city, country):
+
+    location_id = read_query('SELECT id FROM locations WHERE city = ? AND country = ?', (city, country))
+
+    return location_id[0][0]
+
+def find_location_id_by_city(city):
+
+    location_id = read_query('SELECT id FROM locations WHERE city = ?', (city,))
+
+    return location_id[0][0]
 
 def edit_info(username: str, summary: str, city: str, status: str):
 
     converted_status = convert_status(status)
     update_query('UPDATE job_seekers SET summary = ?, busy = ? WHERE username = ?', (summary, converted_status, username))
+
+    if not find_location_by_city(city):
+        country = find_country_by_city(city)
+        insert_query('INSERT INTO locations (city, country) VALUES (?,?)', (city,country))
+        contact_id = find_employee_contacts_id(username)
+        location_id = find_location_id_by_city_country(city, country)
+        update_query('UPDATE employee_contacts SET locations_id = ? WHERE id = ?', (location_id,contact_id))
+    else:
+        contact_id = find_employee_contacts_id(username)
+        location_id = find_location_id_by_city(city)
+        update_query('UPDATE employee_contacts SET locations_id = ? WHERE id = ?', (location_id, contact_id))
 
     return JSONResponse(status_code=200, content='You successfully edited your personal info')
 
