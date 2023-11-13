@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Query, Body,Header, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from services import company_services
+from services import job_ads_services
 from app_models.company_models import Company
 from typing import Annotated
 from common.auth import get_current_user
@@ -48,12 +49,26 @@ def company_registration(Company_Name: str = Query(), Password: str = Query(),
 
 
 @companies_router.get('/information')
-def your_company_information(company: str,current_user_payload=Depends(get_current_user)):
+def your_company_information(current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'companies':
             return JSONResponse(status_code=403,
                                 content='This option is only available for Companies')  
-    company_info = company_services.read_company_information(company)
     
-    return Company(company_name=company_info.company_name,email = company_info.company_name, work_adress = company_info.company_name, 
-                   telephone = company_info.company_name, country = company_info.company_name, city = company_info.company_name)
+    company_name = current_user_payload.get('username')
+
+    all_information = []
+    
+    get_company_information = company_services.get_company_info_name(company_name)
+    get_location_id = company_services.location_id(company_name[0][1])
+    company_location_from_id = company_services.find_location(get_location_id)
+    company_dict = {
+         "Company Name": get_company_information[0][0],
+         "Company Description": get_company_information[0][1],
+         "Company City": company_location_from_id[0][0]
+
+    }
+
+    all_information.append(company_dict)
+
+    return all_information
