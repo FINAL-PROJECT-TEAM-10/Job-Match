@@ -67,15 +67,9 @@ def create_company(Company_Name, Password, Company_City, Company_Country,Company
 
     return JSONResponse(status_code=200,content='Your company has been created')
 
-def get_company_info_name(company_name: str):
-
-    company = read_query('SELECT username,description FROM companies WHERE username = ?',(company_name,))
-
-    return company
-
 def location_id(contact_id: int):
 
-    data = read_query('SELECT locations_id FROM companies_contacts WHERE id = ?', (contact_id,))
+    data = read_query('SELECT locations_id FROM company_contacts WHERE company_id = ?', (contact_id,))
 
     return data[0][0]
 
@@ -87,3 +81,9 @@ def find_location(location_id: int):
         return data
     else:
         return None
+
+def get_company_info_name(company_name: str):
+
+    company = read_query('SELECT username,description FROM companies WHERE username = ?',(company_name,))
+
+    return company

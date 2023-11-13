@@ -29,3 +29,13 @@ def view_all_job_ads(username: str):
     company_id = find_company(username)
     data = read_query('SELECT * FROM job_ads WHERE companies_id = ?',(company_id[0][0],))
     return data
+
+def view_job_ads_by_id(ads_id: int):
+
+    data = read_query('SELECT * FROM job_ads WHERE companies_id = ?', (ads_id,))
+
+    if data:
+        ads = [{'Job Description': row[1], 'Minimum Salary': row[2], 'Maximum Salary': row[3], 'Status': row[4], 'Date Posted': row[5]} for row in data]
+        return ads
+    else:
+        return None
