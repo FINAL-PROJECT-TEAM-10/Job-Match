@@ -4,7 +4,6 @@ from common.job_seeker_status_check import recognize_status, convert_status
 from app_models.job_seeker_models import JobSeekerInfo
 from app_models.job_seeker_models import JobSeeker
 from app_models.cv_models import CvCreation
-from services.authorization_services import get_password_hash
 from services import admin_services
 from common.country_validators_helpers import find_country_by_city
 from datetime import datetime
@@ -121,7 +120,7 @@ def get_seeker(username) -> None | JobSeeker:
 
 
 def create_seeker(username, password, first_name, last_name, email, city, country):
-
+    from services.authorization_services import get_password_hash
 
     location_id = admin_services.find_location_id(city, country)
 
