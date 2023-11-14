@@ -4,6 +4,8 @@ from fastapi.responses import JSONResponse
 from app_models.company_models import Company
 from services import admin_services
 from services.authorization_services import get_password_hash
+from common.country_validators_helpers import *
+from services import job_seeker_services
 
 def read_companies():
     data = read_query('SELECT * FROM companies')
@@ -100,5 +102,14 @@ def edit_company_information(username: str, description: str, city: str, address
 
     update_query('UPDATE companies SET description = ? WHERE username = ?',(description,username,))
     update_query('UPDATE company_contacts SET address = ?, telephone = ? WHERE company_id = ?',(address,telephone,company_id,))
+
+    if not job_seeker_services.find_location_by_city(city):
+        country = find_country_by_city(city)
+        insert_query('INSERT INTO locations(city,country) VALUES (?,?)',(city,country,))
+        location_id = job_seeker_services.find_location_id_by_city_country(city,country)
+        update_query('UPDATE company_contacts SET locations_id = ? WHERE company_id = ?',(location_id,company_id,))
+    else:
+        location_id = job_seeker_services.find_location_id_by_city(city)
+        update_query('UPDATE company_contacts SET locations_id = ? WHERE company_id = ?',(location_id,company_id,))
 
     return JSONResponse(status_code=200, content="You successfully edited your personal company information")

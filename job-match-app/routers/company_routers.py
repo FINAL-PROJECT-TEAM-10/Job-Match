@@ -5,6 +5,7 @@ from services import job_ads_services
 from app_models.company_models import Company
 from typing import Annotated
 from common.auth import get_current_user
+from common.country_validators_helpers import *
 
 companies_router = APIRouter(prefix='/companies',tags={'Everything available for Companies'})
 
@@ -109,8 +110,11 @@ def edit_your_company_information(description: str = Query(None),
     final_company_city = city or get_city_and_country_for_company[0][0]
     final_company_adress = address or get_company_contacts[0][2]
     final_company_telephone = telephone or get_company_contacts[0][3]
+    
     if not description and not city and not address and not telephone:
-        return JSONResponse(status_code=203,content='You havent done any changes to your personal company information')
+        return JSONResponse(status_code=203,content= "You haven't done any changes to your personal company information")
+
+    validate_city(final_company_city)
 
     return company_services.edit_company_information(username, final_company_description, final_company_city, final_company_adress, final_company_telephone)
 
