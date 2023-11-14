@@ -82,10 +82,6 @@ def edit_proffesional_info(summary: str = Query(None),
 
     validate_city(job_seeker.city)
     
-
-    if not job_seeker_services.check_seeker_exists(job_seeker.username):
-        return JSONResponse(status_code=404, content='No seeker found in the system!')
-    
     return job_seeker_services.edit_info(job_seeker.username, job_seeker.summary,job_seeker.city,job_seeker.status)
 
 @job_seekers_router.post('/cv')
@@ -108,9 +104,9 @@ def create_cv(description: str = Query(),
 @job_seekers_router.get('/cv')
 def view_personal_cvs(current_user_payload=Depends(get_current_user)):
 
-    # if current_user_payload['group'] != 'seekers':
-    #     return JSONResponse(status_code=403,
-    #                         content='Only seekers can view cvs')
+    if current_user_payload['group'] != 'seekers':
+        return JSONResponse(status_code=403,
+                            content='Only seekers can view cvs')
     
 
     username = current_user_payload.get('username')
