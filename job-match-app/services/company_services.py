@@ -87,3 +87,18 @@ def get_company_info_name(company_name: str):
     company = read_query('SELECT username,description FROM companies WHERE username = ?',(company_name,))
 
     return company
+
+def everything_from_companies_by_username(username: str):
+
+    company = read_query('SELECT * FROM companies WHERE username = ?',(username,))
+
+    return company
+
+def edit_company_information(username: str, description: str, city: str, address: str, telephone: int):
+
+    company_id = find_company_id_byusername(username)
+
+    update_query('UPDATE companies SET description = ? WHERE username = ?',(description,username,))
+    update_query('UPDATE company_contacts SET address = ?, telephone = ? WHERE company_id = ?',(address,telephone,company_id,))
+
+    return JSONResponse(status_code=200, content="You successfully edited your personal company information")

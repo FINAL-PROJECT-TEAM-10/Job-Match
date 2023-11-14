@@ -1,6 +1,7 @@
 from data.database import read_query, insert_query, update_query
 from datetime import date,datetime
 from app_models.job_ads_models import Job_ad
+from fastapi.responses import JSONResponse
 
 def find_company(name_of_company):
     
@@ -37,7 +38,7 @@ def view_job_ads_by_id(ads_id: int):
         ads = [{'Job Description': row[1], 'Minimum Salary': row[2], 'Maximum Salary': row[3], 'Status': row[4], 'Date Posted': row[5]} for row in data]
         return ads
     else:
-        return None
+        return JSONResponse(status_code=404,content='There are no current job ads found')
 
 
 def get_current_active_job_ads(company_id: int):

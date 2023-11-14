@@ -64,6 +64,7 @@ def your_company_information(current_user_payload=Depends(get_current_user)):
     get_location_id = company_services.location_id(company_id)
     company_location_from_id = company_services.find_location(get_location_id)
     count_active_job_ads = job_ads_services.get_current_active_job_ads(company_id)
+    company_contacts = company_services.read_company_adress(company_id)
     
     description = get_company_information[0][1]
     if not description:
@@ -72,6 +73,9 @@ def your_company_information(current_user_payload=Depends(get_current_user)):
     company_dict = {
          "Company Name": get_company_information[0][0],
          "Company Description": description,
+         "Company Email": company_contacts[0][1],
+         "Company Address": company_contacts[0][2],
+         "Company Telephone": company_contacts[0][3],
          "Company City": company_location_from_id[0][0],
          "Company Country": company_location_from_id[0][1],
          "Active job ads": count_active_job_ads
@@ -81,3 +85,32 @@ def your_company_information(current_user_payload=Depends(get_current_user)):
     all_information.append(company_dict)
 
     return all_information
+
+@companies_router.put('/information/edit')
+def edit_your_company_information(description: str = Query(None),
+                             city: str = Query(None),
+                             address: str = Query(None),
+                             telephone: int = Query(None),
+                             current_user_payload=Depends(get_current_user)
+                             ):
+     
+    if current_user_payload['group'] != 'companies':
+        return JSONResponse(status_code=403,
+                            content='This option is only available for Companies')
+     
+    username = current_user_payload.get('username')
+
+    company_info = company_services.everything_from_companies_by_username(username)
+    location_id = company_services.location_id(company_info[0][0])
+    get_city_and_country_for_company = company_services.find_location(location_id)
+    get_company_contacts = company_services.read_company_adress(company_info[0][0])
+    
+    final_company_description = description or company_info[0][3]
+    final_company_city = city or get_city_and_country_for_company[0][0]
+    final_company_adress = address or get_company_contacts[0][2]
+    final_company_telephone = telephone or get_company_contacts[0][3]
+    if not description and not city and not address and not telephone:
+        return JSONResponse(status_code=203,content='You havent done any changes to your personal company information')
+
+    return company_services.edit_company_information(username, final_company_description, final_company_city, final_company_adress, final_company_telephone)
+
