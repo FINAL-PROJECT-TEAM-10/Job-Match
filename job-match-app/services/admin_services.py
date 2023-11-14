@@ -49,7 +49,7 @@ def create_admin(new_admin: Admin, password):
     contacts_id = insert_query('''
     INSERT INTO employee_contacts
     (email, address, telephone, locations_id)
-    VALUES (?,?,?,?,?)
+    VALUES (?,?,?,?)
     ''', (new_admin.email, new_admin.address, new_admin.phone,
           location_id))
 
