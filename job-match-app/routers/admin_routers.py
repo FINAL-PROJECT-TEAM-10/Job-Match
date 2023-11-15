@@ -6,16 +6,10 @@ from fastapi.responses import JSONResponse, Response
 
 from app_models.admin_models import Admin
 from common.auth import get_current_user, TokenInfo
+from common.country_validators_helpers import validate_location
 from services import admin_services
 
 admin_router = APIRouter(prefix='/admin',tags={'Only for Admins'})
-
-
-@admin_router.get('/info', response_model=TokenInfo,
-                  responses={200: {"description": "Informs the user of basic info, which is included in the token."}})
-def get_self(current_user_payload=Depends(get_current_user)):
-    return JSONResponse(status_code=200,
-                        content=current_user_payload)
 
 
 # TODO: Fix registration
@@ -53,6 +47,11 @@ def add_admin(registration_details: Admin, password: Annotated[str, Body()], cur
         return JSONResponse(status_code=409,
                             content=f'Admin with username {registration_details.username} already exists.')
 
+    validate_location(registration_details.city, registration_details.country)
+
+    if registration_details.group != 'admins':
+        return JSONResponse(status_code=400,
+                            content='This is an endpoint for creating admins only.')
     new_admin = admin_services.create_admin(registration_details, password)
     return JSONResponse(status_code=201,
                         content=new_admin.json())

@@ -4,7 +4,7 @@ from passlib.context import CryptContext
 from app_models.admin_models import Admin
 from app_models.company_models import Company
 from app_models.job_seeker_models import JobSeeker
-from data.database import read_query
+from data.database import read_query, update_query
 from services import admin_services, job_seeker_services, company_services
 
 _SECRET_KEY = '2d776838352e75a9f95de915c269c8ce45b12de47f720213c5f71c4e25618c25'
@@ -108,3 +108,26 @@ def create_access_token(user_data, expiration_delta: timedelta = _TOKEN_EXPIRATI
 
 def is_authenticated(token: str):
     return jwt.decode(token, _SECRET_KEY, algorithms=[_ALGORITHM])
+
+
+def password_changer(payload, new_password):
+    # I tried to use a dynamic table name but the connector threw an error.
+    new_password = get_password_hash(new_password)
+    if payload['group'] == 'admins':
+        return update_query('''UPDATE admin_list SET password = ? WHERE id = ?''',
+                            (new_password, payload['id']))
+    if payload['group'] == 'companies':
+        return update_query('''UPDATE companies SET password = ? WHERE id = ?''',
+                            (new_password, payload['id']))
+    if payload['group'] == 'seekers':
+        return update_query('''UPDATE job_seekers SET password = ? WHERE id = ?''',
+                            (new_password, payload['id']))
+
+
+def is_password_identical_by_type(payload, password):
+    if payload['group'] == 'admins':
+        return verify_password(password, _get_pass_by_username_admin(payload['username']))
+    elif payload['group'] == 'companies':
+        return verify_password(password, _get_pass_by_username_company(payload['username']))
+    elif payload['group'] == 'seekers':
+        return verify_password(password, _get_pass_by_username_seeker(payload['username']))
