@@ -64,14 +64,4 @@ def create_admin(new_admin: Admin, password):
 
     return new_admin
 
-# _first_admin = Admin(username='first_admin',
-#                      first_name='Admin',
-#                      last_name='Adminov',
-#                      email='admin@admin.admin',
-#                      phone='1234567890',
-#                      post_code='1000',
-#                      city='Sofia',
-#                      country='Bulgaria')
-# _first_admin_pass = 'asdQWE123!@#'
-#
-# create_admin(_first_admin, _first_admin_pass)
+

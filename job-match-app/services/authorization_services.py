@@ -131,3 +131,43 @@ def is_password_identical_by_type(payload, password):
         return verify_password(password, _get_pass_by_username_company(payload['username']))
     elif payload['group'] == 'seekers':
         return verify_password(password, _get_pass_by_username_seeker(payload['username']))
+
+
+def generate_password():
+    import random
+    import string
+
+    max_length = 15
+
+    lower_case = string.ascii_lowercase
+    upper_case = string.ascii_uppercase
+    numbers = string.digits
+    special_chars = "@$!%*?&"
+
+    password_set = (
+            random.choice(lower_case) +
+            random.choice(upper_case) +
+            random.choice(numbers) +
+            random.choice(special_chars))
+
+    password_set += ''.join(
+        random.choice(string.ascii_letters + string.digits + special_chars)
+        for _ in range(max_length - len(password_set)))
+
+    password_list = list(password_set)
+    random.shuffle(password_list)
+    return ''.join(password_list)
+
+# TODO: Enter your real email after setting up with mailjet to use mailing functionality
+# First admin needs to be added because only admins can add other admins
+# _first_admin = Admin(username='first_admin',
+#                      first_name='Admin',
+#                      last_name='Adminov',
+#                      email='admin@admin.admin',
+#                      phone='1234567890',
+#                      post_code='1000',
+#                      city='Sofia',
+#                      country='Bulgaria')
+# _first_admin_pass = 'asdQWE123!@#'
+#
+# create_admin(_first_admin, _first_admin_pass)
