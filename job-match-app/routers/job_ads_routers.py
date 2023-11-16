@@ -8,7 +8,8 @@ from common.separators_validators import parse_skills
 job_ads_router = APIRouter(prefix='/job_ads',tags={'Everything available for Job_Ads'})
 
 @job_ads_router.post('/')
-def create_new_job_ad(description: str = Query(), min_salary: int = Query(),max_salary: int = Query(), requirements: str = Query(),
+def create_new_job_ad(description: str = Query(), min_salary: int = Query(),max_salary: int = Query(), 
+                      requirements: str = Query(description='Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'),
                       current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'companies':
@@ -19,6 +20,11 @@ def create_new_job_ad(description: str = Query(), min_salary: int = Query(),max_
     requirements_list = parse_skills(requirements)
     requirements_names = [skill.split(';')[0] for skill in requirements_list]
     requirements_levels = [skill.split(';')[1] for skill in requirements_list]
+
+    if len(requirements_list) < 2:
+        return JSONResponse(status_code=400, content='You need atleast 2 requirements!')
+    if len(requirements_list) > 5:
+        return JSONResponse(status_code=400, content='The maximum requirements limit of 5 has been reached!')
 
     company_username = current_user_payload.get('username')
     company_id = job_ads_services.find_company(company_username)
