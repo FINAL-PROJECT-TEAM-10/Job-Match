@@ -20,7 +20,7 @@ def password_reset_email(user, generated_password):
                 ],
                 "Subject": "Password Reset at SkillSync",
                 "TextPart": "You requested a password reset for your SkillSync account.",
-                "HTMLPart": f'<h3>{user.username}., !</h3><br/>' +
+                "HTMLPart": f'<h3>{user.username}!</h3><br/>' +
                             '<p>Your password has been successfully reset. ' +
                             f'Your new password is: <strong>{generated_password}</strong></p>' +
                             '<p>May the secure connection be with you!</p>' +

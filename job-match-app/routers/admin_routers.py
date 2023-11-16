@@ -59,4 +59,3 @@ def add_admin(registration_details: Admin, password: Annotated[str, Body()], cur
 
 # TODO: Implement mailing history for admins
 
-# TODO: Allow admins to add skills/requirements based on user feedback
