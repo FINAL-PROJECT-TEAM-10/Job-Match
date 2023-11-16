@@ -56,3 +56,4 @@ def add_admin(registration_details: Admin, password: Annotated[str, Body()], cur
     return JSONResponse(status_code=201,
                         content=new_admin.json())
 
+# TODO: Implement mailing history for admins
