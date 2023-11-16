@@ -6,7 +6,7 @@ mailjet = Client(auth=(api_key, api_secret), version='v3.1')
 
 def password_reset_email(user, generated_password):
     data_password_reset = {
-        'Messages' : [
+        'Messages': [
             {
                 "From": {
                     "Email": f"{sender}",
@@ -15,16 +15,16 @@ def password_reset_email(user, generated_password):
                 "To": [
                     {
                         "Email": f"{user.email}",
-                        "Name": {user.username}
+                        "Name": f"{user.username}"
                     }
                 ],
                 "Subject": "Password Reset at SkillSync",
                 "TextPart": "You requested a password reset for your SkillSync account.",
-                "HTMLPart": f'<h3>{user.username}., !</h3><br/>'
-                            '<p>Your password has been successfully reset.'
-                            f'Your new password is: <strong>[{generated_password}]</strong></p>'
-                            '<p>May the secure connection be with you!</p>'
-                            '<p></p>'
+                "HTMLPart": f'<h3>{user.username}., !</h3><br/>' +
+                            '<p>Your password has been successfully reset. ' +
+                            f'Your new password is: <strong>{generated_password}</strong></p>' +
+                            '<p>May the secure connection be with you!</p>' +
+                            '<p></p>' +
                             '<p><em>Skill, Sync, Match!</em></p>'
             }
 
@@ -32,5 +32,4 @@ def password_reset_email(user, generated_password):
     }
 
     result = mailjet.send.create(data=data_password_reset)
-
     return result
