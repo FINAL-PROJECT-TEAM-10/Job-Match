@@ -3,11 +3,12 @@ from services import job_ads_services
 from fastapi.responses import JSONResponse
 from common.auth import get_current_user
 from services import company_services
+from common.separators_validators import parse_skills
 
 job_ads_router = APIRouter(prefix='/job_ads',tags={'Everything available for Job_Ads'})
 
 @job_ads_router.post('/')
-def create_new_job_ad(description: str = Query(), min_salary: int = Query(),max_salary: int = Query(),
+def create_new_job_ad(description: str = Query(), min_salary: int = Query(),max_salary: int = Query(), requirements: str = Query(),
                       current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'companies':
@@ -15,10 +16,14 @@ def create_new_job_ad(description: str = Query(), min_salary: int = Query(),max_
                             content='This option is only available for Companies')
     
     status = 'active'
+    requirements_list = parse_skills(requirements)
+    requirements_names = [skill.split(';')[0] for skill in requirements_list]
+    requirements_levels = [skill.split(';')[1] for skill in requirements_list]
+
     company_username = current_user_payload.get('username')
     company_id = job_ads_services.find_company(company_username)
 
-    create_job = job_ads_services.create_job_add(description,min_salary,max_salary,status,company_id[0][0])
+    create_job = job_ads_services.create_job_add(description,min_salary,max_salary,status,company_id[0][0],requirements_names,requirements_levels)
     return create_job
 
 @job_ads_router.get('/companies')
