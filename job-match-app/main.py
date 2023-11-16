@@ -6,7 +6,7 @@ from routers.admin_routers import admin_router
 from routers.token_router import token_router
 
 
-app = FastAPI(title='Job_Match', description='to be continued')
+app = FastAPI(title='Skill Sync', description='to be continued')
 app.include_router(companies_router)
 app.include_router(job_ads_router)
 app.include_router(admin_router)

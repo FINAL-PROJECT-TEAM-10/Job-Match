@@ -5,6 +5,8 @@ from app_models.job_seeker_models import *
 from typing import Annotated
 from common.auth import get_current_user
 from common.country_validators_helpers import validate_location, validate_city
+from typing import List
+from common.separators_validators import parse_skills
 
 job_seekers_router = APIRouter(prefix='/job_seekers',tags={'Job seekers'})
 
@@ -12,9 +14,9 @@ job_seekers_router = APIRouter(prefix='/job_seekers',tags={'Job seekers'})
 @job_seekers_router.get('/', description= 'All functions for job seekers')
 def get_all_seekers(current_user_payload=Depends(get_current_user)):
 
-    if current_user_payload['group'] != 'admins':
+    if current_user_payload['group'] != 'seekers':
         return JSONResponse(status_code=403,
-                            content='Only  admins can view all seekers')
+                            content='Only seekers can view all seekers')
 
 
     get_seekers = job_seeker_services.read_seekers()
@@ -88,6 +90,7 @@ def edit_proffesional_info(summary: str = Query(None),
 def create_cv(description: str = Query(),
               min_salary: int = Query(),
               max_salary: int = Query(),
+              skills: str = Query(),
               current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'seekers':
@@ -97,8 +100,13 @@ def create_cv(description: str = Query(),
     status = 'Active'
     seeker_username = current_user_payload.get('username')
     seeker_id = job_seeker_services.get_job_seeker_info(seeker_username)
-
-    return job_seeker_services.create_cv(description,min_salary,max_salary,status,seeker_id[0][0])
+    skill_list = parse_skills(skills)
+    if len(skill_list) < 2:
+        return JSONResponse(status_code=400, content='You need atleast 2 skills!')
+    if len(skill_list) > 5:
+        return JSONResponse(status_code=400, content='The maximum skill limit of 5 has been reached!')
+    
+    return job_seeker_services.create_cv(description,min_salary,max_salary,status,seeker_id[0][0], skill_list)
 
 
 @job_seekers_router.get('/cv')

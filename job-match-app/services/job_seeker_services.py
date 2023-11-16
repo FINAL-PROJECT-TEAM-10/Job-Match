@@ -150,14 +150,45 @@ def create_seeker(username, password, first_name, last_name, email, city, countr
     
     return JSONResponse(status_code=200, content='Seeker was created')
 
+def check_skill_exist(skill_name: str):
 
-def create_cv(description: str, min_salary: int, max_salary: int, status: str, job_seeker_id: int):
+    check = read_query('SELECT * FROM skills_or_requirements WHERE name = ?', (skill_name,))
+
+    return bool(check)
+
+def find_cv_by_seeker_id_description(seeker_id: int, description: str):
+
+    cv_id = read_query('SELECT id FROM mini_cvs WHERE job_seekers_id = ? AND description = ?', (seeker_id, description))
+
+
+    return cv_id[0][0]
+
+def find_skill_id_by_name(name:str):
+
+    skill_id = read_query('SELECT id FROM skills_or_requirements WHERE name = ?', (name,))
+
+    return skill_id[0][0]
+
+def create_cv(description: str, min_salary: int, max_salary: int, status: str, job_seeker_id: int, list_skills: list): #['python','js']
 
     date_posted = datetime.now()
 
     cv = insert_query('''INSERT INTO mini_cvs (min_salary, max_salary, description, status, date_posted, job_seekers_id)
                         VALUES (?,?,?,?,?,?)
                       ''', (min_salary, max_salary, description, status, date_posted, job_seeker_id))
+    
+    cv_id = find_cv_by_seeker_id_description(job_seeker_id, description)
+
+    for skill in list_skills:
+        if not check_skill_exist(skill):
+            insert_query('INSERT INTO skills_or_requirements (name) VALUES (?)', (skill,))
+            skill_id = find_skill_id_by_name(skill)
+            insert_query('INSERT INTO mini_cvs_has_skills (mini_cvs_id, skills_or_requirements_id,level) VALUES (?,?,?)',
+                         (cv_id, skill_id, 'None'))
+        else:
+            skill_id = find_skill_id_by_name(skill)
+            insert_query('INSERT INTO mini_cvs_has_skills (mini_cvs_id, skills_or_requirements_id, level) VALUES (?,?,?)',
+                         (cv_id, skill_id, 'None'))
     
 
     return CvCreation(description=description, min_salary=min_salary, max_salary=max_salary,status=status, date_posted=date_posted)
