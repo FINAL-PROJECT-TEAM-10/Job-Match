@@ -90,7 +90,7 @@ def edit_proffesional_info(summary: str = Query(None),
 def create_cv(description: str = Query(),
               min_salary: int = Query(),
               max_salary: int = Query(),
-              skills: str = Query(),
+              skills: str = Query(description='Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'),
               current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'seekers':
@@ -100,13 +100,15 @@ def create_cv(description: str = Query(),
     status = 'Active'
     seeker_username = current_user_payload.get('username')
     seeker_id = job_seeker_services.get_job_seeker_info(seeker_username)
-    skill_list = parse_skills(skills)
+    skill_list = parse_skills(skills)#['python;2', 'javascript;3']
+    skill_names = [skill.split(';')[0] for skill in skill_list]
+    skill_levels = [skill.split(';')[1] for skill in skill_list] #[2,3]
     if len(skill_list) < 2:
         return JSONResponse(status_code=400, content='You need atleast 2 skills!')
     if len(skill_list) > 5:
         return JSONResponse(status_code=400, content='The maximum skill limit of 5 has been reached!')
     
-    return job_seeker_services.create_cv(description,min_salary,max_salary,status,seeker_id[0][0], skill_list)
+    return job_seeker_services.create_cv(description,min_salary,max_salary,status,seeker_id[0][0], skill_names, skill_levels)
 
 
 @job_seekers_router.get('/cv')

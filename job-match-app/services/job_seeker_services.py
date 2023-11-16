@@ -8,6 +8,19 @@ from services import admin_services
 from common.country_validators_helpers import find_country_by_city
 from datetime import datetime
 
+
+
+def convert_level(level):
+    result = ''
+    if level == 1:
+        result = 'Beginner'
+    elif level == 2:
+        result = 'Intermidiate'
+    elif level == 3:
+        result = 'Advanced'
+
+    return result
+
 def read_seekers():
 
     data = read_query('SELECT * FROM job_seekers')
@@ -169,7 +182,7 @@ def find_skill_id_by_name(name:str):
 
     return skill_id[0][0]
 
-def create_cv(description: str, min_salary: int, max_salary: int, status: str, job_seeker_id: int, list_skills: list): #['python','js']
+def create_cv(description: str, min_salary: int, max_salary: int, status: str, job_seeker_id: int, list_skills: list, skill_levels: list): #['python','js']
 
     date_posted = datetime.now()
 
@@ -179,16 +192,19 @@ def create_cv(description: str, min_salary: int, max_salary: int, status: str, j
     
     cv_id = find_cv_by_seeker_id_description(job_seeker_id, description)
 
-    for skill in list_skills:
+    for skill,level in zip(list_skills, skill_levels):
+        level = int(level)
         if not check_skill_exist(skill):
+            converted_level = convert_level(level)
             insert_query('INSERT INTO skills_or_requirements (name) VALUES (?)', (skill,))
             skill_id = find_skill_id_by_name(skill)
             insert_query('INSERT INTO mini_cvs_has_skills (mini_cvs_id, skills_or_requirements_id,level) VALUES (?,?,?)',
-                         (cv_id, skill_id, 'None'))
+                         (cv_id, skill_id, converted_level))
         else:
+            converted_level = convert_level(level)
             skill_id = find_skill_id_by_name(skill)
             insert_query('INSERT INTO mini_cvs_has_skills (mini_cvs_id, skills_or_requirements_id, level) VALUES (?,?,?)',
-                         (cv_id, skill_id, 'None'))
+                         (cv_id, skill_id, converted_level))
     
 
     return CvCreation(description=description, min_salary=min_salary, max_salary=max_salary,status=status, date_posted=date_posted)
