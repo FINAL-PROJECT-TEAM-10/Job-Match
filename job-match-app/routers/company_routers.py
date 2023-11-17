@@ -118,7 +118,7 @@ def edit_your_company_information(description: str = Query(None),
     return company_services.edit_company_information(username, final_company_description, final_company_city, final_company_adress, final_company_telephone)
 
 @companies_router.get('/job_seekers/cv')
-def company_cvs_search(current_user_payload=Depends(get_current_user)):
+def get_cv_from_job_seeker(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'companies':
         return JSONResponse(status_code=403,

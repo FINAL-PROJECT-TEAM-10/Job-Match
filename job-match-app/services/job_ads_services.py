@@ -72,3 +72,26 @@ def find_job_ad_by_id(company_id: int, description: str):
 
 
     return job_ad[0][0]
+
+def check_owner_company(job_ad_id, company_id):
+
+    data = read_query('SELECT * FROM job_ads WHERE id = ? AND companies_id = ?', (job_ad_id, company_id,))
+
+    return bool(data)
+
+
+def check_company_information(job_ad_id: int, company_id: str):
+
+    data = read_query('SELECT * FROM job_ads WHERE id = ? AND companies_id = ?', (job_ad_id, company_id,))
+
+    return data
+
+def edit_job_ads(company_id:int, job_ads_id: int, min_salary: int, max_salary: int, 
+            description: str):
+
+
+    update_query('UPDATE job_ads SET min_salary = ?, max_salary = ?, description = ? WHERE id = ? AND companies_id = ?',
+                 (min_salary, max_salary, description, job_ads_id, company_id))
+    
+
+    return JSONResponse(status_code=200, content='You successfully edited your selected Job AD.')
