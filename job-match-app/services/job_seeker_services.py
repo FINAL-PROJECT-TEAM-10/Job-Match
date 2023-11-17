@@ -96,10 +96,13 @@ def find_location_id_by_city(city):
 
     return location_id[0][0]
 
-def edit_info(username: str, summary: str, city: str, status: str):
+def edit_info(username: str, summary: str, city: str, status: str, address: str, telephone: str):
 
     converted_status = convert_status(status)
+    contact = find_employee_contacts_id(username)
+    email = read_query('SELECT email FROM employee_contacts WHERE id = ?', (contact,))
     update_query('UPDATE job_seekers SET summary = ?, busy = ? WHERE username = ?', (summary, converted_status, username))
+    update_query('UPDATE employee_contacts SET address = ?, telephone = ? WHERE email = ?', (address, telephone, email[0][0]))
 
     if not find_location_by_city(city):
         country = find_country_by_city(city)

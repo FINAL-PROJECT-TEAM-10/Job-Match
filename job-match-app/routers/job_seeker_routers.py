@@ -62,6 +62,8 @@ def your_information(current_user_payload=Depends(get_current_user)):
 @job_seekers_router.put('/personal_info/edit')
 def edit_proffesional_info(summary: str = Query(None),
                            city: str = Query(None),
+                           address: str = Query(None),
+                           telephone: str = Query(None),
                            status: str =  Query(enum=['Active', 'Busy']),
                            current_user_payload=Depends(get_current_user)):
     
@@ -75,14 +77,18 @@ def edit_proffesional_info(summary: str = Query(None),
     job_seeker = JobSeekerOptionalInfo()
     contacts = job_seeker_services.location_id_from_contacts(db_seeker[0][10])
     db_location = job_seeker_services.location_finder(contacts)
+    db_contacts = job_seeker_services.contacts_info_for_seeker(db_seeker[0][10])
     job_seeker.username = username
     job_seeker.summary = summary or db_seeker[0][5]
     job_seeker.city = city or db_location[0][0]
     job_seeker.status = status
+    job_seeker.address = address or db_contacts[0][1]
+    job_seeker.telephone = telephone or db_contacts[0][2]
 
     validate_city(job_seeker.city)
     
-    return job_seeker_services.edit_info(job_seeker.username, job_seeker.summary,job_seeker.city,job_seeker.status)
+    return job_seeker_services.edit_info(job_seeker.username, job_seeker.summary,job_seeker.city,
+                                         job_seeker.status, job_seeker.address, job_seeker.telephone)
 
 @job_seekers_router.post('/cv')
 def create_cv(description: str = Query(),

@@ -25,6 +25,8 @@ class JobSeekerOptionalInfo:
     email: Optional[str] = None
     password: Optional[str] = None
     country: Optional[str] = None
+    address: Optional[str] = None
+    telephone: Optional[str] = None
 
     @classmethod
     def from_query_result(cls, username, first_name,last_name, summary,status):
