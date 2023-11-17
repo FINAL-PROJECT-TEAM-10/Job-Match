@@ -21,14 +21,14 @@ def create_location(city: str, country: str):
 
 
 def admin_exists(admin: Admin) -> bool:
-    return any(read_query('''SELECT id from admin_list WHERE username = ?''',
+    return any(read_query('''SELECT id from admins WHERE username = ?''',
                           (admin.username,)))
 
 
 def get_admin(username) -> None | Admin:
     admin_data = read_query('''
     SELECT a.id, a.username, a.first_name, a.last_name, a.picture, c.email, c.address, c.telephone, l.city, l.country
-    FROM admin_list as a, employee_contacts as c, locations as l 
+    FROM admins as a, employee_contacts as c, locations as l 
     WHERE a.employee_contacts_id = c.id AND c.locations_id = l.id
     AND a.username = ?
     ''', (username,))
@@ -39,7 +39,7 @@ def get_admin(username) -> None | Admin:
 def get_admin_by_email(email):
     admin_data = read_query('''
     SELECT a.id, a.username, a.first_name, a.last_name, a.picture, c.email, c.address, c.telephone, l.city, l.country
-    FROM admin_list as a, employee_contacts as c, locations as l 
+    FROM admins as a, employee_contacts as c, locations as l 
     WHERE a.employee_contacts_id = c.id AND c.locations_id = l.id
     AND c.email = ?
     ''', (email,))
@@ -64,7 +64,7 @@ def create_admin(new_admin: Admin, password):
           location_id))
 
     admin_id = insert_query('''
-    INSERT INTO admin_list
+    INSERT INTO admins
     (username, password, first_name, last_name, picture, employee_contacts_id)
     VALUES (?,?,?,?,?,?)
     ''', (new_admin.username, password, new_admin.first_name, new_admin.last_name,

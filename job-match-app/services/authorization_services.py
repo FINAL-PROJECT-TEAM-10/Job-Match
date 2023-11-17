@@ -24,7 +24,7 @@ def get_password_hash(password):
 
 def _get_pass_by_username_admin(username):
     hashed_password = read_query('''
-    SELECT password FROM admin_list WHERE username = ?
+    SELECT password FROM admins WHERE username = ?
     ''', (username,))
 
     if hashed_password:
@@ -114,7 +114,7 @@ def password_changer(payload, new_password):
     # I tried to use a dynamic table name but the connector threw an error.
     new_password = get_password_hash(new_password)
     if payload['group'] == 'admins':
-        return update_query('''UPDATE admin_list SET password = ? WHERE id = ?''',
+        return update_query('''UPDATE admins SET password = ? WHERE id = ?''',
                             (new_password, payload['id']))
     if payload['group'] == 'companies':
         return update_query('''UPDATE companies SET password = ? WHERE id = ?''',
