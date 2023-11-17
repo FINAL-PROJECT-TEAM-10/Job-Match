@@ -4,7 +4,7 @@ from common.job_seeker_status_check import recognize_status, convert_status
 from app_models.job_seeker_models import JobSeekerInfo
 from app_models.job_seeker_models import JobSeeker
 from app_models.cv_models import CvCreation
-from services import admin_services
+from services import admin_services,company_services
 from common.country_validators_helpers import find_country_by_city
 from datetime import datetime
 from mariadb import IntegrityError
@@ -251,3 +251,13 @@ def get_cv_info(seeker_id: int, cv_id: str):
     data = read_query('SELECT * FROM mini_cvs WHERE id = ? AND job_seekers_id = ?', (cv_id, seeker_id))
 
     return data
+
+def get_all_job_ads():
+
+    data = read_query('SELECT * FROM job_ads WHERE status = "active"')
+
+    if data:
+        jb_ads = [{'Company': company_services.find_company_id_byusername_for_job_seeker(row[6]), 'Job_Ad Description': row[1], 'Minimum Salary': row[2], 'Maximum Salary': row[3], 'Status': row[4], 'Date Posted': row[5]} for row in data]
+        return jb_ads
+    else:
+        return JSONResponse(status_code=404, content='There is no such company with this job ad')

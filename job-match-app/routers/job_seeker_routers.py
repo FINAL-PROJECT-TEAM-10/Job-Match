@@ -200,3 +200,12 @@ def search_job_ads_percentage(current_user_payload=Depends(get_current_user)):
     job_seeker_id = current_user_payload.get('id')
 
     ...
+
+@job_seekers_router.get('/companies/job_ads')
+def get_job_ads_from_companies(current_user_payload=Depends(get_current_user)):
+
+    if current_user_payload['group'] != 'seekers':
+        return JSONResponse(status_code=403,
+                            content='This option is only available for Job_Seekers')
+    return job_seeker_services.get_all_job_ads()
+
