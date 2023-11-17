@@ -131,6 +131,12 @@ def get_seeker(username) -> None | JobSeeker:
 
     return next((JobSeeker.from_query_results(*row) for row in seeker_data), None)
 
+def get_username_by_id(seeker_id: int):
+
+    username = read_query('SELECT username FROM job_seekers WHERE id = ?', (seeker_id,))
+
+    return username[0][0]
+
 
 def create_seeker(username, password, first_name, last_name, email, city, country):
     from services.authorization_services import get_password_hash
@@ -213,17 +219,35 @@ def view_personal_cvs(seeker_id:int ):
     data = read_query('SELECT * FROM mini_cvs WHERE job_seekers_id = ?', (seeker_id,))
 
     if data:
-        ads = [{'Cv Description': row[3], 'Minimum Salary': row[1], 'Maximum Salary': row[2], 'Status': row[4], 'Date Posted': row[5]} for row in data]
+        ads = [{'Cv ID': row[0], 'Cv Description': row[3], 'Minimum Salary': row[1], 'Maximum Salary': row[2], 'Status': row[4], 'Date Posted': row[5]} for row in data]
         return ads
     else:
         return JSONResponse(status_code=404, content='No cvs found!')
-    
-def check_cv_exist(seeker_id: int):
 
-    check = ('SELECT * FROM mini_cvs WHERE job_seekers_id = ?', (seeker_id,))
-
-    return bool(check)
-
-def get_all_requirments():
+def get_all_requirements():
 
     ...
+
+
+def check_owner_cv(cv_id, seeker_id):
+
+    data = read_query('SELECT * FROM mini_cvs WHERE id = ? AND job_seekers_id = ?', (cv_id,seeker_id))
+
+    return bool(data)
+
+
+def edit_cv(job_seeker_id:int, cv_id: int, min_salary: int, max_salary: int, 
+            description: str, status, skill_names: list = None, skill_levels: list = None):
+
+
+    update_query('UPDATE mini_cvs SET min_salary = ?, max_salary = ?, description = ?, status = ? WHERE id = ? AND job_seekers_id = ?',
+                 (min_salary, max_salary, description, status, cv_id, job_seeker_id))
+    
+
+    return JSONResponse(status_code=200, content='You successfully edited your selected CV.')
+
+def get_cv_info(seeker_id: int, cv_id: str):
+
+    data = read_query('SELECT * FROM mini_cvs WHERE id = ? AND job_seekers_id = ?', (cv_id, seeker_id))
+
+    return data
