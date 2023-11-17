@@ -1,5 +1,7 @@
+from fastapi import HTTPException
+
 from app_models.skill_requirement_models import SkillRequirement
-from data.database import read_query, insert_query, update_query
+from data.database import read_query, insert_query, update_query, update_queries_transaction
 
 
 def skill_exists(skill: SkillRequirement) -> bool:
@@ -57,3 +59,18 @@ def is_skill_in_mini_cvs(id):
 def simple_delete(id):
     return update_query('''DELETE FROM skills_or_requirements WHERE id = ?''',
                         (id,))
+
+
+def force_delete(id):
+    delete_queries = (
+        '''DELETE FROM job_ads_has_requirements WHERE skills_or_requirements_id = ?''',
+        '''DELETE FROM mini_cvs_has_skills WHERE skills_or_requirements_id = ?''',
+        '''DELETE FROM skills_or_requirements WHERE id = ?'''
+    )
+
+    delete_params = ((id,), (id,), (id,))
+
+    is_successful = update_queries_transaction(delete_queries, delete_params)
+    if not is_successful:
+        raise HTTPException(status_code=409,
+                            detail='The database transaction for deleting the skill/requirement failed.')

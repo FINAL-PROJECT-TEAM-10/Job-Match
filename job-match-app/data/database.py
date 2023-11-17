@@ -41,7 +41,7 @@ def update_query(sql: str, sql_params=()) -> bool:
         return cursor.rowcount > 0
 
 
-def update_queries_transaction(sql_queries: tuple[str], sql_params: tuple[tuple]) -> bool:
+def update_queries_transaction(sql_queries: tuple[str, ...], sql_params: tuple[tuple, ...]) -> bool:
     with _get_connection() as conn:
         try:
             cursor = conn.cursor()

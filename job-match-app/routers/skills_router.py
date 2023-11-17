@@ -76,8 +76,6 @@ def change_skill_name_description_and_career(id: int, name: str = None, descript
                         content='Skill/Requirement successfully updated.')
 
 
-# TODO: Consider what happens with percent matches when force delete is called:
-#  Possible solution. Forcing an update of matches that have the skill/requirement.
 @skills_router.delete('/{id}', description='Admin endpoint')
 def delete_skill_requirement(id: int, current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'admins':
@@ -103,6 +101,19 @@ def delete_skill_requirement(id: int, current_user_payload=Depends(get_current_u
                         content='Unused skill/requirement deleted from the database.')
 
 
+# TODO: Consider what happens with percent matches when force delete is called:
+#  Possible solution. Forcing an update of matches that have the skill/requirement.
+#  Implemented once matching functionality is complete.
 @skills_router.delete('/{id}/force_delete', description='Admin endpoint')
-def force_delete_skill_requirement(id: int):
-    pass
+def force_delete_skill_requirement(id: int, current_user_payload=Depends(get_current_user)):
+    if current_user_payload['group'] != 'admins':
+        return JSONResponse(status_code=403,
+                            content='Only admins can delete skills/requirements.')
+
+    if not skill_requirement_services.skill_exists_by_id(id):
+        return JSONResponse(status_code=404,
+                            content=f'No skill/requirement with ID #{id} exists.')
+
+    skill_requirement_services.force_delete(id)
+    return JSONResponse(status_code=200,
+                        content=f'Skill/requirement with id #{id} fully deleted from the database.')
