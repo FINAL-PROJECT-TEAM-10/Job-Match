@@ -7,6 +7,11 @@ def skill_exists(skill: SkillRequirement) -> bool:
                           (skill.name,)))
 
 
+def skill_exists_by_id(id: int) -> bool:
+    return any(read_query('''SELECT id from skills_or_requirements WHERE id = ?''',
+                          (id,)))
+
+
 def create_skill(skill: SkillRequirement):
     new_skill_id = insert_query('''
     INSERT INTO skills_or_requirements (name, description, career_type)
@@ -35,3 +40,20 @@ def update_skill(skill: SkillRequirement):
     UPDATE skills_or_requirements SET name = ?, description = ?, career_type = ?
     WHERE id = ?
     ''', (skill.name, skill.description, skill.career_type, skill.id))
+
+
+def is_requirement_in_job_ads(id):
+    return any(read_query('''
+    SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE skills_or_requirements_id = ?
+    ''', (id,)))
+
+
+def is_skill_in_mini_cvs(id):
+    return any(read_query('''
+    SELECT skills_or_requirements_id FROM mini_cvs_has_skills WHERE skills_or_requirements_id = ?
+    ''', (id,)))
+
+
+def simple_delete(id):
+    return update_query('''DELETE FROM skills_or_requirements WHERE id = ?''',
+                        (id,))

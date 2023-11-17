@@ -50,8 +50,9 @@ def find_skill_by_id(id: int):
 
 
 @skills_router.put('/{id}', description='Admin endpoint')
-def change_skill_name_description_and_career(id: int, name: str = None, description: str = None, career_type: str = None,
-                                        current_user_payload=Depends(get_current_user)):
+def change_skill_name_description_and_career(id: int, name: str = None, description: str = None,
+                                             career_type: str = None,
+                                             current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'admins':
         return JSONResponse(status_code=403,
                             content='Only admins can edit skills/requirements.')
@@ -74,4 +75,34 @@ def change_skill_name_description_and_career(id: int, name: str = None, descript
     return JSONResponse(status_code=200,
                         content='Skill/Requirement successfully updated.')
 
-# TODO: Allow admins to delete skill/requirements: Think what happens with orphans
+
+# TODO: Consider what happens with percent matches when force delete is called:
+#  Possible solution. Forcing an update of matches that have the skill/requirement.
+@skills_router.delete('/{id}', description='Admin endpoint')
+def delete_skill_requirement(id: int, current_user_payload=Depends(get_current_user)):
+    if current_user_payload['group'] != 'admins':
+        return JSONResponse(status_code=403,
+                            content='Only admins can delete skills/requirements.')
+
+    if not skill_requirement_services.skill_exists_by_id(id):
+        return JSONResponse(status_code=404,
+                            content=f'No skill/requirement with ID #{id} exists.')
+
+    skill_in_mini_cvs = skill_requirement_services.is_skill_in_mini_cvs(id)
+    requirement_in_job_ads = skill_requirement_services.is_requirement_in_job_ads(id)
+
+    if skill_in_mini_cvs or requirement_in_job_ads:
+        return JSONResponse(status_code=403,
+                            content=f'Skill/requirement cannot be deleted because CVs or Job Ads depend on it. '
+                                    f'If you would like to delete a skill/requirement completely from the database, '
+                                    f'please use FORCE DELETE. Note: force delete may make some matches obsolete.')
+
+    skill_requirement_services.simple_delete(id)
+
+    return JSONResponse(status_code=200,
+                        content='Unused skill/requirement deleted from the database.')
+
+
+@skills_router.delete('/{id}/force_delete', description='Admin endpoint')
+def force_delete_skill_requirement(id: int):
+    pass
