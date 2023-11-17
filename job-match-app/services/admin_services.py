@@ -2,7 +2,6 @@ from app_models.admin_models import Admin
 from data.database import insert_query, read_query
 
 
-
 # TODO: Perhaps take the location and other repeatable checks in a separate service
 def find_location_id(city: str, country: str):
     location_id = read_query('''SELECT id from locations WHERE city = ? AND country = ?''',
@@ -37,6 +36,17 @@ def get_admin(username) -> None | Admin:
     return next((Admin.from_query_results(*row) for row in admin_data), None)
 
 
+def get_admin_by_email(email):
+    admin_data = read_query('''
+    SELECT a.id, a.username, a.first_name, a.last_name, a.picture, c.email, c.address, c.telephone, l.city, l.country
+    FROM admin_list as a, employee_contacts as c, locations as l 
+    WHERE a.employee_contacts_id = c.id AND c.locations_id = l.id
+    AND c.email = ?
+    ''', (email,))
+
+    return next((Admin.from_query_results(*row) for row in admin_data), None)
+
+
 def create_admin(new_admin: Admin, password):
     from services.authorization_services import get_password_hash
 
@@ -63,5 +73,3 @@ def create_admin(new_admin: Admin, password):
     new_admin.id = admin_id
 
     return new_admin
-
-

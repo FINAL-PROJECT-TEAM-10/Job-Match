@@ -119,6 +119,15 @@ def get_seeker(username) -> None | JobSeeker:
     return next((JobSeeker.from_query_results(*row) for row in seeker_data), None)
 
 
+def get_seeker_by_email(email):
+    seeker_data = read_query('''
+        SELECT js.id, js.username, ec.email, js.first_name, js.last_name, js.summary, js.blocked
+        FROM job_seekers as js, employee_contacts as ec
+        WHERE js.employee_contacts_id = ec.id AND ec.email = ?
+        ''', (email,))
+
+
+    return next((JobSeeker.from_query_results(*row) for row in seeker_data), None)
 def create_seeker(username, password, first_name, last_name, email, city, country):
     from services.authorization_services import get_password_hash
 

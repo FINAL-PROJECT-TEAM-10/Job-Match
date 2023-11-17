@@ -33,29 +33,30 @@ def update_password(credentials: PasswordUpdater,
 
 
 @profile_router.patch('/password/reset')
-def password_reset(username: str, user_type: str):
+def password_reset(email: str, user_type: str):
     fake_payload = {}
     if user_type == 'admins':
-        user = admin_services.get_admin(username)
+        user = admin_services.get_admin_by_email(email)
         fake_payload['group'] = 'admins'
-        fake_payload['id'] = user.id
     elif user_type == 'companies':
-        user = company_services.get_company(username)
+        user = company_services.get_company_by_email(email)
         fake_payload['group'] = 'companies'
-        fake_payload['id'] = user.id
     elif user_type == 'job_seekers':
-        user = job_seeker_services.get_seeker(username)
+        user = job_seeker_services.get_seeker_by_email(email)
         fake_payload['group'] = 'job_seekers'
-        fake_payload['id'] = user.id
     else:
         return JSONResponse(status_code=400,
                             content='Invalid user type category.'
                                     'Categories can be: admins, companies, job_seekers')
 
-    generated_password = authorization_services.generate_password()
-    authorization_services.password_changer(fake_payload, generated_password)
+    if user:
+        fake_payload['id'] = user.id
+        generated_password = authorization_services.generate_password()
+        authorization_services.password_changer(fake_payload, generated_password)
+        password_reset_email(user, generated_password)
 
-    response = password_reset_email(user, generated_password)
     return JSONResponse(status_code=200,
-                        content=response.json())
+                        content='If there is a user with such an email, an email will be sent.')
+    # return JSONResponse(status_code=200,
+    #                     content=response.json())
 
