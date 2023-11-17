@@ -1,11 +1,9 @@
-from fastapi import APIRouter, Query,HTTPException, Depends
+from fastapi import APIRouter, Query, Depends
 from fastapi.responses import JSONResponse
 from services import job_seeker_services
 from app_models.job_seeker_models import *
-from typing import Annotated
 from common.auth import get_current_user
 from common.country_validators_helpers import validate_location, validate_city
-from typing import List
 from common.separators_validators import parse_skills
 
 job_seekers_router = APIRouter(prefix='/job_seekers',tags={'Job seekers'})
@@ -99,10 +97,20 @@ def create_cv(description: str = Query(),
     
     status = 'Active'
     seeker_username = current_user_payload.get('username')
+    seeker_id = current_user_payload.get('id')
     seeker_id = job_seeker_services.get_job_seeker_info(seeker_username)
+
+    if job_seeker_services.check_cv_exist(seeker_id):
+        return JSONResponse(status_code=400, content='You already have CV you can edit existing one')
+
     skill_list = parse_skills(skills)#['python;2', 'javascript;3']
-    skill_names = [skill.split(';')[0] for skill in skill_list]
-    skill_levels = [skill.split(';')[1] for skill in skill_list] #[2,3]
+    
+    try:
+        skill_names = [skill.split(';')[0] for skill in skill_list]
+        skill_levels = [skill.split(';')[1] for skill in skill_list] #[2,3]
+    except IndexError:
+        return JSONResponse(status_code=400, content='Invalid input look at the description')
+    
     if len(skill_list) < 2:
         return JSONResponse(status_code=400, content='You need atleast 2 skills!')
     if len(skill_list) > 5:
@@ -154,4 +162,15 @@ def add_seeker(seeker_username: str = Query(),
     new_seeker = job_seeker_services.create_seeker(current_seeker.username, current_seeker.password, current_seeker.first_name, current_seeker.last_name,
                                                    current_seeker.email, current_seeker.city, current_seeker.country)
     return new_seeker
-    
+
+
+@job_seekers_router.get('/search/job_ads')
+def search_job_ads_percentage(current_user_payload=Depends(get_current_user)):
+
+    if current_user_payload['group'] != 'seekers':
+        return JSONResponse(status_code=403,
+                            content='Only seekers can search job ads')
+
+    job_seeker_id = current_user_payload.get('id')
+
+    ...

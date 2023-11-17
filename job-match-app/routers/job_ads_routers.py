@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, Body,Header, HTTPException,Depends
+from fastapi import APIRouter, Query,Depends
 from services import job_ads_services
 from fastapi.responses import JSONResponse
 from common.auth import get_current_user

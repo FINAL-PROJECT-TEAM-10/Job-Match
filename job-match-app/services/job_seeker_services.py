@@ -7,7 +7,7 @@ from app_models.cv_models import CvCreation
 from services import admin_services
 from common.country_validators_helpers import find_country_by_city
 from datetime import datetime
-
+from mariadb import IntegrityError
 
 
 def convert_level(level):
@@ -191,20 +191,18 @@ def create_cv(description: str, min_salary: int, max_salary: int, status: str, j
                       ''', (min_salary, max_salary, description, status, date_posted, job_seeker_id))
     
     cv_id = find_cv_by_seeker_id_description(job_seeker_id, description)
-
-    for skill,level in zip(list_skills, skill_levels):
-        level = int(level)
-        if not check_skill_exist(skill):
-            converted_level = convert_level(level)
-            insert_query('INSERT INTO skills_or_requirements (name) VALUES (?)', (skill,))
-            skill_id = find_skill_id_by_name(skill)
-            insert_query('INSERT INTO mini_cvs_has_skills (mini_cvs_id, skills_or_requirements_id,level) VALUES (?,?,?)',
-                         (cv_id, skill_id, converted_level))
-        else:
-            converted_level = convert_level(level)
-            skill_id = find_skill_id_by_name(skill)
-            insert_query('INSERT INTO mini_cvs_has_skills (mini_cvs_id, skills_or_requirements_id, level) VALUES (?,?,?)',
-                         (cv_id, skill_id, converted_level))
+    try:
+        for skill,level in zip(list_skills, skill_levels):
+            level = int(level)
+            if not check_skill_exist(skill):
+                return JSONResponse(status_code=404, detail='''That is not a valid skill name. You can send a ticket suggestion for this skill to our moderation team''')
+            else:
+                converted_level = convert_level(level)
+                skill_id = find_skill_id_by_name(skill)
+                insert_query('INSERT INTO mini_cvs_has_skills (mini_cvs_id, skills_or_requirements_id, level) VALUES (?,?,?)',
+                            (cv_id, skill_id, converted_level))
+    except IntegrityError:
+        return JSONResponse(status_code=400, content='You are using the same information from your previous CV')
     
 
     return CvCreation(description=description, min_salary=min_salary, max_salary=max_salary,status=status, date_posted=date_posted)
@@ -219,3 +217,13 @@ def view_personal_cvs(seeker_id:int ):
         return ads
     else:
         return JSONResponse(status_code=404, content='No cvs found!')
+    
+def check_cv_exist(seeker_id: int):
+
+    check = ('SELECT * FROM mini_cvs WHERE job_seekers_id = ?', (seeker_id,))
+
+    return bool(check)
+
+def get_all_requirments():
+
+    ...

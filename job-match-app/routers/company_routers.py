@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Query, Body,Header, HTTPException, Depends
+from fastapi import APIRouter, Query,Depends
 from fastapi.responses import JSONResponse
 from services import company_services
 from services import job_ads_services
 from app_models.company_models import Company
-from typing import Annotated
 from common.auth import get_current_user
 from common.country_validators_helpers import *
 
