@@ -18,8 +18,11 @@ def create_new_job_ad(description: str = Query(), min_salary: int = Query(),max_
     
     status = 'active'
     requirements_list = parse_skills(requirements)
-    requirements_names = [skill.split(';')[0] for skill in requirements_list]
-    requirements_levels = [skill.split(';')[1] for skill in requirements_list]
+    try:
+        requirements_names = [skill.split(';')[0] for skill in requirements_list]
+        requirements_levels = [skill.split(';')[1] for skill in requirements_list]
+    except IndexError:
+        return JSONResponse(status_code=404,content='Invalid input look at the description')
 
     if len(requirements_list) < 2:
         return JSONResponse(status_code=400, content='You need atleast 2 requirements!')

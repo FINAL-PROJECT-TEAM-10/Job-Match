@@ -154,4 +154,3 @@ def add_seeker(seeker_username: str = Query(),
     new_seeker = job_seeker_services.create_seeker(current_seeker.username, current_seeker.password, current_seeker.first_name, current_seeker.last_name,
                                                    current_seeker.email, current_seeker.city, current_seeker.country)
     return new_seeker
-    
