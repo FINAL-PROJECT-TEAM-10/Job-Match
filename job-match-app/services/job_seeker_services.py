@@ -240,12 +240,26 @@ def check_owner_cv(cv_id, seeker_id):
 
 
 def edit_cv(job_seeker_id:int, cv_id: int, min_salary: int, max_salary: int, 
-            description: str, status, skill_names: list = None, skill_levels: list = None):
+            description: str, status, skill_names: list, skill_levels: list):
 
 
     update_query('UPDATE mini_cvs SET min_salary = ?, max_salary = ?, description = ?, status = ? WHERE id = ? AND job_seekers_id = ?',
                  (min_salary, max_salary, description, status, cv_id, job_seeker_id))
     
+    for skill,level in zip(skill_names, skill_levels):
+        level = int(level)
+        converted_level = convert_level(level)
+        skill_id = find_skill_id_by_name(skill)
+        if not check_skill_cv_exist(cv_id, skill_id):
+            insert_query('INSERT INTO mini_cvs_has_skills (mini_cvs_id, skills_or_requirements_id, level) VALUES (?,?,?)',
+                        (cv_id, skill_id, converted_level))
+        else:
+            try:
+                update_query('UPDATE mini_cvs_has_skills SET skills_or_requirements_id = ?, level = ? WHERE mini_cvs_id = ?', 
+                            (skill_id, converted_level, cv_id))
+            except IntegrityError:
+                    update_query('UPDATE mini_cvs_has_skills SET level = ? WHERE mini_cvs_id = ? AND skills_or_requirements_id = ?',    
+                            (converted_level, cv_id, skill_id))
 
     return JSONResponse(status_code=200, content='You successfully edited your selected CV.')
 
@@ -254,3 +268,36 @@ def get_cv_info(seeker_id: int, cv_id: str):
     data = read_query('SELECT * FROM mini_cvs WHERE id = ? AND job_seekers_id = ?', (cv_id, seeker_id))
 
     return data
+
+
+def get_existing_skills(cv_id: int):
+
+    all_skills = read_query('SELECT skills_or_requirements_id FROM mini_cvs_has_skills WHERE mini_cvs_id = ?', (cv_id,))
+
+    return all_skills
+
+def find_skill_name_by_id(skill_id: int):
+
+    name = read_query('SELECT name FROM skills_or_requirements WHERE id = ?', (skill_id,))
+
+    return name[0][0]
+
+def find_level_by_ids(cv_id, skill_id):
+
+    level = read_query('SELECT level FROM mini_cvs_has_skills WHERE mini_cvs_id = ? AND skills_or_requirements_id = ?', (cv_id,skill_id))
+
+    return level[0][0]
+
+
+def find_skill_id_by_name(skill_name: int):
+
+    skill_id = read_query('SELECT id FROM skills_or_requirements WHERE name = ?', (skill_name,))
+
+    return skill_id[0][0]
+
+def check_skill_cv_exist(cv_id, skill_id):
+
+    data = read_query('SELECT * FROM mini_cvs_has_skills WHERE mini_cvs_id = ? AND skills_or_requirements_id = ?',
+                      (cv_id, skill_id))
+    
+    return bool(data)
