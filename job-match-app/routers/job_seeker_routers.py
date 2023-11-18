@@ -102,9 +102,9 @@ def create_cv(description: str = Query(),
     if current_user_payload['group'] != 'seekers':
         return JSONResponse(status_code=403,
                             content='Only seekers can create cv')
-    
-    if min_salary > max_salary:
-        return JSONResponse(status_code=400, content='The minimum salary cannot be bigger than the maximum salary')
+    # TODO FIX THIS
+    # if min_salary > max_salary:
+    #     return JSONResponse(status_code=400, content='The minimum salary cannot be bigger than the maximum salary')
     
     status = 'Active'
     seeker_username = current_user_payload.get('username')
@@ -140,8 +140,9 @@ def edit_cv(cv_id: int = Query(),
     
     seeker_id = current_user_payload.get('id')
 
-    if min_salary > max_salary:
-        return JSONResponse(status_code=400, content='The minimum salary cannot be bigger than the maximum salary')
+    # TODO FIX THIS
+    # if min_salary > max_salary:
+    #     return JSONResponse(status_code=400, content='The minimum salary cannot be bigger than the maximum salary')
     
 
     if not job_seeker_services.check_owner_cv(cv_id,seeker_id):

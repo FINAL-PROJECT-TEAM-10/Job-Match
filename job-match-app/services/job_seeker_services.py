@@ -9,7 +9,7 @@ from common.country_validators_helpers import find_country_by_city
 from datetime import datetime
 from mariadb import IntegrityError
 
-
+# TODO catchni si else s invalid status
 def convert_level(level):
     result = ''
     if level == 1:
@@ -238,7 +238,7 @@ def check_owner_cv(cv_id, seeker_id):
 
     return bool(data)
 
-
+# TODO Cikula da se izpulnqva samo kogato ima neshto v skills
 def edit_cv(job_seeker_id:int, cv_id: int, min_salary: int, max_salary: int, 
             description: str, status, skill_names: list, skill_levels: list):
 
