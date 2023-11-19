@@ -13,6 +13,7 @@ admin_router = APIRouter(prefix='/admin',tags={'Only for Admins'})
 
 
 # TODO: Fix registration
+#  Test registration to see if to do is still relevant.
 
 @admin_router.post('/register', response_model=Admin, responses={
     201: {"description": "Informs of admin creation",
