@@ -102,26 +102,27 @@ def create_cv(description: str = Query(),
     if current_user_payload['group'] != 'seekers':
         return JSONResponse(status_code=403,
                             content='Only seekers can create cv')
-    # TODO FIX THIS
-    # if min_salary > max_salary:
-    #     return JSONResponse(status_code=400, content='The minimum salary cannot be bigger than the maximum salary')
     
     status = 'Active'
     seeker_username = current_user_payload.get('username')
     seeker_id = current_user_payload.get('id')
     seeker_id = job_seeker_services.get_job_seeker_info(seeker_username)
-    skill_list = parse_skills(skills)#['python;2', 'javascript;3']
+    skill_list = parse_skills(skills)
     
-    try:
-        skill_names = [skill.split(';')[0] for skill in skill_list]
-        skill_levels = [skill.split(';')[1] for skill in skill_list] #[2,3]
-    except IndexError:
-        return JSONResponse(status_code=400, content='Invalid input look at the description')
+    if min_salary > max_salary:
+        return JSONResponse(status_code=400, content='The minimum salary cannot be bigger than the maximum salary')
     
     if len(skill_list) < 2:
         return JSONResponse(status_code=400, content='You need atleast 2 skills!')
+    
     if len(skill_list) > 5:
         return JSONResponse(status_code=400, content='The maximum skill limit of 5 has been reached!')
+    
+    try:
+        skill_names = [skill.split(';')[0] for skill in skill_list]
+        skill_levels = [skill.split(';')[1] for skill in skill_list]
+    except IndexError:
+        return JSONResponse(status_code=400, content='Invalid input look at the description')
     
     return job_seeker_services.create_cv(description,min_salary,max_salary,status,seeker_id[0][0], skill_names, skill_levels)
 
@@ -140,11 +141,6 @@ def edit_cv(cv_id: int = Query(),
     
     seeker_id = current_user_payload.get('id')
 
-    # TODO FIX THIS
-    # if min_salary > max_salary:
-    #     return JSONResponse(status_code=400, content='The minimum salary cannot be bigger than the maximum salary')
-    
-
     if not job_seeker_services.check_owner_cv(cv_id,seeker_id):
         return JSONResponse(status_code=400, content='That id is not a valid for your cvs')
     
@@ -159,20 +155,31 @@ def edit_cv(cv_id: int = Query(),
         cv_skills_info_ids = job_seeker_services.get_existing_skills(cv_id) #2,10
         skill_names = []
         skill_levels = []
-
-        for skill_id in cv_skills_info_ids[0]:
-            current_name = job_seeker_services.find_skill_name_by_id(skill_id)
-            skill_names.append(current_name)
-            current_skill_level = job_seeker_services.find_level_by_ids(cv_id, skill_id)
-            skill_levels.append(current_skill_level)
+        try:
+            for skill_id in cv_skills_info_ids[0]:
+                current_name = job_seeker_services.find_skill_name_by_id(skill_id)
+                skill_names.append(current_name)
+                current_skill_level = job_seeker_services.find_level_by_ids(cv_id, skill_id)
+                skill_levels.append(current_skill_level)
+        except IndexError:
+            skill_names = []
+            skill_list = []
     
     cv_info = job_seeker_services.get_cv_info(seeker_id, cv_id)
+
+    if min_salary and max_salary:
+        if min_salary > max_salary:
+            return JSONResponse(status_code=400, content='The minimum salary cannot be bigger than the maximum salary')
+    
+    if min_salary > cv_info[0][2]:
+            return JSONResponse(status_code=400, content="Your maximum salary is low change it if you wan't to change the minimum")
 
     arg_min_salary = min_salary or cv_info[0][1]
     arg_max_salary = max_salary or cv_info[0][2]
     arg_description = description or cv_info[0][3]
     if not description and not min_salary and not max_salary and not skills:
-        return JSONResponse(status_code=400, content="You haven't done any changes to your CV information")
+        return JSONResponse(status_code=202, content="You haven't done any changes to your CV information")
+    
 
     return job_seeker_services.edit_cv(seeker_id, cv_id, arg_min_salary,arg_max_salary,arg_description, status, skill_names, skill_levels)
 
