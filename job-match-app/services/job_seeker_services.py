@@ -206,7 +206,7 @@ def create_cv(description: str, min_salary: int, max_salary: int,
     date_posted = datetime.now()
 
     cv = insert_query('''INSERT INTO mini_cvs (min_salary, max_salary, description, status, date_posted, job_seekers_id, main_cv)
-                        VALUES (?,?,?,?,?,?)
+                        VALUES (?,?,?,?,?,?,?)
                       ''', (min_salary, max_salary, description, status, date_posted, job_seeker_id, is_main_cv))
     
     cv_id = find_cv_by_seeker_id_description(job_seeker_id, description)
@@ -327,3 +327,14 @@ def check_skill_cv_exist(cv_id, skill_id):
                       (cv_id, skill_id))
 
     return bool(data)
+
+def update_main_cv(cv_id, seeker_id):
+
+    other_cv_id = read_query('SELECT id FROM mini_cvs WHERE main_cv = 1 AND job_seekers_id = ?', (seeker_id,))
+
+    if other_cv_id:
+        update_query('UPDATE mini_cvs SET main_cv = 0 WHERE id = ? AND job_seekers_id = ?', (other_cv_id[0][0], seeker_id))
+    
+    update_query('UPDATE mini_cvs SET main_cv = 1 WHERE id = ? AND job_seekers_id = ?', (cv_id, seeker_id))
+
+    return JSONResponse(status_code=200, content=f'You successfully choose a main CV with id: {cv_id}')

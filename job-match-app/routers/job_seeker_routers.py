@@ -237,3 +237,19 @@ def get_job_ads_from_companies(current_user_payload=Depends(get_current_user)):
                             content='This option is only available for Job_Seekers')
     return job_seeker_services.get_all_job_ads()
 
+
+
+@job_seekers_router.get('/main_cv', tags=['CV Section'])
+def select_main_cv(cv_id: int = Query(), current_user_payload=Depends(get_current_user)):
+    
+    if current_user_payload['group'] != 'seekers':
+        return JSONResponse(status_code=403,
+                            content='Only seekers can search job ads')
+    
+    seeker_id = current_user_payload.get('id')
+    
+    if not job_seeker_services.check_owner_cv(cv_id,seeker_id):
+        return JSONResponse(status_code=400, content='That id is not a valid for your cvs')
+    
+
+    return job_seeker_services.update_main_cv(cv_id, seeker_id)
