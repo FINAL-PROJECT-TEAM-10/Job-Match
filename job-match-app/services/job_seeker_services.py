@@ -366,19 +366,13 @@ def calculate_percents_job_ad(seeker_id, current_sort):
 
 
 def get_current_job_ad_requirements(job_ad_id:int):
-
     data = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_ad_id,))
 
-    result_ids = []
-    for job_ad in data:
-        for id in job_ad:
+    result_pairs = [(get_requirement_name(id), get_level(id)) for job_ad in data for id in job_ad]
 
-            result_ids.append(get_requirement_name(id))
+    joined_pairs = [f"{name};{level}" for name, level in result_pairs]
 
-            result_ids.append(get_level(id))
-
-    
-    joined = ';'.join(result_ids)
+    joined = ','.join(joined_pairs)
     return joined
 
 
