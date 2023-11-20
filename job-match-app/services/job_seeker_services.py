@@ -21,6 +21,17 @@ def convert_level(level):
 
     return result
 
+def convert_level_name(level):
+    result = ''
+    if level == 'Beginner':
+        result = 1
+    elif level == 'Intermidiate':
+        result = 2
+    elif level == 'Advanced':
+        result = 3
+
+    return int(result)
+
 def read_seekers():
 
     data = read_query('SELECT * FROM job_seekers')
@@ -188,13 +199,15 @@ def find_skill_id_by_name(name:str):
 
     return skill_id[0][0]
 
-def create_cv(description: str, min_salary: int, max_salary: int, status: str, job_seeker_id: int, list_skills: list, skill_levels: list): #['python','js']
+def create_cv(description: str, min_salary: int, max_salary: int, 
+              status: str, job_seeker_id: int, list_skills: list, 
+              skill_levels: list, is_main_cv: bool): #['python','js']
 
     date_posted = datetime.now()
 
-    cv = insert_query('''INSERT INTO mini_cvs (min_salary, max_salary, description, status, date_posted, job_seekers_id)
+    cv = insert_query('''INSERT INTO mini_cvs (min_salary, max_salary, description, status, date_posted, job_seekers_id, main_cv)
                         VALUES (?,?,?,?,?,?)
-                      ''', (min_salary, max_salary, description, status, date_posted, job_seeker_id))
+                      ''', (min_salary, max_salary, description, status, date_posted, job_seeker_id, is_main_cv))
     
     cv_id = find_cv_by_seeker_id_description(job_seeker_id, description)
     try:
@@ -243,6 +256,26 @@ def edit_cv(job_seeker_id:int, cv_id: int, min_salary: int, max_salary: int,
     update_query('UPDATE mini_cvs SET min_salary = ?, max_salary = ?, description = ?, status = ? WHERE id = ? AND job_seekers_id = ?',
                  (min_salary, max_salary, description, status, cv_id, job_seeker_id))
     
+    if skill_names and skill_levels:
+        for skill,level in zip(skill_names, skill_levels):
+            if level.isnumeric():
+                level = int(level)
+                converted_level = convert_level(level)
+            else:
+                level_num = convert_level_name(level)
+                converted_level = level_num
+            skill_id = find_skill_id_by_name(skill)
+            if not check_skill_cv_exist(cv_id, skill_id):
+                insert_query('INSERT INTO mini_cvs_has_skills (mini_cvs_id, skills_or_requirements_id, level) VALUES (?,?,?)',
+                            (cv_id, skill_id, converted_level))
+            else:
+                try:
+                    update_query('UPDATE mini_cvs_has_skills SET skills_or_requirements_id = ?, level = ? WHERE mini_cvs_id = ?', 
+                                (skill_id, converted_level, cv_id))
+                except IntegrityError:
+                        update_query('UPDATE mini_cvs_has_skills SET level = ? WHERE mini_cvs_id = ? AND skills_or_requirements_id = ?',    
+                                (converted_level, cv_id, skill_id))
+    
 
     return JSONResponse(status_code=200, content='You successfully edited your selected CV.')
 
@@ -261,3 +294,36 @@ def get_all_job_ads():
         return jb_ads
     else:
         return JSONResponse(status_code=404, content='There is no such company with this job ad')
+
+
+def get_existing_skills(cv_id: int):
+
+    all_skills = read_query('SELECT skills_or_requirements_id FROM mini_cvs_has_skills WHERE mini_cvs_id = ?', (cv_id,))
+
+    return all_skills
+
+def find_skill_name_by_id(skill_id: int):
+
+    name = read_query('SELECT name FROM skills_or_requirements WHERE id = ?', (skill_id,))
+
+    return name[0][0]
+
+def find_level_by_ids(cv_id, skill_id):
+
+    level = read_query('SELECT level FROM mini_cvs_has_skills WHERE mini_cvs_id = ? AND skills_or_requirements_id = ?', (cv_id,skill_id))
+
+    return level[0][0]
+
+
+def find_skill_id_by_name(skill_name: int):
+
+    skill_id = read_query('SELECT id FROM skills_or_requirements WHERE name = ?', (skill_name,))
+
+    return skill_id[0][0]
+
+def check_skill_cv_exist(cv_id, skill_id):
+
+    data = read_query('SELECT * FROM mini_cvs_has_skills WHERE mini_cvs_id = ? AND skills_or_requirements_id = ?',
+                      (cv_id, skill_id))
+
+    return bool(data)
