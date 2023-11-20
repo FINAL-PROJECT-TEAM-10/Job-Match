@@ -171,7 +171,8 @@ def edit_cv(cv_id: int = Query(),
         if min_salary > max_salary:
             return JSONResponse(status_code=400, content='The minimum salary cannot be bigger than the maximum salary')
     
-    if min_salary > cv_info[0][2]:
+    if min_salary:
+        if min_salary > cv_info[0][2]:
             return JSONResponse(status_code=400, content="Your maximum salary is low change it if you wan't to change the minimum")
 
     arg_min_salary = min_salary or cv_info[0][1]
