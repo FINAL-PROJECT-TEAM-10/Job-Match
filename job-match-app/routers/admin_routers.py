@@ -58,5 +58,16 @@ def add_admin(registration_details: Admin, password: Annotated[str, Body()], cur
                         content=new_admin.json())
 
 
+@admin_router.delete('/temporary_tokens', description='Admin can delete all temporary tokens. Use with caution.')
+def delete_all_temp_tokens(current_user_payload=Depends(get_current_user)):
+    if current_user_payload['group'] != 'admins':
+        return JSONResponse(status_code=403,
+                            content='Only admins can register other admins.')
+
+    admin_services.delete_temp_tokens()
+
+    return JSONResponse(status_code=200,
+                        content='All temporary tokens were deleted.')
+
 # TODO: Implement mailing history for admins
 

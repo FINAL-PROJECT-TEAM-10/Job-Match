@@ -1,5 +1,5 @@
 from app_models.admin_models import Admin
-from data.database import insert_query, read_query
+from data.database import insert_query, read_query, update_query
 
 
 # TODO: Perhaps take the location and other repeatable checks in a separate service
@@ -73,3 +73,8 @@ def create_admin(new_admin: Admin, password):
     new_admin.id = admin_id
 
     return new_admin
+
+
+# Use below with caution. All rows with temporary tokens will be dropped.
+def delete_temp_tokens():
+    update_query('''DELETE FROM temporary_tokens''', (None,))
