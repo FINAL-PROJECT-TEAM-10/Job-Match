@@ -4,6 +4,7 @@ from private_details import mailjet_sender_email as sender
 
 mailjet = Client(auth=(api_key, api_secret), version='v3.1')
 
+
 def password_reset_email(user, generated_password):
     data_password_reset = {
         'Messages': [
@@ -33,3 +34,7 @@ def password_reset_email(user, generated_password):
 
     result = mailjet.send.create(data=data_password_reset)
     return result
+
+
+def password_reset_activation_email(user, activation_token):
+    pass

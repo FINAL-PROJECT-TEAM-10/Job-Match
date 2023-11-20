@@ -4,12 +4,13 @@ from passlib.context import CryptContext
 from app_models.admin_models import Admin
 from app_models.company_models import Company
 from app_models.job_seeker_models import JobSeeker
-from data.database import read_query, update_query
+from data.database import read_query, update_query, insert_query
 from services import admin_services, job_seeker_services, company_services
 
 _SECRET_KEY = '2d776838352e75a9f95de915c269c8ce45b12de47f720213c5f71c4e25618c25'
 _ALGORITHM = 'HS256'
 _TOKEN_EXPIRATION_TIME_MINUTES = timedelta(minutes=1440)
+_ACTIVATION_TOKEN_EXPIRATION_TIME_MINUTES = timedelta(minutes=60)
 
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated="auto")
 
@@ -106,6 +107,19 @@ def create_access_token(user_data, expiration_delta: timedelta = _TOKEN_EXPIRATI
     return encoded_jwt
 
 
+def create_activation_token(activation_data, expiration_delta: timedelta = _ACTIVATION_TOKEN_EXPIRATION_TIME_MINUTES):
+    to_encode = {
+        "id": activation_data.id,
+        "email": activation_data.email,
+        "group": activation_data.group,
+        "purpose": activation_data.purpose,
+    }
+    expire = datetime.now() + expiration_delta
+
+    to_encode.update({'exp': expire})
+    encoded_jwt = jwt.encode(to_encode, _SECRET_KEY, algorithm=_ALGORITHM)
+
+
 def is_authenticated(token: str):
     return jwt.decode(token, _SECRET_KEY, algorithms=[_ALGORITHM])
 
@@ -157,6 +171,21 @@ def generate_password():
     password_list = list(password_set)
     random.shuffle(password_list)
     return ''.join(password_list)
+
+
+def activation_token_exists(activation_token):
+    return any(read_query('''SELECT id from temporary_tokens WHERE token = ?''',
+                          (activation_token,)))
+
+
+def store_activation_token(activation_token):
+    insert_query('''INSERT INTO temporary_tokens (token) VALUES (?)''',
+                 (activation_token,))
+
+
+def delete_activation_token(activation_token):
+    update_query('''DELETE FROM temporary_tokens WHERE token = ?''',
+                 (activation_token,))
 
 # TODO: Enter your real email after setting up with mailjet to use mailing functionality
 # First admin needs to be added because only admins can add other admins

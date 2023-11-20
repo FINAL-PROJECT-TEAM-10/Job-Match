@@ -1,10 +1,15 @@
+from datetime import time
+from http.client import HTTPException
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Body
 from fastapi.responses import JSONResponse
+from jose import ExpiredSignatureError
+
 from app_models.input_models import PasswordUpdater
+from app_models.token_models import ActivationData
 from common.auth import TokenInfo, get_current_user
-from common.mailing import password_reset_email
+from common.mailing import password_reset_email, password_reset_activation_email
 from services import authorization_services, company_services, job_seeker_services, admin_services
 
 profile_router = APIRouter(prefix='/profile', tags={'Profile info and password management'})
@@ -34,28 +39,56 @@ def update_password(credentials: PasswordUpdater,
 
 # TODO: For security purposes, this needs to be called after following an activation link.
 #  Reset should send an activation link, and if the link is clicked, only then should the password be reset.
-@profile_router.patch('/password/reset')
-def password_reset(email: str, user_type: str):
+
+
+@profile_router.patch('/password/forgotten')
+def forgotten_password_activation_link(email: str, user_type: str):
     fake_payload = {}
     if user_type == 'admins':
         user = admin_services.get_admin_by_email(email)
-        fake_payload['group'] = 'admins'
     elif user_type == 'companies':
         user = company_services.get_company_by_email(email)
-        fake_payload['group'] = 'companies'
     elif user_type == 'job_seekers':
         user = job_seeker_services.get_seeker_by_email(email)
-        fake_payload['group'] = 'job_seekers'
     else:
         return JSONResponse(status_code=400,
                             content='Invalid user type category.'
                                     'Categories can be: admins, companies, job_seekers')
 
     if user:
-        fake_payload['id'] = user.id
-        generated_password = authorization_services.generate_password()
-        authorization_services.password_changer(fake_payload, generated_password)
-        password_reset_email(user, generated_password)
+        activation_data = ActivationData(id=user.id, email=user.email, group=user.group, purpose='forgotten_password')
+        activation_token = authorization_services.create_activation_token(activation_data)
+        authorization_services.store_activation_token(activation_token)
+        password_reset_activation_email(user, activation_token)
+
+    return JSONResponse(status_code=200,
+                        content='If there is a user with such an email, an email will be sent.')
+
+
+@profile_router.patch('/password/reset/{activation_token}')
+def password_reset(activation_token: str):
+    if not authorization_services.activation_token_exists(activation_token):
+        return JSONResponse(status_code=401,
+                            content='You are not using a valid token')
+    decoded_token = authorization_services.is_authenticated(activation_token)
+
+    try:
+        if decoded_token:
+            if decoded_token['exp'] > time():
+                if decoded_token['purpose'] == 'forgotten_password':
+                    generated_password = authorization_services.generate_password()
+                    authorization_services.password_changer(decoded_token, generated_password)
+                    authorization_services.delete_activation_token(activation_token)
+                    password_reset_email(decoded_token['email'], generated_password)
+                else:
+                    return JSONResponse(status_code=401,
+                                        content='You are not using a valid token.')
+            else:
+                authorization_services.delete_activation_token(activation_token)
+                raise ExpiredSignatureError
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401,
+                            detail='Password reset timelimit has been exceeded. Please request a new password reset.')
 
     return JSONResponse(status_code=200,
                         content='If there is a user with such an email, an email will be sent.')
