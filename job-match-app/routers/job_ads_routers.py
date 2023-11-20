@@ -127,3 +127,14 @@ def edit_your_job_ad(job_ad_id: int = Query(), description: str = Query(None), m
         return JSONResponse(status_code=202, content="You haven't done any changes to your Job_Ad information")
 
     return job_ads_services.edit_job_ads(company_id, job_ad_id, arg_min_salary,arg_max_salary,arg_description,requirements_names,requirements_levels)
+
+@job_ads_router.get('/search/cv')
+def search_cv_from_job_seeker(job_ad_id: int = Query(), status: str =  Query(default='Best',enum=['Best', 'Very Good', 'Good','Bad','Worst']), 
+                              current_user_payload=Depends(get_current_user)):
+     
+     if current_user_payload['group'] != 'companies':
+        return JSONResponse(status_code=403,
+                            content='This option is only available for Companies')
+     
+     getting_cv_id = current_user_payload.get('id')
+
