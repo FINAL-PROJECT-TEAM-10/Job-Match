@@ -54,7 +54,7 @@ def view_job_ads_by_id(ads_id: int):
     data = read_query('SELECT * FROM job_ads WHERE companies_id = ?', (ads_id,))
 
     if data:
-        ads = [{'Job Description': row[1], 'Minimum Salary': row[2], 'Maximum Salary': row[3], 'Status': row[4], 'Date Posted': row[5]} for row in data]
+        ads = [{'Job Ad ID': row[0],'Job Description': row[1], 'Minimum Salary': row[2], 'Maximum Salary': row[3], 'Status': row[4], 'Date Posted': row[5]} for row in data]
         return ads
     else:
         return JSONResponse(status_code=404,content='There are no current job ads found')
@@ -87,11 +87,73 @@ def check_company_information(job_ad_id: int, company_id: str):
     return data
 
 def edit_job_ads(company_id:int, job_ads_id: int, min_salary: int, max_salary: int, 
-            description: str):
+            description: str, requirement_names: list, requirement_levels: list):
 
 
     update_query('UPDATE job_ads SET min_salary = ?, max_salary = ?, description = ? WHERE id = ? AND companies_id = ?',
                  (min_salary, max_salary, description, job_ads_id, company_id))
     
+    if requirement_names and requirement_levels:
+        for requirement,level in zip(requirement_names, requirement_levels):
+            if level.isnumeric():
+                level = int(level)
+                converted_level = job_seeker_services.convert_level(level)
+            else:
+                level_num = convert_level_name(level)
+                converted_level = level_num
+            requirements_id = find_requirement_by_name(requirement)
+            if not check_requirement_ad_exist(job_ads_id, requirements_id):
+                insert_query('INSERT INTO job_ads_has_requirements (job_ads_id, skills_or_requirements_id, level) VALUES (?,?,?)',
+                            (job_ads_id, requirements_id, converted_level))
+            else:
+                try:
+                    update_query('UPDATE job_ads_has_requirements SET skills_or_requirements_id = ?, level = ? WHERE job_ads_id = ?', 
+                                (requirements_id, converted_level, job_ads_id))
+                except IntegrityError:
+                        update_query('UPDATE job_ads_has_requirements SET level = ? WHERE job_ads_id = ? AND skills_or_requirements_id = ?',    
+                                (converted_level, job_ads_id, requirements_id))
+
 
     return JSONResponse(status_code=200, content='You successfully edited your selected Job AD.')
+
+def existing_requirements(job_ad_id: int):
+
+    all_requirements = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_ad_id,))
+
+    return all_requirements
+
+def find_requirement_by_id(job_ad_id: int):
+
+    name = read_query('SELECT name FROM skills_or_requirements WHERE id = ?', (job_ad_id,))
+
+    return name[0][0]
+
+def find_requirements_level(job_ad_id, requirement_id):
+
+    level = read_query('SELECT level FROM job_ads_has_requirements WHERE job_ads_id = ? AND skills_or_requirements_id = ?', (job_ad_id,requirement_id))
+
+    return level[0][0]
+
+def find_requirement_by_name(skill_name: int):
+
+    skill_id = read_query('SELECT id FROM skills_or_requirements WHERE name = ?', (skill_name,))
+
+    return skill_id[0][0]
+
+def check_requirement_ad_exist(job_ad_id, requirement_id):
+
+    data = read_query('SELECT * FROM job_ads_has_requirements WHERE job_ads_id = ? AND skills_or_requirements_id = ?',
+                      (job_ad_id, requirement_id))
+    
+    return bool(data)
+
+def convert_level_name(level):
+    result = ''
+    if level == 'Beginner':
+        result = 1
+    elif level == 'Intermidiate':
+        result = 2
+    elif level == 'Advanced':
+        result = 3
+
+    return int(result)
