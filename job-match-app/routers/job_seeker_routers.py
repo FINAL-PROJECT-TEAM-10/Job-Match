@@ -6,10 +6,10 @@ from common.auth import get_current_user
 from common.country_validators_helpers import validate_location, validate_city
 from common.separators_validators import parse_skills
 
-job_seekers_router = APIRouter(prefix='/job_seekers',tags={'Job seekers'})
+job_seekers_router = APIRouter(prefix='/job_seekers')
 
 
-@job_seekers_router.get('/', description= 'All functions for job seekers')
+@job_seekers_router.get('/', description= 'All functions for job seekers', tags=['Seeker Section'])
 def get_all_seekers(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'seekers':
@@ -40,7 +40,7 @@ def get_all_seekers(current_user_payload=Depends(get_current_user)):
     return result
 
 
-@job_seekers_router.get('/personal_info')
+@job_seekers_router.get('/personal_info', tags=['Seeker Section'])
 def your_information(current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'seekers':
@@ -59,7 +59,7 @@ def your_information(current_user_payload=Depends(get_current_user)):
     return current_job_seeker_info
 
 
-@job_seekers_router.put('/personal_info/edit')
+@job_seekers_router.put('/personal_info/edit', tags=['Seeker Section'])
 def edit_proffesional_info(summary: str = Query(None),
                            city: str = Query(None),
                            status: str =  Query(enum=['Active', 'Busy']),
@@ -84,7 +84,7 @@ def edit_proffesional_info(summary: str = Query(None),
     
     return job_seeker_services.edit_info(job_seeker.username, job_seeker.summary,job_seeker.city,job_seeker.status)
 
-@job_seekers_router.post('/cv')
+@job_seekers_router.post('/cv', tags=['CV Section'])
 def create_cv(description: str = Query(),
               min_salary: int = Query(),
               max_salary: int = Query(),
@@ -114,7 +114,7 @@ def create_cv(description: str = Query(),
     
     return job_seeker_services.create_cv(description,min_salary,max_salary,status,seeker_id[0][0], skill_names, skill_levels)
 
-@job_seekers_router.put('/cv/edit')
+@job_seekers_router.put('/cv/edit', tags=['CV Section'])
 def edit_cv(cv_id: int = Query(),description: str = Query(None), min_salary: int = Query(None),
             max_salary: int = Query(None), status: str =  Query(enum=['Active', 'Hidden', 'Private']),
             skills: str = Query(None),
@@ -146,7 +146,7 @@ def edit_cv(cv_id: int = Query(),description: str = Query(None), min_salary: int
     return job_seeker_services.edit_cv(seeker_id, cv_id, arg_min_salary,arg_max_salary,arg_description, status, skill_names, skill_levels)
 
 
-@job_seekers_router.get('/cv')
+@job_seekers_router.get('/cv', tags=['CV Section'])
 def view_personal_cvs(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'seekers':
@@ -159,7 +159,7 @@ def view_personal_cvs(current_user_payload=Depends(get_current_user)):
     return job_seeker_services.view_personal_cvs(seeker_id[0][0])
 
 
-@job_seekers_router.post('/register')
+@job_seekers_router.post('/register', tags=['Seeker & Company Signup'])
 def add_seeker(seeker_username: str = Query(),
               seeker_password: str = Query(),
               seeker_first_name: str = Query(), 
@@ -190,7 +190,7 @@ def add_seeker(seeker_username: str = Query(),
     return new_seeker
 
 
-@job_seekers_router.get('/search/job_ads')
+@job_seekers_router.get('/search/job_ads', tags=['Seeker Section'])
 def search_job_ads_percentage(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'seekers':
@@ -201,7 +201,7 @@ def search_job_ads_percentage(current_user_payload=Depends(get_current_user)):
 
     ...
 
-@job_seekers_router.get('/companies/job_ads')
+@job_seekers_router.get('/companies/job_ads',tags=['Seeker Section'])
 def get_job_ads_from_companies(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'seekers':

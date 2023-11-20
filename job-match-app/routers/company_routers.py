@@ -6,9 +6,9 @@ from app_models.company_models import Company
 from common.auth import get_current_user
 from common.country_validators_helpers import *
 
-companies_router = APIRouter(prefix='/companies',tags={'Everything available for Companies'})
+companies_router = APIRouter(prefix='/companies')
 
-@companies_router.get('/', description= 'You can view every company from here')
+@companies_router.get('/', description= 'You can view every company from here', tags=['Company Section'])
 def view_all_companies(current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'companies':
         return JSONResponse(status_code=403,
@@ -33,7 +33,7 @@ def view_all_companies(current_user_payload=Depends(get_current_user)):
 
     return result
 
-@companies_router.post('/register', response_model=Company)
+@companies_router.post('/register', response_model=Company, tags=['Seeker & Company Signup'])
 def company_registration(Company_Name: str = Query(), Password: str = Query(), 
                          Company_City: str = Query(), Company_Country: str = Query(), Company_Adress: str = Query(),
                          Telephone_Number: int = Query(),Email_Adress: str = Query(),):
@@ -48,7 +48,7 @@ def company_registration(Company_Name: str = Query(), Password: str = Query(),
     return create_company
 
 
-@companies_router.get('/information')
+@companies_router.get('/information', tags=['Company Section'])
 def your_company_information(current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'companies':
@@ -86,7 +86,7 @@ def your_company_information(current_user_payload=Depends(get_current_user)):
 
     return all_information
 
-@companies_router.put('/information/edit')
+@companies_router.put('/information/edit', tags=['Company Section'])
 def edit_your_company_information(description: str = Query(None),
                              city: str = Query(None),
                              address: str = Query(None),
@@ -117,7 +117,7 @@ def edit_your_company_information(description: str = Query(None),
 
     return company_services.edit_company_information(username, final_company_description, final_company_city, final_company_adress, final_company_telephone)
 
-@companies_router.get('/job_seekers/cv')
+@companies_router.get('/job_seekers/cv', tags=['Company Section'])
 def get_cv_from_job_seeker(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'companies':
