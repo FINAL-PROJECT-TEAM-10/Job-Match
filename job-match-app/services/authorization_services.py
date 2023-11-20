@@ -111,6 +111,7 @@ def create_activation_token(activation_data, expiration_delta: timedelta = _ACTI
     to_encode = {
         "id": activation_data.id,
         "email": activation_data.email,
+        "username": activation_data.username,
         "group": activation_data.group,
         "purpose": activation_data.purpose,
     }
@@ -118,6 +119,8 @@ def create_activation_token(activation_data, expiration_delta: timedelta = _ACTI
 
     to_encode.update({'exp': expire})
     encoded_jwt = jwt.encode(to_encode, _SECRET_KEY, algorithm=_ALGORITHM)
+
+    return encoded_jwt
 
 
 def is_authenticated(token: str):

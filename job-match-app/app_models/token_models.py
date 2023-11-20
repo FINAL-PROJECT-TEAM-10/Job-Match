@@ -9,5 +9,6 @@ class Token(BaseModel):
 class ActivationData(BaseModel):
     id: int
     email: str
+    username: str
     group: str
     purpose: str

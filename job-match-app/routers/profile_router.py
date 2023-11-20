@@ -1,8 +1,8 @@
-from datetime import time
+from time import time
 from http.client import HTTPException
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends, Body, Query
 from fastapi.responses import JSONResponse
 from jose import ExpiredSignatureError
 
@@ -56,7 +56,11 @@ def forgotten_password_activation_link(email: str, user_type: str):
                                     'Categories can be: admins, companies, job_seekers')
 
     if user:
-        activation_data = ActivationData(id=user.id, email=user.email, group=user.group, purpose='forgotten_password')
+        activation_data = ActivationData(id=user.id,
+                                         email=user.email,
+                                         username=user.username,
+                                         group=user.group,
+                                         purpose='forgotten_password')
         activation_token = authorization_services.create_activation_token(activation_data)
         authorization_services.store_activation_token(activation_token)
         password_reset_activation_email(user, activation_token)
@@ -65,8 +69,8 @@ def forgotten_password_activation_link(email: str, user_type: str):
                         content='If there is a user with such an email, an email will be sent.')
 
 
-@profile_router.patch('/password/reset/{activation_token}')
-def password_reset(activation_token: str):
+@profile_router.get('/password/reset/')
+def password_reset(activation_token: str = Query()):
     if not authorization_services.activation_token_exists(activation_token):
         return JSONResponse(status_code=401,
                             content='You are not using a valid token')
@@ -79,7 +83,7 @@ def password_reset(activation_token: str):
                     generated_password = authorization_services.generate_password()
                     authorization_services.password_changer(decoded_token, generated_password)
                     authorization_services.delete_activation_token(activation_token)
-                    password_reset_email(decoded_token['email'], generated_password)
+                    password_reset_email(decoded_token, generated_password)
                 else:
                     return JSONResponse(status_code=401,
                                         content='You are not using a valid token.')
@@ -91,7 +95,7 @@ def password_reset(activation_token: str):
                             detail='Password reset timelimit has been exceeded. Please request a new password reset.')
 
     return JSONResponse(status_code=200,
-                        content='If there is a user with such an email, an email will be sent.')
+                        content='Your password has been updated. A new password has been sent to your email.')
     # return JSONResponse(status_code=200,
     #                     content=response.json())
 

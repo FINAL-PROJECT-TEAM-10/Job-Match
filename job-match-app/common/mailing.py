@@ -6,39 +6,8 @@ mailjet = Client(auth=(api_key, api_secret), version='v3.1')
 
 
 def password_reset_activation_email(user, activation_token):
+    activation_link: str =skill_sync_address + 'profile/password/reset?activation_token=' + activation_token
     data_password_reset_activation = {
-        'Messages': [
-            {
-                "From": {
-                    "Email": f"{sender}",
-                    "Name": "Skill Sync"
-                },
-                "To": [
-                    {
-                        "Email": f"{user.email}",
-                    }
-                ],
-                "Subject": "Password Reset Request at SkillSync",
-                "TextPart": "You requested a password reset for your SkillSync account.",
-                "HTMLPart": f'<h3>Hello!</h3><br/>' +
-                            f'<p>You have requested a password request at our website.</strong></p>' +
-                            f'If you haven\'t requested a password request please ignore this email.' +
-                            f"If you would like to proceed resetting your password please click below:"
-                            f"<p><a href='''{skill_sync_address + 'profile/password/reset/' +activation_token}'''>RESET PASSWORD!</a></p>" +
-                            '<p>May the secure connection be with you!</p>' +
-                            '<p></p>' +
-                            '<p><em>Skill, Sync, Match!</em></p>'
-            }
-
-        ]
-    }
-
-    result = mailjet.send.create(data=data_password_reset_activation)
-    return result
-
-
-def password_reset_email(user, generated_password):
-    data_password_reset = {
         'Messages': [
             {
                 "From": {
@@ -51,10 +20,43 @@ def password_reset_email(user, generated_password):
                         "Name": f"{user.username}"
                     }
                 ],
+                "Subject": "Password Reset Request at SkillSync",
+                "TextPart": "You requested a password reset for your SkillSync account.",
+                "HTMLPart": f'<h3>Hello, {user.username}!</h3><br/>' +
+                            f'<p>You have requested a password request at our website.</strong></p>' +
+                            f'If you haven\'t requested a password request please ignore this email.' +
+                            f"If you would like to proceed resetting your password please click below:"
+                            f"<p><a href='{activation_link}'>RESET PASSWORD!</a></p>" +
+                            '<p>May the secure connection be with you!</p>' +
+                            '<p></p>' +
+                            '<p><em>Skill, Sync, Match!</em></p>'
+            }
+
+        ]
+    }
+
+    result = mailjet.send.create(data=data_password_reset_activation)
+    return result
+
+
+def password_reset_email(payload, generated_password):
+    data_password_reset = {
+        'Messages': [
+            {
+                "From": {
+                    "Email": f"{sender}",
+                    "Name": "Skill Sync"
+                },
+                "To": [
+                    {
+                        "Email": f"{payload['email']}",
+                        "Name": f"{payload['username']}"
+                    }
+                ],
                 "Subject": "Password Reset Confirmation at SkillSync",
                 "TextPart": "You requested a password reset for your SkillSync account.",
-                "HTMLPart": f'<h3>{user.username}!</h3><br/>' +
-                            f'<p>Your password has been successfully reset. For the following account type: {user.group}. ' +
+                "HTMLPart": f"<h3>Hello, {payload['username']}!</h3><br/>" +
+                            f'<p>Your password has been successfully reset. For the following account type: {payload["group"]}. ' +
                             f'Your new password is: <strong>{generated_password}</strong></p>' +
                             '<p>May the secure connection be with you!</p>' +
                             '<p></p>' +
