@@ -219,7 +219,8 @@ def add_seeker(seeker_username: str = Query(),
 
 
 @job_seekers_router.get('/search/job_ads', tags=['Seeker Section'])
-def search_job_ads_percentage(current_user_payload=Depends(get_current_user)):
+def search_job_ads_percentage(current_user_payload=Depends(get_current_user),
+                              sort_percent: str =  Query(default='Best', enum=['Best', 'Very good', 'Good', 'Bad', 'Worst'])):
 
     if current_user_payload['group'] != 'seekers':
         return JSONResponse(status_code=403,
@@ -227,7 +228,9 @@ def search_job_ads_percentage(current_user_payload=Depends(get_current_user)):
 
     job_seeker_id = current_user_payload.get('id')
 
-    ...
+
+    return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent)
+    
 
 @job_seekers_router.get('/companies/job_ads',tags=['Seeker Section'])
 def get_job_ads_from_companies(current_user_payload=Depends(get_current_user)):

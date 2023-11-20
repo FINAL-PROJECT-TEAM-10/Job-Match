@@ -338,3 +338,59 @@ def update_main_cv(cv_id, seeker_id):
     update_query('UPDATE mini_cvs SET main_cv = 1 WHERE id = ? AND job_seekers_id = ?', (cv_id, seeker_id))
 
     return JSONResponse(status_code=200, content=f'You successfully choose a main CV with id: {cv_id}')
+
+def get_main_cv_id(seeker_id):
+    cv_id = read_query('SELECT id FROM mini_cvs WHERE main_cv = 1 AND job_seekers_id = ?', (seeker_id,))
+
+    return cv_id[0][0]
+
+def calculate_percents_job_ad(seeker_id, current_sort):
+    
+    cv_id = get_main_cv_id(seeker_id)
+
+    skills = read_query('SELECT skills_or_requirements_id FROM mini_cvs_has_skills WHERE mini_cvs_id = ?', (cv_id,))
+
+    all_job_ads = read_query('SELECT * FROM job_ads')
+
+    result = []
+
+    for current_job_ad in all_job_ads:
+        current_job_requirements = get_current_job_ad_requirements(current_job_ad[0])
+
+        data_dict = {
+            current_job_ad[0]: current_job_requirements
+        }
+        result.append(data_dict)
+
+    return result
+
+
+def get_current_job_ad_requirements(job_ad_id:int):
+
+    data = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_ad_id,))
+
+    result_ids = []
+    for job_ad in data:
+        for id in job_ad:
+
+            result_ids.append(get_requirement_name(id))
+
+            result_ids.append(get_level(id))
+
+    
+    joined = ';'.join(result_ids)
+    return joined
+
+
+def get_requirement_name(id):
+
+    data = read_query('SELECT name FROM skills_or_requirements WHERE id = ?', (id,))
+
+    return data[0][0]
+
+def get_level(job_ad_id):
+
+    data = read_query('SELECT level FROM job_ads_has_requirements WHERE skills_or_requirements_id = ?',
+                      (job_ad_id,))
+    
+    return data[0][0]
