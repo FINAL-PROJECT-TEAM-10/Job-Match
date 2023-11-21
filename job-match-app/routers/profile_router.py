@@ -37,10 +37,6 @@ def update_password(credentials: PasswordUpdater,
                             content='You did not input correctly your current password.')
 
 
-# TODO: For security purposes, this needs to be called after following an activation link.
-#  Reset should send an activation link, and if the link is clicked, only then should the password be reset.
-
-
 @profile_router.patch('/password/forgotten')
 def forgotten_password_activation_link(email: str, user_type: str):
     fake_payload = {}
