@@ -121,7 +121,7 @@ def get_job_seeker_info(username: str):
     return data
 
 
-# TODO: Consider having a more encompassing get function
+# TODO: Consider having a more encompassing get function (medium priority)
 def get_seeker(username) -> None | JobSeeker:
     seeker_data = read_query('''
         SELECT js.id, js.username, ec.email, js.first_name, js.last_name, js.summary, js.blocked

@@ -190,7 +190,7 @@ def delete_activation_token(activation_token):
     update_query('''DELETE FROM temporary_tokens WHERE token = ?''',
                  (activation_token,))
 
-# TODO: Enter your real email after setting up with mailjet to use mailing functionality
+# TODO: Enter your real email after setting up with mailjet to use mailing functionality (installation guide)
 # First admin needs to be added because only admins can add other admins
 # _first_admin = Admin(username='first_admin',
 #                      first_name='Admin',

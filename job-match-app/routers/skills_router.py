@@ -10,7 +10,7 @@ skills_router = APIRouter(prefix='/skill-requirements',
                           tags={'Skills and requirements'})
 
 
-# TODO: Add filtration/pagination for skills
+# TODO: Add filtration/pagination for skills (medium priority)
 @skills_router.get('/')
 def find_all_skills():
     skill_list = skill_requirement_services.get_all_skills()
@@ -103,7 +103,7 @@ def delete_skill_requirement(id: int, current_user_payload=Depends(get_current_u
 
 # TODO: Consider what happens with percent matches when force delete is called:
 #  Possible solution. Forcing an update of matches that have the skill/requirement.
-#  Implemented once matching functionality is complete.
+#  Implemented once matching functionality is complete. (medium priority, awaits functionality)
 @skills_router.delete('/{id}/force_delete', description='Admin endpoint')
 def force_delete_skill_requirement(id: int, current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'admins':

@@ -30,7 +30,7 @@ def read_company_information(company: str):
 
 
 # TODO: The get below doesn't consider multiple addresses for a company!!!
-#  Consider having a main column to get a company's main address
+#  Consider having a main column to get a company's main address (medium priority)
 def get_company(username) -> None | Company:
     company_data = read_query('''
         SELECT c.id, c.username, cc.email, cc.address, cc.telephone, l.country, l.city, c.blocked

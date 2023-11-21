@@ -2,7 +2,7 @@ from app_models.admin_models import Admin
 from data.database import insert_query, read_query, update_query
 
 
-# TODO: Perhaps take the location and other repeatable checks in a separate service
+# TODO: Perhaps take the location and other repeatable checks in a separate service (low priority)
 def find_location_id(city: str, country: str):
     location_id = read_query('''SELECT id from locations WHERE city = ? AND country = ?''',
                              (city, country))

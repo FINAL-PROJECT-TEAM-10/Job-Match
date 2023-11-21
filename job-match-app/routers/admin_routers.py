@@ -12,9 +12,6 @@ from services import admin_services
 admin_router = APIRouter(prefix='/admin',tags={'Only for Admins'})
 
 
-# TODO: Fix registration
-#  Test registration to see if to do is still relevant.
-
 @admin_router.post('/register', response_model=Admin, responses={
     201: {"description": "Informs of admin creation",
           "content": {"application/json": {"example": {"id": 1,
@@ -69,5 +66,5 @@ def delete_all_temp_tokens(current_user_payload=Depends(get_current_user)):
     return JSONResponse(status_code=200,
                         content='All temporary tokens were deleted.')
 
-# TODO: Implement mailing history for admins
+# TODO: Implement mailing history for admins, if implemented, add to readme (low priority)
 

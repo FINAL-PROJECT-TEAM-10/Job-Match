@@ -35,9 +35,9 @@ class JobSeekerOptionalInfo:
                    status = status
             )
 
-# TODO: Look into BLOBs for picture
+# TODO: Look into BLOBs for picture (high priority)
 
-# TODO: Consider shortened or full class (full class at the bottom of module)
+# TODO: Consider shortened or full class (full class at the bottom of module) (unknown priority)
 
 # Shortened class from Ivaylo's Branch
 class JobSeeker(BaseModel):
