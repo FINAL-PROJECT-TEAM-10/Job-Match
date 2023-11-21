@@ -8,6 +8,8 @@ from services import admin_services,company_services
 from common.country_validators_helpers import find_country_by_city
 from datetime import datetime
 from mariadb import IntegrityError
+from common.percent_jobad_calculator import job_ad_percentage_calculator
+from common.percent_sections import percent_section_helper
 
 
 def convert_level(level):
@@ -362,28 +364,44 @@ def calculate_percents_job_ad(seeker_id, current_sort):
         }
         result.append(data_dict)
 
-    return result
+    filtered_data = {key: value for item in result for key, value in item.items() if value}
+
+
+    matches_per_job_ad = {}
+
+    for job_ad_id, requirements in filtered_data.items():
+        current_percent = job_ad_percentage_calculator(requirements, cv_skills)
+        matches_per_job_ad[job_ad_id] = round(current_percent)
+
+    #TODO : SALARY CALCULATION NEED
+
+
+    return percent_section_helper(current_sort,matches_per_job_ad, filtered_data)
 
 
 def get_current_job_ad_requirements(job_ad_id:int):
     data = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_ad_id,))
 
     #REQUIREMENTS
-    result_pairs_requirements = [(get_requirement_name(id), get_level(id)) for job_ad in data for id in job_ad]
+    result_pairs = [
+        f"{get_requirement_name(id)};{get_level(job_ad_id, id)}"
+        for job_ad in data
+        for id in job_ad
+    ]
 
-    joined_pairs = [f"{name};{level}" for name, level in result_pairs_requirements]
-
-    return joined_pairs
+    return result_pairs
 
 def get_current_cv_skills(cv_id:int):
     cv_skills = read_query('SELECT skills_or_requirements_id FROM mini_cvs_has_skills WHERE mini_cvs_id = ?', (cv_id,))
 
-    #SKILLS
-    result_pairs_skills = [(get_requirement_name(id), get_level_skill(id)) for job_ad in cv_skills for id in job_ad]
+    #CV SKILLS
+    result_pairs = [
+        f"{get_requirement_name(id)};{get_level_skill(cv_id, id)}"
+        for cv in cv_skills
+        for id in cv
+    ]
 
-    joined_pairs = [f"{name};{level}" for name, level in result_pairs_skills]
-
-    return joined_pairs
+    return result_pairs
 
 
 def get_requirement_name(id):
@@ -392,17 +410,16 @@ def get_requirement_name(id):
 
     return data[0][0]
 
-def get_level(job_ad_id):
-    skill_id = read_query('SELECT skills_or_requirements_id WHERE job_ad_id = ?', (job_ad_id,))
+def get_level(job_ad_id, requirement_id):
 
     data = read_query('SELECT level FROM job_ads_has_requirements WHERE job_ads_id = ? AND skills_or_requirements_id = ?',
-                      (job_ad_id,skill_id[0][0]))
+                      (job_ad_id,requirement_id))
     
     return data[0][0]
 
-def get_level_skill(skill_id):
+def get_level_skill(cv_id, skill_id):
 
-    data = read_query('SELECT level FROM mini_cvs_has_skills WHERE skills_or_requirements_id = ?',
-                      (skill_id,))
+    data = read_query('SELECT level FROM mini_cvs_has_skills WHERE mini_cvs_id = ? AND skills_or_requirements_id = ?',
+                      (cv_id,skill_id))
     
     return data[0][0]

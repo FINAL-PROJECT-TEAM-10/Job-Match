@@ -220,7 +220,7 @@ def add_seeker(seeker_username: str = Query(),
 
 @job_seekers_router.get('/search/job_ads', tags=['Seeker Section'])
 def search_job_ads_percentage(current_user_payload=Depends(get_current_user),
-                              sort_percent: str =  Query(default='Best', enum=['Best', 'Very good', 'Good', 'Bad', 'Worst'])):
+                              sort_percent: str =  Query(enum=['Best', 'Very good', 'Good', 'Bad', 'Worst'])):
 
     if current_user_payload['group'] != 'seekers':
         return JSONResponse(status_code=403,
