@@ -348,7 +348,7 @@ def calculate_percents_job_ad(seeker_id, current_sort):
     
     cv_id = get_main_cv_id(seeker_id)
 
-    skills = read_query('SELECT skills_or_requirements_id FROM mini_cvs_has_skills WHERE mini_cvs_id = ?', (cv_id,))
+    cv_skills = get_current_cv_skills(cv_id)
 
     all_job_ads = read_query('SELECT * FROM job_ads')
 
@@ -368,12 +368,22 @@ def calculate_percents_job_ad(seeker_id, current_sort):
 def get_current_job_ad_requirements(job_ad_id:int):
     data = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_ad_id,))
 
-    result_pairs = [(get_requirement_name(id), get_level(id)) for job_ad in data for id in job_ad]
+    #REQUIREMENTS
+    result_pairs_requirements = [(get_requirement_name(id), get_level(id)) for job_ad in data for id in job_ad]
 
-    joined_pairs = [f"{name};{level}" for name, level in result_pairs]
+    joined_pairs = [f"{name};{level}" for name, level in result_pairs_requirements]
 
-    joined = ','.join(joined_pairs)
-    return joined
+    return joined_pairs
+
+def get_current_cv_skills(cv_id:int):
+    cv_skills = read_query('SELECT skills_or_requirements_id FROM mini_cvs_has_skills WHERE mini_cvs_id = ?', (cv_id,))
+
+    #SKILLS
+    result_pairs_skills = [(get_requirement_name(id), get_level_skill(id)) for job_ad in cv_skills for id in job_ad]
+
+    joined_pairs = [f"{name};{level}" for name, level in result_pairs_skills]
+
+    return joined_pairs
 
 
 def get_requirement_name(id):
@@ -383,8 +393,16 @@ def get_requirement_name(id):
     return data[0][0]
 
 def get_level(job_ad_id):
+    skill_id = read_query('SELECT skills_or_requirements_id WHERE job_ad_id = ?', (job_ad_id,))
 
-    data = read_query('SELECT level FROM job_ads_has_requirements WHERE skills_or_requirements_id = ?',
-                      (job_ad_id,))
+    data = read_query('SELECT level FROM job_ads_has_requirements WHERE job_ads_id = ? AND skills_or_requirements_id = ?',
+                      (job_ad_id,skill_id[0][0]))
+    
+    return data[0][0]
+
+def get_level_skill(skill_id):
+
+    data = read_query('SELECT level FROM mini_cvs_has_skills WHERE skills_or_requirements_id = ?',
+                      (skill_id,))
     
     return data[0][0]
