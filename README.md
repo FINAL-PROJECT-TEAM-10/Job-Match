@@ -56,7 +56,7 @@ Models are found in _/data/models.py_
 
 #### 🏛️ Company Routers 🏛️
 
-#### 📄 Job Ads Routers 📄
+#### 📃 Job Ads Routers 📃
 
 #### 👤 Job Seeker Routers 👤
 
@@ -79,7 +79,7 @@ functionality.
 
 #### 🏛️ Company Services 🏛️
 
-#### 📄 Job Ads Services 📄
+#### 📃 Job Ads Services 📃
 
 #### 👤Job Seeker Services 👤
 
@@ -157,15 +157,152 @@ order to force users to login again and receive their new, updated.
 ## 🔧 Functionality in Detail 🔧
 Here we have listed the RESTful API requirements of the Job Match task and marked what we have completed.
 
+### Important Note
+For readability we have changed the name of Company Ads to CVs/Mini-CVs because semantically
+this reflects the purpose of the so-called "Company Ads" better.
+A "Company Ad" can be misinterpreted as an ad for a company, when in fact it is
+what job seekers (aka professionals) post to attract the attention of companies.
+Thus, we chose to use CVs or Mini-CVs.
+
 ### ❗ MUST Requirements: ❗
-- [ ] [Checklist to be uploaded]
+#### 🧱 REST API 🧱
+- [x] Provide a restful API that supports the functionality of the system
+
+#### 🗺️ Database 🗺️
+- [x] Relational database
+- [x] Normalized
+- [ ] Script for creating the database
+- [ ] Script for populating the database
+
+#### 🌐 Public Part 🌐
+- [x] Login endpoints
+- [x] Register endpoints
+
+These endpoints are handled by three separate routers for the three separate types of users:
+- Admins
+- Job Seekers
+- Companies
+
+#### 🏛️ Companies 🏛️
+- [x] View and edit company Info
+- [ ] View a company's job ads
+- [ ] View a company's archived (matched) job ads
+- [ ] Job ads can be created
+- [ ] Companies can search in CVs
+
+All of the above is accessible only when the user has been authenticated.
+
+#### 👤Job Seekers/Professionals 👤
+- [x] Can edit their own info
+- [x] Can view own CVs
+- [x] Can create, view, edit a CV
+- [ ] Have a list of matches
+
+#### 🔎 Searching 🔎
+- [ ] Companies can search for CVs
+- [ ] Professionals can search for job ads
+- [ ] Salary range can be used in searches
+- [ ] Skills requirements can be used in searches
+- [ ] Locations can be used in searches
+- [ ] Supports match functionality, i.e. returns a result
+
+#### 🤝 Matching 🤝
+- [ ] Companies can match more than one CV
+- [ ] Job seekers can match a job ad
 
 ### ❕SHOULD Requirements❕
-- [ ] [Checklist to be uploaded]
+#### 🏛️ Companies 🏛️
+- [x] Basic info
+- [ ] Can upload pictures 
 
+#### 👤Job Seekers/Professionals 👤
+- [x] Basic info
+- [ ] Can upload pictures
+- [x] Can set up a main ad
+- [ ] List of matches can be public or hidden
+
+#### 📃 Job Ads 📃
+- [x] Basic Info
+
+#### 🪪 CVs 🪪
+- [x] Basic Info
+- [ ] Private (can be found by id, but does not appear in search)
+
+#### 🔎 Searching 🔎
+- [ ] Companies can search for professionals
+- [ ] Professionals can search for companies
+- [ ] Search threshold: searching can accept inexact matches
+- [ ] Salary range can be soft, i.e. range can be expanded with acceptable flexibility (input percent)
+- [ ] Skills/Requirements can be soft, i.e. some may be missing from a match
+
+#### 📫 MailJet Integration 📫 
+- [ ] Notification for a matching request
+
+#### 🐤 Twitter Integration 🐤
+- [ ] Sends tweets on ad creation through a business account
+
+#### 🧪 Unit Testing 🧪
+- [ ] Service layer must be unit tested
+
+#### 🌿 Git Repository 🌿
+- [x] Contributions from all team members
+- [x] Complete application source code
+- [ ] Scripts for database creation and data population
+
+#### 📖 README File 📖
+- [x] Project description
+- [x] Link to Swagger documentation
+- [ ] Link to hosted project
+- [ ] Instructions on local installation
+- [ ] Images of database relations
 
 ### ✅ COULD Requirements ✅
-- [x] [Checklist to be uploaded]
+#### 📃 Job Ads 📃
+- [x] Set of requirements
+
+Requirements are controlled by admins: only admins can add/delete requirements.
+
+Job Ads and CVs are required to use the preset requirements.
+In a real-world setting, users (job_seekers and companies) would be able to request skills or requirements.
+
+#### 🔎 Searching 🔎
+- [ ] Companies can search for other companies
+- [ ] Professionals can search for other professionals
+
+#### 🎛️ Administration 🎛️
+- [ ] Admins approve companies' and job seekers' registration
+- [ ] Admins can block/unblock companies and professionals
+- [ ] Admins can delete application data (profiles, ads, CVs, etc.)
+- [x] Admins can add/delete or approve skills/requirements
+
+#### 📫 MailJet Integration 📫
+- [ ] Notification for ads/CVs
+
+####  🦺 Mock Third-Party Services🦺
+- [ ] Mock info for skills/requirements
+- [ ] Make range suggestions or update the skill pool with trending entries
+
+#### 📎 Other Third-Party Services📎
+- [x] Validate geographic locations
+
+
+### 💫 Bonus Work 💫
+[We can add here bonus things that are outside of the scope of the official requirements]
+#### 🔐 Forgotten Password 🔐
+- [x] Password can be reset through registered email 
+
+#### 📫 MailJet Integration 📫
+- [x] Password Reset functionality through two e-mails
+
+The first email contains an activation link that uses a custom token for the reset,
+the second contains a randomly generated password.
+#### 🌿 Git Repository 🌿
+- [x] Use of branches
+
+#### 🗺️ Online Database 🗺️
+- [x] Database hosted on Azure
+ 
+
 
 ## 📫 MailJet Setup Guide 📫
 [To be finalized]
