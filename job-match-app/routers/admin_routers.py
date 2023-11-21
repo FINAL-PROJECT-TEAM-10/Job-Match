@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Body
 
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse
 
 from app_models.admin_models import Admin
 from common.auth import get_current_user, TokenInfo

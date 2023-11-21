@@ -131,3 +131,17 @@ def edit_company_information(username: str, description: str, city: str, address
         update_query('UPDATE company_contacts SET locations_id = ? WHERE company_id = ?', (location_id, company_id,))
 
     return JSONResponse(status_code=200, content="You successfully edited your personal company information")
+
+def find_company_id_byusername_for_job_seeker(id: int):
+    data = read_query('SELECT username FROM companies WHERE id = ?',(id,))
+    return data[0][0]
+
+def view_all_cvs():
+
+    data = read_query('SELECT * FROM mini_cvs WHERE status = "Active"')
+
+    if data:
+        ads = [{'CV Creator': job_seeker_services.get_username_by_id(row[6]), 'Cv Description': row[3], 'Minimum Salary': row[1], 'Maximum Salary': row[2], 'Status': row[4], 'Date Posted': row[5]} for row in data]
+        return ads
+    else:
+        return JSONResponse(status_code=404, content='No cvs found!')
