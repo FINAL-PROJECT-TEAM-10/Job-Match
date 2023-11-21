@@ -4,6 +4,8 @@ from app_models.job_ads_models import Job_ad
 from fastapi.responses import JSONResponse
 from services import job_seeker_services
 from mariadb import IntegrityError
+from common.percantage_cv_calculator import cv_percentage_calculator
+from common.percent_section_cv import percent_section_helper
 
 def find_company(name_of_company):
     
@@ -158,20 +160,32 @@ def convert_level_name(level):
 
     return int(result)
 
-def select_certain_job_ad_by_id(company_id):
-    
-    job_ad_id = read_query('SELECT id FROM job_ads WHERE companies_id = ?', (company_id,))
 
-    return job_ad_id[0][0]
+def get_level_job_ad(job_ad_id: int, requirement_id: int):
+    data = read_query('SELECT level FROM job_ads_has_requirements WHERE job_ads_id = ? AND skills_or_requirements_id = ?', (job_ad_id, requirement_id,))
+
+    return data[0][0]
+
+
+def get_current_job_ad(job_ads_id:int):
+    job_ad = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_ads_id,))
+
+    result_pairs = [
+        f"{get_skill_name(id)};{get_level_job_ad(job_ads_id, id)}"
+        for ad in job_ad
+        for id in ad
+    ]
+
+    return result_pairs
 
 
 def calculate_percantage_cv(job_ad_id, sorting):
 
-    job_id = select_certain_job_ad_by_id(job_ad_id)
-
-    ads = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_id,))
+    ads = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_ad_id,))
 
     get_main_cv = read_query('SELECT * FROM mini_cvs WHERE main_cv = 1')
+
+    current_job_ad = get_current_job_ad(job_ad_id)
 
     result = []
 
@@ -182,8 +196,19 @@ def calculate_percantage_cv(job_ad_id, sorting):
            current_mini_cv[0]: current_cv_skills
         }
         result.append(data_dict)
+    
+    filtered_data = {key: value for item in result for key, value in item.items() if value}
 
-    return result
+    matches_per_cv = {}
+
+    for cv_id, requirements in filtered_data.items():
+        current_percent = cv_percentage_calculator(current_job_ad, requirements)
+        matches_per_cv[cv_id] = round(current_percent)
+
+    #TODO : SALARY CALCULATION NEED
+    
+    return percent_section_helper(sorting,matches_per_cv,filtered_data)
+
 
 def get_skill_name(id):
 
@@ -191,19 +216,22 @@ def get_skill_name(id):
 
     return data[0][0]
 
-def get_level(mini_cv_id):
+def get_level(mini_cv_id,skill_id):
 
-    data = read_query('SELECT level FROM mini_cvs_has_skills WHERE skills_or_requirements_id = ?',
-                      (mini_cv_id,))
+    data = read_query('SELECT level FROM mini_cvs_has_skills WHERE mini_cvs_id = ? AND skills_or_requirements_id = ? ',
+                      (mini_cv_id,skill_id,))
 
     return data[0][0]
 
 def get_main_cv_skills(mini_cv_id:int):
     data = read_query('SELECT skills_or_requirements_id FROM mini_cvs_has_skills WHERE mini_cvs_id = ?', (mini_cv_id,))
 
-    result_pairs = [(get_skill_name(id), get_level(id)) for mini_cv in data for id in mini_cv]
+    result_pairs = [
+        f"{get_skill_name(id)};{get_level(mini_cv_id, id)}"
+        for job_ad in data
+        for id in job_ad
+    ]
 
-    joined_pairs = [f"{name};{level}" for name, level in result_pairs]
+    return result_pairs
 
-    joined = ','.join(joined_pairs)
-    return joined
+
