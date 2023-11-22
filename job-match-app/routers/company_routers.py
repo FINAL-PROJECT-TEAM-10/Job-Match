@@ -126,3 +126,8 @@ def get_cv_from_job_seeker(current_user_payload=Depends(get_current_user)):
 
     return company_services.view_all_cvs()
 
+
+@companies_router.get('{company_id}/avatar')
+def get_company_avatar(company_id: str, current_user_payload=Depends(get_current_user())):
+    pass
+

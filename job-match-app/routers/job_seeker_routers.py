@@ -209,3 +209,7 @@ def get_job_ads_from_companies(current_user_payload=Depends(get_current_user)):
                             content='This option is only available for Job_Seekers')
     return job_seeker_services.get_all_job_ads()
 
+
+@job_seekers_router.get('{seeker_id}/avatar')
+def get_seeker_avatar(seeker_id: str, current_user_payload=Depends(get_current_user())):
+    pass

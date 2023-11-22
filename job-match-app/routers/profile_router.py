@@ -1,16 +1,18 @@
+import io
 from time import time
 from http.client import HTTPException
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Body, Query
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, Body, Query, UploadFile, File
+from fastapi.responses import JSONResponse, StreamingResponse
 from jose import ExpiredSignatureError
 
 from app_models.input_models import PasswordUpdater
 from app_models.token_models import ActivationData
 from common.auth import TokenInfo, get_current_user
 from common.mailing import password_reset_email, password_reset_activation_email
-from services import authorization_services, company_services, job_seeker_services, admin_services
+from services import authorization_services, company_services, job_seeker_services, admin_services, upload_services
+from services.upload_services import is_file_jpeg
 
 profile_router = APIRouter(prefix='/profile', tags={'Profile info and password management'})
 
@@ -95,3 +97,34 @@ def password_reset(activation_token: str = Query()):
     # return JSONResponse(status_code=200,
     #                     content=response.json())
 
+
+@profile_router.get('/picture')
+def get_avatar(current_user_payload=Depends(get_current_user)):
+    image_data = upload_services.get_picture(current_user_payload['id'], current_user_payload['group'])
+
+    if image_data is None:
+        return JSONResponse(status_code=404,
+                            content='You have not uploaded a picture to your profile.')
+
+    return StreamingResponse(io.BytesIO(image_data), media_type="image/jpeg")
+
+
+@profile_router.post('/picture')
+def upload_picture(image_file: UploadFile = File(...), current_user_payload=Depends(get_current_user)):
+    try:
+        if not is_file_jpeg(image_file):
+            return JSONResponse(status_code=400,
+                                content='Server accepts only jpg/jpeg as picture formats.')
+        max_file_size_bytes = 1024 * 1024
+        if not image_file.size > max_file_size_bytes:
+            return JSONResponse(status_code=413,
+                                content=f'Image file too big. Please upload a file that is less than 1 MB.')
+
+        image_data = image_file.file.read()
+        upload_services.upload_picture(current_user_payload, image_data)
+
+        return JSONResponse(status_code=201,
+                            content=f"Image {image_file.filename} uploaded successfully")
+    except Exception as e:
+        return JSONResponse(status_code=422,
+                            content=f"An error occurred: {e}")
