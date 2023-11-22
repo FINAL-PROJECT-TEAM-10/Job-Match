@@ -110,13 +110,13 @@ def get_avatar(current_user_payload=Depends(get_current_user)):
 
 
 @profile_router.post('/picture')
-def upload_picture(image_file: UploadFile = File(...), current_user_payload=Depends(get_current_user)):
+def upload_picture(image_file: UploadFile, current_user_payload=Depends(get_current_user)):
     try:
         if not is_file_jpeg(image_file):
             return JSONResponse(status_code=400,
                                 content='Server accepts only jpg/jpeg as picture formats.')
         max_file_size_bytes = 1024 * 1024
-        if not image_file.size > max_file_size_bytes:
+        if image_file.size > max_file_size_bytes:
             return JSONResponse(status_code=413,
                                 content=f'Image file too big. Please upload a file that is less than 1 MB.')
 

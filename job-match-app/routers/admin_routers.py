@@ -70,5 +70,5 @@ def delete_all_temp_tokens(current_user_payload=Depends(get_current_user)):
 
 
 @admin_router.get('{admin_id}/avatar')
-def get_admin_avatar(admin_id: str, current_user_payload=Depends(get_current_user())):
+def get_admin_avatar(admin_id: str, current_user_payload=Depends(get_current_user)):
     pass

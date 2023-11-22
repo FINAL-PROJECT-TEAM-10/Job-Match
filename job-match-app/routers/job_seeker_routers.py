@@ -211,5 +211,5 @@ def get_job_ads_from_companies(current_user_payload=Depends(get_current_user)):
 
 
 @job_seekers_router.get('{seeker_id}/avatar')
-def get_seeker_avatar(seeker_id: str, current_user_payload=Depends(get_current_user())):
+def get_seeker_avatar(seeker_id: str, current_user_payload=Depends(get_current_user)):
     pass

@@ -1,6 +1,5 @@
 from data.database import update_query, read_query
-import imghdr
-
+from PIL import Image
 
 def upload_picture(payload, image_data):
     if payload['group'] == 'admins':
@@ -16,17 +15,25 @@ def upload_picture(payload, image_data):
 
 def get_picture(user_id, user_group):
     if user_group == 'admins':
-        return read_query('''SELECT picture FROM admins WHERE id = ?''', (user_id,))
+        return read_query('''SELECT picture FROM admins WHERE id = ?''',
+                          (user_id,))[0][0]
     if user_group == 'companies':
-        return read_query('''SELECT picture FROM companies WHERE id = ?''', (user_id,))
+        return read_query('''SELECT picture FROM companies WHERE id = ?''',
+                          (user_id,))[0][0]
     if user_group == 'seekers':
-        return read_query('''SELECT picture FROM job_seekers WHERE id = ?''', (user_id,))
+        return read_query('''SELECT picture FROM job_seekers WHERE id = ?''',
+                          (user_id,))[0][0]
 
 
 def is_file_jpeg(file):
     _ALLOWED_TYPES = {'jpg', 'jpeg'}
 
-    image_type = imghdr.what(None, h=file.read(32))
-    file.seek(0)
+    try:
+        with Image.open(file.file) as img:
+            image_type = img.format.lower()
 
-    return image_type in _ALLOWED_TYPES
+            if image_type is None:
+                return False
+            return image_type in _ALLOWED_TYPES
+    except Exception as e:
+        return f"Image could not be tested: {e}"
