@@ -376,7 +376,7 @@ def calculate_percents_job_ad(seeker_id, current_sort):
     #TODO : SALARY CALCULATION NEED
 
 
-    return percent_section_helper(current_sort,matches_per_job_ad, filtered_data)
+    return percent_section_helper(current_sort,matches_per_job_ad)
 
 
 def get_current_job_ad_requirements(job_ad_id:int):

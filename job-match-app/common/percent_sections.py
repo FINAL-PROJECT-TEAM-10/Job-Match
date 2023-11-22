@@ -1,7 +1,7 @@
 from fastapi.responses import JSONResponse
 from data.database import read_query
 from services import job_ads_services
-def percent_section_helper(current_sort, list_of_percentages, job_ads_list): 
+def percent_section_helper(current_sort, list_of_percentages): 
 
         
     result = []
