@@ -1,6 +1,7 @@
+import io
 from fastapi import APIRouter, Query,Depends
-from fastapi.responses import JSONResponse
-from services import company_services
+from fastapi.responses import JSONResponse, StreamingResponse
+from services import company_services, upload_services
 from services import job_ads_services
 from app_models.company_models import Company
 from common.auth import get_current_user
@@ -127,7 +128,17 @@ def get_cv_from_job_seeker(current_user_payload=Depends(get_current_user)):
     return company_services.view_all_cvs()
 
 
-@companies_router.get('{company_id}/avatar')
-def get_company_avatar(company_id: str, current_user_payload=Depends(get_current_user)):
-    pass
+# TODO: test below for companies (low priority)
+@companies_router.get('{id}/avatar')
+def get_company_avatar(id: int, current_user_payload=Depends(get_current_user)):
+    image_data = upload_services.get_picture(id, 'companies')
+
+    if not company_services.company_exists_by_id(id):
+        return JSONResponse(status_code=404,
+                            content='No such company.')
+    if image_data is None:
+        return JSONResponse(status_code=404,
+                            content='No picture associated with the company.')
+
+    return StreamingResponse(io.BytesIO(image_data), media_type="image/jpeg")
 

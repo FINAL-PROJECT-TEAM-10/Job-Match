@@ -32,7 +32,7 @@ def admin_exists_by_id(id: int) -> bool:
 
 def get_admin(username) -> None | Admin:
     admin_data = read_query('''
-    SELECT a.id, a.username, a.first_name, a.last_name, a.picture, c.email, c.address, c.telephone, l.city, l.country
+    SELECT a.id, a.username, a.first_name, a.last_name, c.email, c.address, c.telephone, l.city, l.country
     FROM admins as a, employee_contacts as c, locations as l 
     WHERE a.employee_contacts_id = c.id AND c.locations_id = l.id
     AND a.username = ?
@@ -43,7 +43,7 @@ def get_admin(username) -> None | Admin:
 
 def get_admin_by_email(email):
     admin_data = read_query('''
-    SELECT a.id, a.username, a.first_name, a.last_name, a.picture, c.email, c.address, c.telephone, l.city, l.country
+    SELECT a.id, a.username, a.first_name, a.last_name, c.email, c.address, c.telephone, l.city, l.country
     FROM admins as a, employee_contacts as c, locations as l 
     WHERE a.employee_contacts_id = c.id AND c.locations_id = l.id
     AND c.email = ?

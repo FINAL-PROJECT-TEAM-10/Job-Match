@@ -21,13 +21,11 @@ class Admin(BaseModel):
     country: str
 
     @classmethod
-    def from_query_results(cls, id, username, first_name, last_name, picture,
-                           email, address, telephone,
+    def from_query_results(cls, id, username, first_name, last_name,                            email, address, telephone,
                            city, country):
         return cls(
             id=id, group='admins',
             username=username, first_name=first_name, last_name=last_name,
-            picture=picture,
             email=email, address=address, phone=telephone,
             city=city, country=country
         )

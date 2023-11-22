@@ -56,6 +56,11 @@ def check_company_exist(name: str):
     return bool(data)
 
 
+def company_exists_by_id(id: int) -> bool:
+    return any(read_query('''SELECT id from companies WHERE id = ?''',
+                          (id,)))
+
+
 def find_company_id_byusername(nickname: str):
     data = read_query('SELECT id FROM companies WHERE username = ?', (nickname,))
     return data[0][0]
@@ -132,16 +137,19 @@ def edit_company_information(username: str, description: str, city: str, address
 
     return JSONResponse(status_code=200, content="You successfully edited your personal company information")
 
+
 def find_company_id_byusername_for_job_seeker(id: int):
-    data = read_query('SELECT username FROM companies WHERE id = ?',(id,))
+    data = read_query('SELECT username FROM companies WHERE id = ?', (id,))
     return data[0][0]
 
-def view_all_cvs():
 
+def view_all_cvs():
     data = read_query('SELECT * FROM mini_cvs WHERE status = "Active"')
 
     if data:
-        ads = [{'CV Creator': job_seeker_services.get_username_by_id(row[6]), 'Cv Description': row[3], 'Minimum Salary': row[1], 'Maximum Salary': row[2], 'Status': row[4], 'Date Posted': row[5]} for row in data]
+        ads = [{'CV Creator': job_seeker_services.get_username_by_id(row[6]), 'Cv Description': row[3],
+                'Minimum Salary': row[1], 'Maximum Salary': row[2], 'Status': row[4], 'Date Posted': row[5]} for row in
+               data]
         return ads
     else:
         return JSONResponse(status_code=404, content='No cvs found!')

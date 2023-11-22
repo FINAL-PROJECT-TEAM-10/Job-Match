@@ -67,13 +67,11 @@ def delete_all_temp_tokens(current_user_payload=Depends(get_current_user)):
     return JSONResponse(status_code=200,
                         content='All temporary tokens were deleted.')
 
-# TODO: Implement mailing history for admins, if implemented, add to readme (low priority)
 
-
-# TODO: There is a bug. b-literal for upload and retrieval from database is identical
-#  However, the image is broken in Swagger doc and in general browser (high priority)
-@admin_router.get('/{id}/avatar')
-def get_admin_avatar(id: str):
+@admin_router.get('/{id}/avatar', description='This endpoint is not strictly for admins only.'
+                                              'It allows other users to view their avatars.'
+                                              'But only if authenticated.')
+def get_admin_avatar(id: int, current_user_payload=Depends(get_current_user)):
     image_data = upload_services.get_picture(id, 'admins')
 
     if not admin_services.admin_exists_by_id(id):
@@ -81,6 +79,8 @@ def get_admin_avatar(id: str):
                             content='No such admin.')
     if image_data is None:
         return JSONResponse(status_code=404,
-                            content='You have not uploaded a picture to your profile.')
+                            content='No associated picture with the admin.')
 
     return StreamingResponse(io.BytesIO(image_data), media_type="image/jpeg")
+
+# TODO: Implement mailing history for admins, if implemented, add to readme (low priority)

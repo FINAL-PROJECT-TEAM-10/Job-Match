@@ -99,8 +99,7 @@ def password_reset(activation_token: str = Query()):
 
 
 
-# TODO: There is a bug. b-literal for upload and retrieval from database is identical
-#  However, the image is broken in Swagger doc and in general browser (high priority)
+
 @profile_router.get('/picture')
 def get_avatar(current_user_payload=Depends(get_current_user)):
     image_data = upload_services.get_picture(current_user_payload['id'], current_user_payload['group'])
@@ -120,8 +119,8 @@ def upload_picture(image_file: UploadFile, current_user_payload=Depends(get_curr
         # data. Possibly because the method from PIL has to read a part of the file and
         # does not restore the cursor.
         # If the seek cursor is restored, the image is no longer truncated.
-        # If the seek cursor is not restored like done after the check,
-        # The image becomes corrupt.
+        # If the seek cursor is not restored after the check,
+        # the image becomes corrupt.
 
         if not is_file_jpeg(image_file):
             return JSONResponse(status_code=400,

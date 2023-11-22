@@ -1,6 +1,8 @@
+import io
+
 from fastapi import APIRouter, Query, Depends
-from fastapi.responses import JSONResponse
-from services import job_seeker_services
+from fastapi.responses import JSONResponse, StreamingResponse
+from services import job_seeker_services, upload_services
 from app_models.job_seeker_models import *
 from common.auth import get_current_user
 from common.country_validators_helpers import validate_location, validate_city
@@ -210,6 +212,16 @@ def get_job_ads_from_companies(current_user_payload=Depends(get_current_user)):
     return job_seeker_services.get_all_job_ads()
 
 
-@job_seekers_router.get('{seeker_id}/avatar')
-def get_seeker_avatar(seeker_id: str, current_user_payload=Depends(get_current_user)):
-    pass
+# TODO: Test below (low priority)
+@job_seekers_router.get('{id}/avatar')
+def get_seeker_avatar(id: int, current_user_payload=Depends(get_current_user)):
+    image_data = upload_services.get_picture(id, 'admins')
+
+    if not job_seeker_services.seeker_exists_by_id(id):
+        return JSONResponse(status_code=404,
+                            content='No such job seeker.')
+    if image_data is None:
+        return JSONResponse(status_code=404,
+                            content='No picture associated with the job seeker.')
+
+    return StreamingResponse(io.BytesIO(image_data), media_type="image/jpeg")
