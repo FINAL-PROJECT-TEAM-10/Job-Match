@@ -1,0 +1,37 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+   /* background-image: url('background.jpg');*/
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #fff; /* Text color is set to white for better visibility on the background */
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+.button-container {
+    display: flex;
+}
+
+a {
+    display: inline-block;
+    margin: 0 10px; /* Adjust the margin as needed */
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #fff;
+    background-color: #3498db;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+a:hover {
+    background-color: #2980b9;
+}

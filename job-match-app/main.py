@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from routers.company_routers import companies_router
 from routers.job_ads_routers import job_ads_router
 from routers.job_seeker_routers import job_seekers_router
@@ -10,7 +10,7 @@ from fastapi.responses import HTMLResponse
 
 
 app = FastAPI(title='Skill Sync', description='to be continued')
-templates = Jinja2Templates(directory='job-match-app/templates')
+templates = Jinja2Templates(directory='job-match-app/static')
 app.mount('/static', StaticFiles(directory='job-match-app/static'), name='static')
 app.include_router(companies_router)
 app.include_router(job_ads_router)
@@ -19,10 +19,13 @@ app.include_router(token_router)
 app.include_router(job_seekers_router)
 
 
-@app.get("/", response_class= HTMLResponse)
-async def landing_page(request: HTMLResponse):
-    return templates.TemplateResponse("landing_page.html",{"request": request})
+@app.get('/', response_class= HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("landing_page.html", {"request": request})
 
+@app.get('/job_seeker_register', response_class=HTMLResponse)
+async def read_job_seeker_register(request: Request):
+    return templates.TemplateResponse("job_seeker_register.html", {"request": request})
 
 if __name__ == "__main__":
     import uvicorn

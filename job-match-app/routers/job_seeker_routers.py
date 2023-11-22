@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Query, Depends, Form
 from fastapi.responses import JSONResponse
 from services import job_seeker_services
 from app_models.job_seeker_models import *
 from common.auth import get_current_user
 from common.country_validators_helpers import validate_location, validate_city
 from common.separators_validators import parse_skills
+from fastapi.responses import HTMLResponse
 
 job_seekers_router = APIRouter(prefix='/job_seekers')
 
@@ -188,13 +189,13 @@ def view_personal_cvs(current_user_payload=Depends(get_current_user)):
 
 
 @job_seekers_router.post('/register', tags=['Seeker & Company Signup'])
-def add_seeker(seeker_username: str = Query(),
-              seeker_password: str = Query(),
-              seeker_first_name: str = Query(), 
-              seeker_last_name: str = Query(),
-              seeker_email_adress: str = Query(),
-              seeker_city: str = Query(),
-              seeker_country: str = Query()):
+def add_seeker(seeker_username: str = Form(),
+              seeker_password: str = Form(),
+              seeker_first_name: str = Form(), 
+              seeker_last_name: str = Form(),
+              seeker_email_adress: str = Form(),
+              seeker_city: str = Form(),
+              seeker_country: str = Form()):
     
     validate_location(seeker_city, seeker_country)
 
