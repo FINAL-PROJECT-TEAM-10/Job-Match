@@ -1,13 +1,14 @@
+import io
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Body
 
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 
 from app_models.admin_models import Admin
 from common.auth import get_current_user, TokenInfo
 from common.country_validators_helpers import validate_location
-from services import admin_services
+from services import admin_services, upload_services
 
 admin_router = APIRouter(prefix='/admin',tags={'Only for Admins'})
 
@@ -69,6 +70,17 @@ def delete_all_temp_tokens(current_user_payload=Depends(get_current_user)):
 # TODO: Implement mailing history for admins, if implemented, add to readme (low priority)
 
 
-@admin_router.get('{admin_id}/avatar')
-def get_admin_avatar(admin_id: str, current_user_payload=Depends(get_current_user)):
-    pass
+# TODO: There is a bug. b-literal for upload and retrieval from database is identical
+#  However, the image is broken in Swagger doc and in general browser (high priority)
+@admin_router.get('/{id}/avatar')
+def get_admin_avatar(id: str):
+    image_data = upload_services.get_picture(id, 'admins')
+
+    if not admin_services.admin_exists_by_id(id):
+        return JSONResponse(status_code=404,
+                            content='No such admin.')
+    if image_data is None:
+        return JSONResponse(status_code=404,
+                            content='You have not uploaded a picture to your profile.')
+
+    return StreamingResponse(io.BytesIO(image_data), media_type="image/jpeg")

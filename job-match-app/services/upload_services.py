@@ -1,6 +1,7 @@
 from data.database import update_query, read_query
 from PIL import Image
 
+
 def upload_picture(payload, image_data):
     if payload['group'] == 'admins':
         return update_query('''UPDATE admins SET picture = ? WHERE id = ?''',
@@ -15,14 +16,20 @@ def upload_picture(payload, image_data):
 
 def get_picture(user_id, user_group):
     if user_group == 'admins':
-        return read_query('''SELECT picture FROM admins WHERE id = ?''',
-                          (user_id,))[0][0]
+        image_data = read_query('''SELECT picture FROM admins WHERE id = ?''',
+                                (user_id,))
+
+        return next((row[0] for row in image_data), None)
     if user_group == 'companies':
-        return read_query('''SELECT picture FROM companies WHERE id = ?''',
-                          (user_id,))[0][0]
+        image_data = ('''SELECT picture FROM companies WHERE id = ?''',
+                          (user_id,))
+
+        return next((row[0] for row in image_data), None)
     if user_group == 'seekers':
-        return read_query('''SELECT picture FROM job_seekers WHERE id = ?''',
-                          (user_id,))[0][0]
+        image_data = read_query('''SELECT picture FROM job_seekers WHERE id = ?''',
+                          (user_id,))
+
+        return next((row[0] for row in image_data), None)
 
 
 def is_file_jpeg(file):

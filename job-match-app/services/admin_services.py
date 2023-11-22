@@ -25,6 +25,11 @@ def admin_exists(admin: Admin) -> bool:
                           (admin.username,)))
 
 
+def admin_exists_by_id(id: int) -> bool:
+    return any(read_query('''SELECT id from admins WHERE id = ?''',
+                          (id,)))
+
+
 def get_admin(username) -> None | Admin:
     admin_data = read_query('''
     SELECT a.id, a.username, a.first_name, a.last_name, a.picture, c.email, c.address, c.telephone, l.city, l.country
@@ -75,6 +80,6 @@ def create_admin(new_admin: Admin, password):
     return new_admin
 
 
-# Use below with caution. All rows with temporary tokens will be dropped.
+# Use below with caution. All rows with temporary tokens will be deleted from the database table.
 def delete_temp_tokens():
     update_query('''DELETE FROM temporary_tokens''', (None,))

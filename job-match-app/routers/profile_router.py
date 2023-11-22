@@ -98,6 +98,9 @@ def password_reset(activation_token: str = Query()):
     #                     content=response.json())
 
 
+
+# TODO: There is a bug. b-literal for upload and retrieval from database is identical
+#  However, the image is broken in Swagger doc and in general browser (high priority)
 @profile_router.get('/picture')
 def get_avatar(current_user_payload=Depends(get_current_user)):
     image_data = upload_services.get_picture(current_user_payload['id'], current_user_payload['group'])
@@ -112,14 +115,25 @@ def get_avatar(current_user_payload=Depends(get_current_user)):
 @profile_router.post('/picture')
 def upload_picture(image_file: UploadFile, current_user_payload=Depends(get_current_user)):
     try:
+        # NOTE: After spending hours on investigating why the image was not returned,
+        # I found out that checking jpeg format leads to a hidden truncation of the image
+        # data. Possibly because the method from PIL has to read a part of the file and
+        # does not restore the cursor.
+        # If the seek cursor is restored, the image is no longer truncated.
+        # If the seek cursor is not restored like done after the check,
+        # The image becomes corrupt.
+
         if not is_file_jpeg(image_file):
             return JSONResponse(status_code=400,
                                 content='Server accepts only jpg/jpeg as picture formats.')
+        image_file.file.seek(0)
         max_file_size_bytes = 1024 * 1024
+        # Interestingly, .size does not affect the reading of the image.
         if image_file.size > max_file_size_bytes:
             return JSONResponse(status_code=413,
                                 content=f'Image file too big. Please upload a file that is less than 1 MB.')
 
+        image_file.file.seek(0)
         image_data = image_file.file.read()
         upload_services.upload_picture(current_user_payload, image_data)
 
