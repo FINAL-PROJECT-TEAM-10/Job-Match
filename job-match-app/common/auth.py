@@ -5,15 +5,14 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, ExpiredSignatureError
 from pydantic import BaseModel
 
-from app_models.admin_models import Admin
 from services.authorization_services import is_authenticated
 
 oauth_2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-# TODO: Currently the token verifies against the database.
+#  Currently the token verifies against the database.
 #  If we want to go for statelessness the access token should not verify each time
-#  against the database. Instead there should be a whitelist/blacklist that could
+#  against the database. Instead, there should be a whitelist/blacklist that could
 #  be in memory. Additional functionality could be adding refresh tokens.
 
 def get_current_user(token: str = Depends(oauth_2_scheme)):
