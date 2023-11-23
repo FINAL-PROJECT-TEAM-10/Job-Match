@@ -9,10 +9,14 @@ def job_ad_percentage_calculator(requirements, skills):
 
 #TODO: REMOVE ONE FROM THE TWO FUNCS
 
-def find_matched_unmatched_skill(requirements , skills):
+def find_matched(requirements , skills):
     
-    matched_skills = [skill for skill in skills if skill in requirements]
-    unmatched_skills = [skill for skill in skills if skill not in requirements]
+    matched_skills = [skill for skill in requirements if skill in skills]
 
+    return matched_skills
 
-    return requirements
+def find_unmatched(requirements, skills):
+
+    unmatched_skills = [skill for skill in requirements if skill not in skills]
+
+    return unmatched_skills

@@ -8,7 +8,7 @@ from services import admin_services,company_services
 from common.country_validators_helpers import find_country_by_city
 from datetime import datetime
 from mariadb import IntegrityError
-from common.percent_jobad_calculator import job_ad_percentage_calculator, find_matched_unmatched_skill
+from common.percent_jobad_calculator import *
 from common.percent_sections import percent_section_helper, find_names
 from common.salary_threshold_calculator_seeker import calculate_salaries
 
@@ -348,9 +348,12 @@ def get_main_cv_id(seeker_id):
     return cv_id[0][0]
 
 def calculate_percents_job_ad(seeker_id, current_sort, perms, input_salary = None):
-    
-    cv_id = get_main_cv_id(seeker_id)
 
+    try:
+        cv_id = get_main_cv_id(seeker_id)
+    except IndexError:
+        return JSONResponse(status_code=404, content='You have to select a main CV to use this option!')
+    
     cv_skills = get_current_cv_skills(cv_id)
 
     all_job_ads = read_query('SELECT * FROM job_ads')
@@ -359,6 +362,7 @@ def calculate_percents_job_ad(seeker_id, current_sort, perms, input_salary = Non
     if current_sort == 'All':
         my_cv_ad_range = input_salary
         salaries_for_job_ad = calculate_salaries(all_job_ads)
+    
         
     result = []
 
@@ -372,20 +376,23 @@ def calculate_percents_job_ad(seeker_id, current_sort, perms, input_salary = Non
 
     filtered_data = {key: value for item in result for key, value in item.items() if value}
 
-
-
     matches_per_job_ad = {}
 
     for job_ad_id, requirements in filtered_data.items():
         current_percent = job_ad_percentage_calculator(requirements, cv_skills)
         matches_per_job_ad[job_ad_id] = round(current_percent)
 
+    matched = {}
+    for job_ad_id, requirements in filtered_data.items():
+        matched[job_ad_id] = find_matched(requirements, cv_skills)
+    
     unmatched = {}
     for job_ad_id, requirements in filtered_data.items():
-        unmatched[job_ad_id] = find_matched_unmatched_skill(requirements, cv_skills)
-    
+        unmatched[job_ad_id] = find_unmatched(requirements, cv_skills)
+
+
     if current_sort != 'All':
-        return percent_section_helper(current_sort,matches_per_job_ad, perms)
+        return percent_section_helper(current_sort,matches_per_job_ad, perms, matched, unmatched)
     else:
         return filter_by_salaries(my_cv_ad_range,salaries_for_job_ad)
 
@@ -454,7 +461,7 @@ def filter_by_salaries(current_cv_range, job_ads_calculated_salaries): #[2000, 5
             
             min_salary_ad = value[0]
             max_salary_ad = value[1]
-            company_id = find_names(key)
+            company_id = find_company_id(key)
             description = read_query('SELECT description FROM job_ads WHERE id = ?', (key,))
 
             if cv_min_salary >= min_salary_ad and cv_max_salary <= max_salary_ad:
@@ -468,3 +475,9 @@ def filter_by_salaries(current_cv_range, job_ads_calculated_salaries): #[2000, 5
                     result.append(filtered_ads)
     return result
 
+
+def find_company_id(id):
+
+    data = read_query('SELECT companies_id FROM job_ads WHERE id = ?', (id,))
+
+    return data[0][0]
