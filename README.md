@@ -93,8 +93,8 @@ Notably, the file contains the authorized in the SQL database and password,
 as well as the Azure address to which the app should connect to access the database.
 
 In addition, _private_details.py_ contains information about the
-mailjet public and secret api keys as well as the sender email that
-mailjet, an automated mailing solution, uses when sending emails through the app.
+Mailjet public and secret api keys as well as the sender email that
+Mailjet, an automated mailing solution, uses when sending emails through the app.
 
 [To be finalized: upload a censored image]
 
@@ -213,11 +213,11 @@ All of the above is accessible only when the user has been authenticated.
 ### ❕SHOULD Requirements❕
 #### 🏛️ Companies 🏛️
 - [x] Basic info
-- [ ] Can upload pictures 
+- [x] Can upload pictures 
 
 #### 👤Job Seekers/Professionals 👤
 - [x] Basic info
-- [ ] Can upload pictures
+- [x] Can upload pictures
 - [x] Can set up a main ad
 - [ ] List of matches can be public or hidden
 
@@ -235,7 +235,7 @@ All of the above is accessible only when the user has been authenticated.
 - [ ] Salary range can be soft, i.e. range can be expanded with acceptable flexibility (input percent)
 - [ ] Skills/Requirements can be soft, i.e. some may be missing from a match
 
-#### 📫 MailJet Integration 📫 
+#### 📫 Mailjet Integration 📫 
 - [ ] Notification for a matching request
 
 #### 🐤 Twitter Integration 🐤
@@ -275,7 +275,7 @@ In a real-world setting, users (job_seekers and companies) would be able to requ
 - [ ] Admins can delete application data (profiles, ads, CVs, etc.)
 - [x] Admins can add/delete or approve skills/requirements
 
-#### 📫 MailJet Integration 📫
+#### 📫 Mailjet Integration 📫
 - [ ] Notification for ads/CVs
 
 ####  🦺 Mock Third-Party Services🦺
@@ -291,7 +291,7 @@ In a real-world setting, users (job_seekers and companies) would be able to requ
 #### 🔐 Forgotten Password 🔐
 - [x] Password can be reset through registered email 
 
-#### 📫 MailJet Integration 📫
+#### 📫 Mailjet Integration 📫
 - [x] Password Reset functionality through two e-mails
 
 The first email contains an activation link that uses a custom token for the reset,
@@ -304,11 +304,38 @@ the second contains a randomly generated password.
  
 
 
-## 📫 MailJet Setup Guide 📫
-[To be finalized]
+## 📫 Mailjet Setup Guide 📫
+To use the automatic emailing functionality through endpoint access, you need to set up
+a Mailjet account and include the credentials in a _private_details.py_.
 
-To use the automatic emailing functionality through endpoint access, you need to setup
-a mailjet account and include the credentials in a _private_details.py_. To do so... [to be continued]
+The guide to setting up Mailjet is provided on their website. You need to follow
+[the getting started guide](https://dev.mailjet.com/email/guides/getting-started/).
+Within the guide, it is explained [how to create a Mailjet account](https://app.mailjet.com/signup),
+then how to retrieve [both your API and Secret keys](https://app.mailjet.com/account/api_keys).
+
+For the mailing functionality of Skill-Sync to function, you need to include four things in
+_job-match-app/private_details.py_: the public API, the Secret key, and the sender's email
+(the registration email). The fourth is the address of Skill-Sync.
+
+```
+mailjet_public_api_key = 'XXXXXXXXXXXXXXXXXXXXXXXXXXX'
+mailjet_secret_api_key = 'XXXXXXXXXXXXXXXXXXXXXXXXXXX'
+mailjet_sender_email = 'XXXXXXXXXXXXXXXXXXXX@XXXX.XXX'
+```
+
+You also need to define the address on which the Skill-Sync API is run.
+```
+skill_sync_address = 'XXXXXXXXXXXXXXXXX'
+```
+For the purposes of a locally run installation, you can substitute the address with localhost.
+For example:
+```
+skill_sync_address = 'http://127.0.0.1:8000/'
+```
+
+Our API imports these variables to support mailing functionality, which can be found in
+_job-match-app/common/mailing.py_.
+
 
 ## 📦 Library Versions 📦
 Python version used for the project is 3.11.
