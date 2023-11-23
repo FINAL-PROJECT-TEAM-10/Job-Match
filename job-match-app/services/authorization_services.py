@@ -90,8 +90,6 @@ def authenticate_company(username: str, password: str) -> bool | Company:
     return company
 
 
-# TODO: I should a purpose either in the access token OR in a check, so that other types of tokens cannot be used
-#  To imitate an access token
 def create_access_token(user_data, expiration_delta: timedelta = _TOKEN_EXPIRATION_TIME_MINUTES):
     to_encode = {
         "id": user_data.id,
