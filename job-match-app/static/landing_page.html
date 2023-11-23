@@ -13,6 +13,36 @@
     
     <a href="job_seeker_register">JOB SEEKER</a>
     <a href="">COMPANY</a>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let links = document.querySelectorAll('a');
+
+        links.forEach(function (link) {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                document.body.classList.add('loading');
+                let loadingOverlay = document.createElement('div');
+                loadingOverlay.classList.add('loading-overlay');
+                let loader = document.createElement('div');
+                loader.classList.add('loader');
+
+                loadingOverlay.appendChild(loader);
+
+                document.body.appendChild(loadingOverlay);
+
+                setTimeout(function () {
+                    document.body.classList.remove('loading');
+                    loadingOverlay.remove();
+
+                    window.location.href = link.getAttribute('href');
+                }, 1000);
+            });
+        });
+    });
+</script>
+
 </body>
 </html>
 

@@ -22,7 +22,7 @@ form {
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    text-align: center; /* Center the content inside the form */
+    text-align: center;
 }
 
 label {
@@ -36,6 +36,16 @@ input {
     padding: 8px;
     margin-bottom: 16px;
     box-sizing: border-box;
+    transition: border-color 0.3s ease; /* Add a transition effect for better user experience */
+}
+
+input::placeholder {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+input:focus::placeholder {
+    opacity: 1;
 }
 
 button {
