@@ -8,9 +8,9 @@ from services import admin_services,company_services
 from common.country_validators_helpers import find_country_by_city
 from datetime import datetime
 from mariadb import IntegrityError
-from common.percent_jobad_calculator import job_ad_percentage_calculator
-from common.percent_sections import percent_section_helper, find_company_id
-from common.salary_treshold_calculator_seeker import calculate_salaries
+from common.percent_jobad_calculator import job_ad_percentage_calculator, find_matched_unmatched_skill
+from common.percent_sections import percent_section_helper, find_names
+from common.salary_threshold_calculator_seeker import calculate_salaries
 
 
 def convert_level(level):
@@ -347,7 +347,7 @@ def get_main_cv_id(seeker_id):
 
     return cv_id[0][0]
 
-def calculate_percents_job_ad(seeker_id, current_sort, input_salary = None):
+def calculate_percents_job_ad(seeker_id, current_sort, perms, input_salary = None):
     
     cv_id = get_main_cv_id(seeker_id)
 
@@ -373,15 +373,19 @@ def calculate_percents_job_ad(seeker_id, current_sort, input_salary = None):
     filtered_data = {key: value for item in result for key, value in item.items() if value}
 
 
+
     matches_per_job_ad = {}
 
     for job_ad_id, requirements in filtered_data.items():
         current_percent = job_ad_percentage_calculator(requirements, cv_skills)
         matches_per_job_ad[job_ad_id] = round(current_percent)
 
-
+    unmatched = {}
+    for job_ad_id, requirements in filtered_data.items():
+        unmatched[job_ad_id] = find_matched_unmatched_skill(requirements, cv_skills)
+    
     if current_sort != 'All':
-        return percent_section_helper(current_sort,matches_per_job_ad)
+        return percent_section_helper(current_sort,matches_per_job_ad, perms)
     else:
         return filter_by_salaries(my_cv_ad_range,salaries_for_job_ad)
 
@@ -450,7 +454,7 @@ def filter_by_salaries(current_cv_range, job_ads_calculated_salaries): #[2000, 5
             
             min_salary_ad = value[0]
             max_salary_ad = value[1]
-            company_id = find_company_id(key)
+            company_id = find_names(key)
             description = read_query('SELECT description FROM job_ads WHERE id = ?', (key,))
 
             if cv_min_salary >= min_salary_ad and cv_max_salary <= max_salary_ad:

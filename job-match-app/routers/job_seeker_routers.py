@@ -230,7 +230,7 @@ def search_job_ads_percentage(current_user_payload=Depends(get_current_user),
     job_seeker_id = current_user_payload.get('id')
 
 
-    return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent)
+    return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent, perms = 'Seeker')
 
 
 @job_seekers_router.get('/sorting_salary', tags=['Seeker Section'])
