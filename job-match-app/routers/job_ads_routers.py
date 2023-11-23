@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query,Depends
+from fastapi import APIRouter, Query,Depends, Form
 from services import job_ads_services
 from fastapi.responses import JSONResponse
 from common.auth import get_current_user
@@ -8,16 +8,21 @@ from common.separators_validators import parse_skills
 job_ads_router = APIRouter(prefix='/job_ads',tags={'Everything available for Job_Ads'})
 
 @job_ads_router.post('/')
-def create_new_job_ad(description: str = Query(), min_salary: int = Query(),max_salary: int = Query(), 
-                      requirements: str = Query(description='Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'),
+def create_new_job_ad(description: str = Form(), min_salary: int = Form(),max_salary: int = Form(), 
+                      requirements: str = Form(description='Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'),
                       current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'companies':
         return JSONResponse(status_code=403,
                             content='This option is only available for Companies')
     
+    if max_salary and min_salary:
+        if max_salary < min_salary:
+            return JSONResponse(status_code=400, content='The minimum salary cannot be bigger than the maximum salary')
+        
     status = 'active'
     requirements_list = parse_skills(requirements)
+    
     try:
         requirements_names = [skill.split(';')[0] for skill in requirements_list]
         requirements_levels = [skill.split(';')[1] for skill in requirements_list]
@@ -92,23 +97,27 @@ def edit_your_job_ad(job_ad_id: int = Query(), description: str = Query(None), m
     if max_salary and min_salary:
         if max_salary < min_salary:
             return JSONResponse(status_code=400, content='The minimum salary cannot be bigger than the maximum salary')
-    #TODO : Proverka dali nadvishava 5
+
     try:
         requirements_list = parse_skills(requirements)
         requirements_names = [skill.split(';')[0] for skill in requirements_list]
         requirements_levels = [skill.split(';')[1] for skill in requirements_list]
+
     except IndexError:
         return JSONResponse(status_code=404,content='Invalid input look at the description')
+    
     except TypeError:
         getting_requirements = job_ads_services.existing_requirements(job_ad_id)
         requirements_names = []
         requirements_levels = []
+
         try:
             for requirements_id in getting_requirements[0]:
                 requirements_name = job_ads_services.find_requirement_by_id(requirements_id)
                 requirements_names.append(requirements_name)
                 requirement_level = job_ads_services.find_requirements_level(job_ad_id,requirements_id)
                 requirements_levels.append(requirement_level)
+
         except IndexError:
             requirements_names = []
             requirements_list = []
@@ -123,6 +132,7 @@ def edit_your_job_ad(job_ad_id: int = Query(), description: str = Query(None), m
     arg_min_salary = min_salary or company_information[0][2]
     arg_max_salary = max_salary or company_information[0][3]
     arg_description = description or company_information[0][1]
+
     if not description and not min_salary and not max_salary and not requirements:
         return JSONResponse(status_code=202, content="You haven't done any changes to your Job_Ad information")
 

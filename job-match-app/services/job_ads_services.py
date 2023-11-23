@@ -97,16 +97,21 @@ def edit_job_ads(company_id:int, job_ads_id: int, min_salary: int, max_salary: i
     
     if requirement_names and requirement_levels:
         for requirement,level in zip(requirement_names, requirement_levels):
+
             if level.isnumeric():
                 level = int(level)
                 converted_level = job_seeker_services.convert_level(level)
+
             else:
                 level_num = convert_level_name(level)
                 converted_level = level_num
+
             requirements_id = find_requirement_by_name(requirement)
+
             if not check_requirement_ad_exist(job_ads_id, requirements_id):
                 insert_query('INSERT INTO job_ads_has_requirements (job_ads_id, skills_or_requirements_id, level) VALUES (?,?,?)',
                             (job_ads_id, requirements_id, converted_level))
+                
             else:
                 try:
                     update_query('UPDATE job_ads_has_requirements SET skills_or_requirements_id = ?, level = ? WHERE job_ads_id = ?', 
