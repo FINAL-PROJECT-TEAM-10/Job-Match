@@ -150,3 +150,23 @@ def search_cv_from_job_seeker(job_ad_id: int = Query(),status: str =  Query(defa
 
      return job_ads_services.calculate_percantage_cv(job_ad_id,status, perms = "Company")
 
+
+@job_ads_router.get('/search/cv/salary')
+def search_salary_based_on_different_cvs(job_ad_id: int = Query(), minimum_salary: int = Query(), 
+                              maximum_salary: int = Query(), current_user_payload=Depends(get_current_user)):
+     
+     if current_user_payload['group'] != 'companies':
+        return JSONResponse(status_code=403,
+                            content='This option is only available for Companies')
+     
+     if maximum_salary and minimum_salary:
+        if maximum_salary < minimum_salary:
+            return JSONResponse(status_code=400, content='The minimum salary cannot be bigger than the maximum salary')
+
+     getting_owner = current_user_payload.get('id')
+     percantage_based_on_salary = 'All'
+     salary = [minimum_salary,maximum_salary]
+     perms = 'Company'
+
+     return job_ads_services.calculate_percantage_cv(job_ad_id, percantage_based_on_salary, perms, salary)
+

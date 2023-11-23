@@ -5,7 +5,9 @@ from fastapi.responses import JSONResponse
 from services import job_seeker_services
 from mariadb import IntegrityError
 from common.percantage_cv_calculator import cv_percentage_calculator
-from common.percent_section_cv import percent_section_helper
+from common.percent_sections import percent_section_helper, find_names
+from common.salary_threshold_calculator_seeker import calculate_cv_salaries
+
 
 def find_company(name_of_company):
     
@@ -184,7 +186,7 @@ def get_current_job_ad(job_ads_id:int):
     return result_pairs
 
 
-def calculate_percantage_cv(job_ad_id, sorting, perms):
+def calculate_percantage_cv(job_ad_id, sorting, perms, salary = None):
 
     ads = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_ad_id,))
 
@@ -193,6 +195,10 @@ def calculate_percantage_cv(job_ad_id, sorting, perms):
     current_job_ad = get_current_job_ad(job_ad_id)
 
     result = []
+
+    if sorting == 'All':
+        cv_range = salary
+        salary_based_on_cv = calculate_cv_salaries(get_main_cv)
 
     for current_mini_cv in get_main_cv:
         current_cv_skills = get_main_cv_skills(current_mini_cv[0])
@@ -210,10 +216,13 @@ def calculate_percantage_cv(job_ad_id, sorting, perms):
         current_percent = cv_percentage_calculator(current_job_ad, requirements)
         matches_per_cv[cv_id] = round(current_percent)
 
-    #TODO : SALARY CALCULATION NEED
-    
-    return percent_section_helper(sorting,matches_per_cv,perms)
 
+    if sorting != 'All':
+        return percent_section_helper(sorting,matches_per_cv,perms)
+    else:
+        return filter_by_cv_salaries(cv_range,salary_based_on_cv)
+
+    
 
 def get_skill_name(id):
 
@@ -239,4 +248,42 @@ def get_main_cv_skills(mini_cv_id:int):
 
     return result_pairs
 
+def filter_by_cv_salaries(job_ad_range, cvs_calculated_salaries):
+    
+    job_ad_min_salary = job_ad_range[0]
+    job_ad_max_salary = job_ad_range[1]
 
+
+    result = []
+    for current_dict_cv in cvs_calculated_salaries:
+        for key,value in current_dict_cv.items():
+            
+            min_salary_cv = value[0]
+            max_salary_cv = value[1]
+            seeker_id = find_name_for_job_seeker(key)
+            description = read_query('SELECT description FROM mini_cvs WHERE id = ? AND job_seekers_id = ?', (key, seeker_id))
+
+
+            if job_ad_min_salary >= min_salary_cv and job_ad_max_salary <= max_salary_cv:
+            
+                    filtered_ads = {
+                    'CV ID': key,
+                    'Job Seeker Name': find_username_job_seeker(seeker_id),
+                    'Description': description[0][0],
+                    'Minimum Salary': min_salary_cv,
+                    'Maximum Salary': max_salary_cv
+                    }
+                    result.append(filtered_ads)
+
+    if not result:
+        return JSONResponse(status_code=404,content="There are no found cv's in this salary search range")
+    return result
+
+def find_name_for_job_seeker(id_of_name: int):
+
+    data = read_query('SELECT job_seekers_id from mini_cvs WHERE id = ?', (id_of_name,))
+    return data[0][0]
+
+def find_username_job_seeker(id: int):
+    data = read_query('SELECT username FROM job_seekers WHERE id = ?',(id,))
+    return data[0][0]

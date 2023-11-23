@@ -1,6 +1,5 @@
 from fastapi.responses import JSONResponse
 from data.database import read_query
-from services import job_ads_services
 def percent_section_helper(current_sort, list_of_percentages, perms): 
     #TODO: MAKE THE FUNCTION FRINEDLY FOR BOTH SIDES SEEKERS/COMPANIES TO ESCAPE COPY PASTE CODE
         
@@ -45,6 +44,7 @@ def percent_section_helper(current_sort, list_of_percentages, perms):
 
 
 def create_current_dict(company_id, job_ad_info, value, perms):
+    from services import job_ads_services
     if perms == 'Seeker':
         return {
             "Company": job_ads_services.find_name_by_id(company_id),
@@ -55,7 +55,7 @@ def create_current_dict(company_id, job_ad_info, value, perms):
         }
     else:
         return {
-            "Job Seeker": find_names(company_id),
+            "Job Seeker": find_name_by_id_for_job_seeker(company_id),
             "Description": job_ad_info[0][3],
             "Minimum Salary": job_ad_info[0][1],
             "Maximum Salary": job_ad_info[0][2],
@@ -74,7 +74,7 @@ def find_names(id, perms: str):
     if perms == 'Seeker':
         data = read_query('SELECT companies_id FROM job_ads WHERE id = ?', (id,))
     else:
-        data = read_query('SELECT job_seekers_id from mini_cvs WHERE id = ?', (id, ))
+        data = read_query('SELECT job_seekers_id from mini_cvs WHERE id = ?', (id,))
 
     return data[0][0]
 
