@@ -2,7 +2,7 @@ from fastapi.responses import JSONResponse
 from data.database import read_query
 from services import job_ads_services
 def percent_section_helper(current_sort, list_of_percentages): 
-
+    #TODO: MAKE THE FUNCTION FRINEDLY FOR BOTH SIDES SEEKERS/COMPANIES TO ESCAPE COPY PASTE CODE
         
     result = []
     for key, value in list_of_percentages.items():
@@ -30,6 +30,13 @@ def percent_section_helper(current_sort, list_of_percentages):
             job_ad_info = find_job_ad_info_by_id(int(key))
             company_id = find_company_id(job_ad_info[0][0])
             result.append(create_current_dict(company_id,job_ad_info,value))
+
+# Best - 100%
+# Very Good - 75% - 99%
+# Good - 50% - 74%
+# Bad - 49% - 26%
+# Worst - 25% - 0%
+
             
     if not result:
         return JSONResponse(status_code=404, content=f'There is no available job ads in this section')
@@ -43,7 +50,7 @@ def create_current_dict(company_id, job_ad_info, value):
         "Description": job_ad_info[0][1],
         "Minimum Salary": job_ad_info[0][2],
         "Maximum Salary": job_ad_info[0][3],
-        "Match percent based on your CV skills": f'{value}% / 100%'
+        "Match percent based on your CV skills": f'{value}% / 100%',
     }
 
 

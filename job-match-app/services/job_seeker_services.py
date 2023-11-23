@@ -9,7 +9,8 @@ from common.country_validators_helpers import find_country_by_city
 from datetime import datetime
 from mariadb import IntegrityError
 from common.percent_jobad_calculator import job_ad_percentage_calculator
-from common.percent_sections import percent_section_helper
+from common.percent_sections import percent_section_helper, find_company_id
+from common.salary_treshold_calculator_seeker import calculate_salaries
 
 
 def convert_level(level):
@@ -346,7 +347,7 @@ def get_main_cv_id(seeker_id):
 
     return cv_id[0][0]
 
-def calculate_percents_job_ad(seeker_id, current_sort):
+def calculate_percents_job_ad(seeker_id, current_sort, input_salary = None):
     
     cv_id = get_main_cv_id(seeker_id)
 
@@ -354,6 +355,11 @@ def calculate_percents_job_ad(seeker_id, current_sort):
 
     all_job_ads = read_query('SELECT * FROM job_ads')
 
+
+    if current_sort == 'All':
+        my_cv_ad_range = input_salary
+        salaries_for_job_ad = calculate_salaries(all_job_ads)
+        
     result = []
 
     for current_job_ad in all_job_ads:
@@ -373,10 +379,11 @@ def calculate_percents_job_ad(seeker_id, current_sort):
         current_percent = job_ad_percentage_calculator(requirements, cv_skills)
         matches_per_job_ad[job_ad_id] = round(current_percent)
 
-    #TODO : SALARY CALCULATION NEED
 
-
-    return percent_section_helper(current_sort,matches_per_job_ad)
+    if current_sort != 'All':
+        return percent_section_helper(current_sort,matches_per_job_ad)
+    else:
+        return filter_by_salaries(my_cv_ad_range,salaries_for_job_ad)
 
 
 def get_current_job_ad_requirements(job_ad_id:int):
@@ -423,3 +430,37 @@ def get_level_skill(cv_id, skill_id):
                       (cv_id,skill_id))
     
     return data[0][0]
+
+def get_min_salary_and_max(cv_id):
+
+    salary = read_query('SELECT min_salary, max_salary FROM mini_cvs WHERE id = ?', (cv_id,))
+
+
+    return salary
+
+
+def filter_by_salaries(current_cv_range, job_ads_calculated_salaries): #[2000, 5000] CV RANGE
+    cv_min_salary = current_cv_range[0]
+    cv_max_salary = current_cv_range[1]
+
+
+    result = []
+    for current_dict_ad in job_ads_calculated_salaries:
+        for key,value in current_dict_ad.items():
+            
+            min_salary_ad = value[0]
+            max_salary_ad = value[1]
+            company_id = find_company_id(key)
+            description = read_query('SELECT description FROM job_ads WHERE id = ?', (key,))
+
+            if cv_min_salary >= min_salary_ad and cv_max_salary <= max_salary_ad:
+                    filtered_ads = {
+                    'Job AD ID': key,
+                    'Company Name': company_services.find_company_id_byusername_for_job_seeker(company_id),
+                    'Description': description[0][0],
+                    'Minimum Salary': min_salary_ad,
+                    'Maximum Salary': max_salary_ad
+                    }
+                    result.append(filtered_ads)
+    return result
+

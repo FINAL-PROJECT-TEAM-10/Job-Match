@@ -231,6 +231,21 @@ def search_job_ads_percentage(current_user_payload=Depends(get_current_user),
 
 
     return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent)
+
+
+@job_seekers_router.get('/sorting_salary', tags=['Seeker Section'])
+def search_job_ads_by_salary(current_user_payload=Depends(get_current_user),
+                              min_salary: int = Query(), max_salary: int = Query()):
+
+    if current_user_payload['group'] != 'seekers':
+        return JSONResponse(status_code=403,
+                            content='Only seekers can search job ads')
+
+    job_seeker_id = current_user_payload.get('id')
+    sort_percent = 'All'
+    salary_input = [min_salary, max_salary]
+
+    return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent, salary_input)
     
 
 @job_seekers_router.get('/companies/job_ads',tags=['Seeker Section'])

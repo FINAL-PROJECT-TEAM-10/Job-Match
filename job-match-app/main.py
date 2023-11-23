@@ -19,11 +19,11 @@ app.include_router(token_router)
 app.include_router(job_seekers_router)
 
 
-@app.get('/', response_class= HTMLResponse)
+@app.get('/', response_class= HTMLResponse, include_in_schema=False)
 async def read_root(request: Request):
     return templates.TemplateResponse("landing_page.html", {"request": request})
 
-@app.get('/job_seeker_register', response_class=HTMLResponse)
+@app.get('/job_seeker_register', response_class=HTMLResponse, include_in_schema=False)
 async def read_job_seeker_register(request: Request):
     return templates.TemplateResponse("job_seeker_register.html", {"request": request})
 
