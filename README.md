@@ -75,13 +75,45 @@ functionality.
 [To be finalized]
 #### 🎛️ Admin services  🎛️
 
-#### 🗝️ Authorization Serivces 🗝️
+#### 🗝️ Authorization Services 🗝️
+| Method                                                                  | Parameters                        | Purpose                                                                                                                          |
+|-------------------------------------------------------------------------|-----------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
+| _verify_password_                                                       | text_password, hashed password    | verifies input password against hashed password in database                                                                      |
+| _get_password_hash_                                                     | password                          | used in user account creation and when a randomly generate password is created after email activation-based password reset       |
+| _get_password_hash_                                                     | password                          | used in user account creation and when a randomly generate password is created after email activation-based password reset       |
+| _get_pass_by_username_admin_ OR _get...seeker_ OR _get...company_       | username                          | finds hashed password in the database based on user type                                                                         |
+| _authenticate_admin_ OR _authenticate_seeker_ OR _authenticate_company_ | username, password                | returns user if user exists and if the input password matches the hashed password in the database                                |
+| _create_access_token_                                                   | user_data, expiration_delta       | accepts user data such as id, email, etc. to encode a token and sets an expiration time difference for the validity of the token |
+| _create_activation_token_                                               | activation_data, expiration_delta | generates a custom token similar to the access token, but only used for a specific purpose, such as password reset               |
+| _is_authenticated_                                                      | token                             | decodes a token based on a secret key                                                                                            |
+| _is_authenticated_custom_                                               | token                             | decodes a token based on a secret key                                                                                            |
+| _password_changer_                                                      | payload, new_password             | uses the payload to find a user's type and updates the hashed password in the database                                           |
+| _is_password_identical_by_type_                                         | payload, new_password             | uses the payload's user type and checks the appropriate table's hashed password to the input password                            |
+| _generate_password_                                                     | None                              | generates a random password, used in password reset                                                                              |
+| _activation_token_exists_                                               | activation_token                  | checks database for activation token, such as one generated during password reset                                                |
+| _store_activation_token_                                                | activation_token                  | stores in database an activation token, such as one generated during password reset                                              |
+| _delete_activation_token_                                               | activation_token                  | deletes in database an activation token, used to remove used tokens that are not for authentication                              |
+
 
 #### 🏛️ Company Services 🏛️
 
 #### 📃 Job Ads Services 📃
 
 #### 👤Job Seeker Services 👤
+
+#### 📤 Upload Services📤
+A routerless service file has been created to harbour upload functionality.
+At the current stage, the upload services handles only the upload of pictures/avatars.
+
+| Method           | Parameters          | Purpose                                                                                                                                                    |
+|------------------|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| _upload_picture_ | payload, image_data | takes the payload to find the table and user in order to insert the image binary data into the database at the appropriate location                        |
+| _get_picture_    | user_id, user_group | the method takes user_id and user_group directly and not through the payload because we have considered pictures on our platform to be publicly accessible |
+| _is_file_jpeg_   | file                | checks if a file is a jpg/jpeg; uses PIL library, note: this method requires cursor reset (file.seek(0)) after its use                                     |
+
+These services has been compartmentalized in a separate file
+and the basic logic for file upload has been written out,
+so that it could be used to extend upload features if needed. 
 
 ### 🔏 Private Details🔏
 When installing Skill Sync, you must create a _private_details.py_ file that holds the
@@ -154,11 +186,11 @@ order to force users to login again and receive their new, updated.
 [To be updated]
 
 
-## 🔧 Functionality in Detail 🔧
+## 🔧 Functionality Checklist 🔧
 Here we have listed the RESTful API requirements of the Job Match task and marked what we have completed.
 
 ### Important Note
-For readability we have changed the name of Company Ads to CVs/Mini-CVs because semantically
+For readability, we have changed the name of Company Ads to CVs/Mini-CVs because semantically
 this reflects the purpose of the so-called "Company Ads" better.
 A "Company Ad" can be misinterpreted as an ad for a company, when in fact it is
 what job seekers (aka professionals) post to attract the attention of companies.

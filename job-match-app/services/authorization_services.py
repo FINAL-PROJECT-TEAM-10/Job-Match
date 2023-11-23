@@ -8,6 +8,7 @@ from data.database import read_query, update_query, insert_query
 from services import admin_services, job_seeker_services, company_services
 
 _SECRET_KEY = '2d776838352e75a9f95de915c269c8ce45b12de47f720213c5f71c4e25618c25'
+_CUSTOM_SECRET_KEY = 'b1b2c3d4e5f6g7890123456789abcdef0123456789194def0123456789e2186a'
 _ALGORITHM = 'HS256'
 _TOKEN_EXPIRATION_TIME_MINUTES = timedelta(minutes=1440)
 _ACTIVATION_TOKEN_EXPIRATION_TIME_MINUTES = timedelta(minutes=60)
@@ -89,6 +90,8 @@ def authenticate_company(username: str, password: str) -> bool | Company:
     return company
 
 
+# TODO: I should a purpose either in the access token OR in a check, so that other types of tokens cannot be used
+#  To imitate an access token
 def create_access_token(user_data, expiration_delta: timedelta = _TOKEN_EXPIRATION_TIME_MINUTES):
     to_encode = {
         "id": user_data.id,
@@ -118,13 +121,16 @@ def create_activation_token(activation_data, expiration_delta: timedelta = _ACTI
     expire = datetime.now() + expiration_delta
 
     to_encode.update({'exp': expire})
-    encoded_jwt = jwt.encode(to_encode, _SECRET_KEY, algorithm=_ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, _CUSTOM_SECRET_KEY, algorithm=_ALGORITHM)
 
     return encoded_jwt
 
 
 def is_authenticated(token: str):
     return jwt.decode(token, _SECRET_KEY, algorithms=[_ALGORITHM])
+
+def is_authenticated_custom(token: str):
+    return jwt.decode(token, _CUSTOM_SECRET_KEY, algorithms=[_ALGORITHM])
 
 
 def password_changer(payload, new_password):

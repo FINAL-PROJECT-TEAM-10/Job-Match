@@ -72,7 +72,7 @@ def password_reset(activation_token: str = Query()):
     if not authorization_services.activation_token_exists(activation_token):
         return JSONResponse(status_code=401,
                             content='You are not using a valid token')
-    decoded_token = authorization_services.is_authenticated(activation_token)
+    decoded_token = authorization_services.is_authenticated_custom(activation_token)
 
     try:
         if decoded_token:
