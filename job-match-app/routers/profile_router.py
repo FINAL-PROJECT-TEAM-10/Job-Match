@@ -132,7 +132,7 @@ def upload_picture(image_file: UploadFile, current_user_payload=Depends(get_curr
             return JSONResponse(status_code=413,
                                 content=f'Image file too big. Please upload a file that is less than 1 MB.')
 
-        image_file.file.seek(0)
+        # image_file.file.seek(0)
         image_data = image_file.file.read()
         upload_services.upload_picture(current_user_payload, image_data)
 

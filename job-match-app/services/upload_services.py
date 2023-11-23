@@ -39,8 +39,8 @@ def is_file_jpeg(file):
         with Image.open(file.file) as img:
             image_type = img.format.lower()
 
-            if image_type is None:
-                return False
-            return image_type in _ALLOWED_TYPES
+        if image_type is None:
+            return False
+        return image_type in _ALLOWED_TYPES
     except Exception as e:
         return f"Image could not be tested: {e}"
