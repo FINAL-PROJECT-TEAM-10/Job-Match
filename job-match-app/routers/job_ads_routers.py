@@ -148,5 +148,5 @@ def search_cv_from_job_seeker(job_ad_id: int = Query(),status: str =  Query(defa
      
      getting_owner = current_user_payload.get('id')
 
-     return job_ads_services.calculate_percantage_cv(job_ad_id,status)
+     return job_ads_services.calculate_percantage_cv(job_ad_id,status, perms = "Company")
 

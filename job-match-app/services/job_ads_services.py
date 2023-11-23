@@ -184,7 +184,7 @@ def get_current_job_ad(job_ads_id:int):
     return result_pairs
 
 
-def calculate_percantage_cv(job_ad_id, sorting):
+def calculate_percantage_cv(job_ad_id, sorting, perms):
 
     ads = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_ad_id,))
 
@@ -212,7 +212,7 @@ def calculate_percantage_cv(job_ad_id, sorting):
 
     #TODO : SALARY CALCULATION NEED
     
-    return percent_section_helper(sorting,matches_per_cv,filtered_data)
+    return percent_section_helper(sorting,matches_per_cv,perms)
 
 
 def get_skill_name(id):
