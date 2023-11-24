@@ -38,13 +38,6 @@ def percent_section_helper(current_sort, list_of_percentages, perms, matched_ski
             skills_matched_ad = matched_skills[key]
             skills_unmatched_ad = unmatched_skills[key]
             result.append(create_current_dict(company_id,job_ad_info,value, perms, skills_matched_ad, skills_unmatched_ad))
-
-# Best - 100%
-# Very Good - 75% - 99%
-# Good - 50% - 74%
-# Bad - 49% - 26%
-# Worst - 25% - 0%
-
             
     if not result:
         return JSONResponse(status_code=404, content=f'There is no available job ads in this section')
@@ -82,7 +75,7 @@ def create_current_dict(company_id, job_ad_info, value, perms, matched_skills, u
             "Minimum Salary": job_ad_info[0][2],
             "Maximum Salary": job_ad_info[0][3],
             "Match percent based on your CV skills": f'{value}% / 100%',
-            "Matched Skills": matched_skills_result,
+            "Matched Skills from the Company Job AD": matched_skills_result,
             "Not matched Skills": unmatched_skills_result,
         }
         return result_dict
@@ -114,8 +107,8 @@ def create_current_dict(company_id, job_ad_info, value, perms, matched_skills, u
             "Minimum Salary": job_ad_info[0][1],
             "Maximum Salary": job_ad_info[0][2],
             "Match percent based on your Company Requirements": f'{value}% / 100%',
-            "Matched Skills": matched_skills_result,
-            "Not matched Skills": unmatched_skills_result
+            "Matched Requirements from the Seeker CV": matched_skills_result,
+            "Not matched Requirements": unmatched_skills_result
         }
         return result_cv
 
@@ -137,3 +130,11 @@ def find_names(id, perms: str):
 def find_name_by_id_for_job_seeker(id: int):
     data = read_query('SELECT username from job_seekers WHERE id = ?',(id,))
     return data[0][0]
+
+# Graph of percent calculations
+# --------------
+# Best - 100%
+# Very Good - 75% - 99%
+# Good - 50% - 74%
+# Bad - 49% - 26%
+# Worst - 25% - 0%
