@@ -244,8 +244,9 @@ def search_job_ads_by_salary(current_user_payload=Depends(get_current_user),
     job_seeker_id = current_user_payload.get('id')
     sort_percent = 'All'
     salary_input = [min_salary, max_salary]
+    perms = 'Seeker'
 
-    return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent, salary_input)
+    return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent,perms, salary_input)
     
 
 @job_seekers_router.get('/companies/job_ads',tags=['Seeker Section'])
