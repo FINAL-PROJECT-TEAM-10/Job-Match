@@ -127,11 +127,14 @@ def edit_company_information(username: str, description: str, city: str, address
                  (address, telephone, company_id,))
 
     if not job_seeker_services.find_location_by_city(city):
+
         country = find_country_by_city(city)
-        insert_query('INSERT INTO locations(city,country) VALUES (?,?)', (city, country,))
-        location_id = job_seeker_services.find_location_id_by_city_country(city, country)
-        update_query('UPDATE company_contacts SET locations_id = ? WHERE company_id = ?', (location_id, company_id,))
+        insert_query('INSERT INTO locations(city,country) VALUES (?,?)',(city,country,))
+        location_id = job_seeker_services.find_location_id_by_city_country(city,country)
+        update_query('UPDATE company_contacts SET locations_id = ? WHERE company_id = ?',(location_id,company_id,))
+
     else:
+        
         location_id = job_seeker_services.find_location_id_by_city(city)
         update_query('UPDATE company_contacts SET locations_id = ? WHERE company_id = ?', (location_id, company_id,))
 
@@ -147,9 +150,9 @@ def view_all_cvs():
     data = read_query('SELECT * FROM mini_cvs WHERE status = "Active"')
 
     if data:
-        ads = [{'CV Creator': job_seeker_services.get_username_by_id(row[6]), 'Cv Description': row[3],
-                'Minimum Salary': row[1], 'Maximum Salary': row[2], 'Status': row[4], 'Date Posted': row[5]} for row in
-               data]
+        ads = [{'CV Creator': job_seeker_services.get_username_by_id(row[6]), 'Cv Description': row[3], 'Minimum Salary': row[1], 
+                'Maximum Salary': row[2], 'Status': row[4], 'Date Posted': row[5]} for row in data]
         return ads
+    
     else:
         return JSONResponse(status_code=404, content='No cvs found!')

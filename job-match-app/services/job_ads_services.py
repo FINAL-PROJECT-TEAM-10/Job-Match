@@ -4,6 +4,10 @@ from app_models.job_ads_models import Job_ad
 from fastapi.responses import JSONResponse
 from services import job_seeker_services
 from mariadb import IntegrityError
+from common.percantage_cv_calculator import cv_percentage_calculator
+from common.percent_sections import percent_section_helper, find_names
+from common.salary_threshold_calculator_seeker import calculate_cv_salaries
+from common.percent_jobad_calculator import *
 
 def find_company(name_of_company):
     
@@ -95,16 +99,21 @@ def edit_job_ads(company_id:int, job_ads_id: int, min_salary: int, max_salary: i
     
     if requirement_names and requirement_levels:
         for requirement,level in zip(requirement_names, requirement_levels):
+
             if level.isnumeric():
                 level = int(level)
                 converted_level = job_seeker_services.convert_level(level)
+
             else:
                 level_num = convert_level_name(level)
                 converted_level = level_num
+
             requirements_id = find_requirement_by_name(requirement)
+
             if not check_requirement_ad_exist(job_ads_id, requirements_id):
                 insert_query('INSERT INTO job_ads_has_requirements (job_ads_id, skills_or_requirements_id, level) VALUES (?,?,?)',
                             (job_ads_id, requirements_id, converted_level))
+                
             else:
                 try:
                     update_query('UPDATE job_ads_has_requirements SET skills_or_requirements_id = ?, level = ? WHERE job_ads_id = ?', 
@@ -157,3 +166,131 @@ def convert_level_name(level):
         result = 3
 
     return int(result)
+
+
+def get_level_job_ad(job_ad_id: int, requirement_id: int):
+    data = read_query('SELECT level FROM job_ads_has_requirements WHERE job_ads_id = ? AND skills_or_requirements_id = ?', (job_ad_id, requirement_id,))
+
+    return data[0][0]
+
+
+def get_current_job_ad(job_ads_id:int):
+    job_ad = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_ads_id,))
+
+    result_pairs = [
+        f"{get_skill_name(id)};{get_level_job_ad(job_ads_id, id)}"
+        for ad in job_ad
+        for id in ad
+    ]
+
+    return result_pairs
+
+
+def calculate_percantage_cv(job_ad_id, sorting, perms, salary = None):
+
+    ads = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_ad_id,))
+
+    get_main_cv = read_query('SELECT * FROM mini_cvs WHERE main_cv = 1')
+
+    current_job_ad = get_current_job_ad(job_ad_id)
+
+    result = []
+
+    if sorting == 'All':
+        cv_range = salary
+        salary_based_on_cv = calculate_cv_salaries(get_main_cv)
+
+    for current_mini_cv in get_main_cv:
+        current_cv_skills = get_main_cv_skills(current_mini_cv[0])
+
+        data_dict = {
+           current_mini_cv[0]: current_cv_skills
+        }
+        result.append(data_dict)
+    
+    filtered_data = {key: value for item in result for key, value in item.items() if value}
+
+    matches_per_cv = {}
+
+    for cv_id, requirements in filtered_data.items():
+        current_percent = cv_percentage_calculator(current_job_ad, requirements)
+        matches_per_cv[cv_id] = round(current_percent)
+
+    matched = {}
+    for job_ad_id, requirements in filtered_data.items():
+        matched[job_ad_id] = find_matched(requirements, current_job_ad)
+    
+    unmatched = {}
+    for job_ad_id, requirements in filtered_data.items():
+        unmatched[job_ad_id] = find_unmatched(requirements, current_job_ad)
+
+    if sorting != 'All':
+        return percent_section_helper(sorting,matches_per_cv,perms,matched,unmatched)
+    else:
+        return filter_by_cv_salaries(cv_range,salary_based_on_cv)
+
+    
+
+def get_skill_name(id):
+
+    data = read_query('SELECT name FROM skills_or_requirements WHERE id = ?', (id,))
+
+    return data[0][0]
+
+def get_level(mini_cv_id,skill_id):
+
+    data = read_query('SELECT level FROM mini_cvs_has_skills WHERE mini_cvs_id = ? AND skills_or_requirements_id = ? ',
+                      (mini_cv_id,skill_id,))
+
+    return data[0][0]
+
+def get_main_cv_skills(mini_cv_id:int):
+    data = read_query('SELECT skills_or_requirements_id FROM mini_cvs_has_skills WHERE mini_cvs_id = ?', (mini_cv_id,))
+
+    result_pairs = [
+        f"{get_skill_name(id)};{get_level(mini_cv_id, id)}"
+        for job_ad in data
+        for id in job_ad
+    ]
+
+    return result_pairs
+
+def filter_by_cv_salaries(job_ad_range, cvs_calculated_salaries):
+    
+    job_ad_min_salary = job_ad_range[0]
+    job_ad_max_salary = job_ad_range[1]
+
+
+    result = []
+    for current_dict_cv in cvs_calculated_salaries:
+        for key,value in current_dict_cv.items():
+            
+            min_salary_cv = value[0]
+            max_salary_cv = value[1]
+            seeker_id = find_name_for_job_seeker(key)
+            description = read_query('SELECT description FROM mini_cvs WHERE id = ? AND job_seekers_id = ?', (key, seeker_id))
+
+
+            if job_ad_min_salary >= min_salary_cv and job_ad_max_salary <= max_salary_cv:
+            
+                    filtered_ads = {
+                    'CV ID': key,
+                    'Job Seeker Name': find_username_job_seeker(seeker_id),
+                    'Description': description[0][0],
+                    'Minimum Salary': min_salary_cv,
+                    'Maximum Salary': max_salary_cv
+                    }
+                    result.append(filtered_ads)
+
+    if not result:
+        return JSONResponse(status_code=404,content="There are no found cv's in this salary search range")
+    return result
+
+def find_name_for_job_seeker(id_of_name: int):
+
+    data = read_query('SELECT job_seekers_id from mini_cvs WHERE id = ?', (id_of_name,))
+    return data[0][0]
+
+def find_username_job_seeker(id: int):
+    data = read_query('SELECT username FROM job_seekers WHERE id = ?',(id,))
+    return data[0][0]

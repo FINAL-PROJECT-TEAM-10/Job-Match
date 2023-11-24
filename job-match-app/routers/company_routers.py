@@ -2,6 +2,9 @@ import io
 from fastapi import APIRouter, Query,Depends
 from fastapi.responses import JSONResponse, StreamingResponse
 from services import company_services, upload_services
+from fastapi import APIRouter, Query,Depends,Form
+from fastapi.responses import JSONResponse
+from services import company_services
 from services import job_ads_services
 from app_models.company_models import Company
 from common.auth import get_current_user
@@ -35,9 +38,9 @@ def view_all_companies(current_user_payload=Depends(get_current_user)):
     return result
 
 @companies_router.post('/register', response_model=Company, tags=['Seeker & Company Signup'])
-def company_registration(Company_Name: str = Query(), Password: str = Query(), 
-                         Company_City: str = Query(), Company_Country: str = Query(), Company_Adress: str = Query(),
-                         Telephone_Number: int = Query(),Email_Adress: str = Query(),):
+def company_registration(Company_Name: str = Form(), Password: str = Form(), 
+                         Company_City: str = Form(), Company_Country: str = Form(), Company_Adress: str = Form(),
+                         Telephone_Number: int = Form(),Email_Adress: str = Form(),):
     
 
     if company_services.check_company_exist(Company_Name):
@@ -68,6 +71,7 @@ def your_company_information(current_user_payload=Depends(get_current_user)):
     company_contacts = company_services.read_company_adress(company_id)
     
     description = get_company_information[0][1]
+    
     if not description:
         description = 'There is no current description set for this company'
 

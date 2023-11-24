@@ -15,6 +15,22 @@ def calculate_salaries(job_ads_info):
     return result
 
 
+def calculate_cv_salaries(cv_info):
+    
+    result = []
+    for cv in cv_info:
+        cv_range = []
+        cv_range.append(cv[1])
+        cv_range.append(cv[2])
+        threshold_result = calculate_threshold(cv_range)
+
+        data_dict = {
+            cv[0]: threshold_result,
+        }
+        result.append(data_dict)
+    
+    return result
+
 def calculate_threshold(job_range):
     threshold_percent = 20
 
