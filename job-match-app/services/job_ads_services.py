@@ -7,7 +7,7 @@ from mariadb import IntegrityError
 from common.percantage_cv_calculator import cv_percentage_calculator
 from common.percent_sections import percent_section_helper, find_names
 from common.salary_threshold_calculator_seeker import calculate_cv_salaries
-
+from common.percent_jobad_calculator import *
 
 def find_company(name_of_company):
     
@@ -216,9 +216,16 @@ def calculate_percantage_cv(job_ad_id, sorting, perms, salary = None):
         current_percent = cv_percentage_calculator(current_job_ad, requirements)
         matches_per_cv[cv_id] = round(current_percent)
 
+    matched = {}
+    for job_ad_id, requirements in filtered_data.items():
+        matched[job_ad_id] = find_matched(requirements, current_job_ad)
+    
+    unmatched = {}
+    for job_ad_id, requirements in filtered_data.items():
+        unmatched[job_ad_id] = find_unmatched(requirements, current_job_ad)
 
     if sorting != 'All':
-        return percent_section_helper(sorting,matches_per_cv,perms)
+        return percent_section_helper(sorting,matches_per_cv,perms,matched,unmatched)
     else:
         return filter_by_cv_salaries(cv_range,salary_based_on_cv)
 
