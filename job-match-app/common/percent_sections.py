@@ -38,8 +38,12 @@ def percent_section_helper(current_sort, list_of_percentages, perms, matched_ski
             skills_unmatched_ad = unmatched_skills[key]
             result.append(create_current_dict(company_id,job_ad_info,value, perms, skills_matched_ad, skills_unmatched_ad))
             
-    if not result:
-        return JSONResponse(status_code=404, content=f'There is no available job ads in this section')
+    if perms == 'Seeker':        
+        if not result:
+            return JSONResponse(status_code=404, content=f'There is no available Job Ads in this section')
+    else:
+        if not result:
+            return JSONResponse(status_code=404, content=f'There is no available CVS in this section')
     
     return result
 

@@ -398,7 +398,7 @@ def calculate_percents_job_ad(seeker_id, current_sort, perms, input_salary = Non
     matches_per_job_ad = {}
 
     for job_ad_id, requirements in filtered_data.items():
-        current_percent = job_ad_percentage_calculator(requirements, cv_skills)
+        current_percent = percentage_calculator(requirements, cv_skills)
         matches_per_job_ad[job_ad_id] = round(current_percent)
 
     matched = {}
@@ -500,3 +500,9 @@ def find_company_id(id):
     data = read_query('SELECT companies_id FROM job_ads WHERE id = ?', (id,))
 
     return data[0][0]
+
+def is_main_already(cv_id):
+
+    check = read_query('SELECT min_salary FROM mini_cvs WHERE id = ? AND main_cv = 1', (cv_id,))
+
+    return bool(check)

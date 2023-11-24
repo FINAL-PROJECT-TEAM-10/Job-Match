@@ -1,4 +1,4 @@
-def job_ad_percentage_calculator(requirements, skills):
+def percentage_calculator(requirements, skills):
 
     matching_requirements = sum(skill in skills for skill in requirements)
 
@@ -6,8 +6,6 @@ def job_ad_percentage_calculator(requirements, skills):
 
     return percentage
 
-
-#TODO: REMOVE ONE FROM THE TWO FUNCS
 
 def find_matched(requirements , skills):
     

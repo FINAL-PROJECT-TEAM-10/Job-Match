@@ -4,7 +4,6 @@ from app_models.job_ads_models import Job_ad
 from fastapi.responses import JSONResponse
 from services import job_seeker_services
 from mariadb import IntegrityError
-from common.percantage_cv_calculator import cv_percentage_calculator
 from common.percent_sections import percent_section_helper, find_names
 from common.salary_threshold_calculator_seeker import calculate_cv_salaries
 from common.percent_jobad_calculator import *
@@ -213,7 +212,7 @@ def calculate_percantage_cv(job_ad_id, sorting, perms, salary = None):
     matches_per_cv = {}
 
     for cv_id, requirements in filtered_data.items():
-        current_percent = cv_percentage_calculator(current_job_ad, requirements)
+        current_percent = percentage_calculator(current_job_ad, requirements)
         matches_per_cv[cv_id] = round(current_percent)
 
     matched = {}

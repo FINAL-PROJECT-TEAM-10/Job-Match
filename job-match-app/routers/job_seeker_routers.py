@@ -277,7 +277,7 @@ def get_seeker_avatar(id: int, current_user_payload=Depends(get_current_user)):
 
     return StreamingResponse(io.BytesIO(image_data), media_type="image/jpeg")
 
-@job_seekers_router.get('/main_cv', tags=['CV Section'])
+@job_seekers_router.put('/main_cv', tags=['CV Section'])
 def select_main_cv(cv_id: int = Query(), current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'seekers':
@@ -288,6 +288,9 @@ def select_main_cv(cv_id: int = Query(), current_user_payload=Depends(get_curren
     
     if not job_seeker_services.check_owner_cv(cv_id,seeker_id):
         return JSONResponse(status_code=400, content='That id is not a valid for your cvs')
+    
+    if job_seeker_services.is_main_already(cv_id):
+        return JSONResponse(status_code=202, content='This CV is already main!')
     
 
     return job_seeker_services.update_main_cv(cv_id, seeker_id)
