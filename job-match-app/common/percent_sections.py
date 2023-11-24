@@ -1,6 +1,5 @@
 from fastapi.responses import JSONResponse
 from data.database import read_query
-from services import job_ads_services
 def percent_section_helper(current_sort, list_of_percentages, perms, matched_skills, unmatched_skills): 
 
     result = []
@@ -53,27 +52,29 @@ def percent_section_helper(current_sort, list_of_percentages, perms, matched_ski
 
 
 def create_current_dict(company_id, job_ad_info, value, perms, matched_skills, unmatched_skills = None):
-    if perms == 'Seeker':
-        matched_skills_result = []
-        unmatched_skills_result = []
-        if matched_skills:
-            for pair in matched_skills:
-                skill, level = pair.split(';')
-                matched_skills_result.append(f'{skill.capitalize()} ({level.capitalize()})')
-        if unmatched_skills:
-            for pair in unmatched_skills:
-                skill, level = pair.split(';')
-                unmatched_skills_result.append(f'{skill.capitalize()} ({level.capitalize()})')
+    from services import job_ads_services
+    matched_skills_result = []
+    unmatched_skills_result = []
+    if matched_skills:
+        for pair in matched_skills:
+            skill, level = pair.split(';')
+            matched_skills_result.append(f'{skill.capitalize()} ({level.capitalize()})')
+    if unmatched_skills:
+        for pair in unmatched_skills:
+            skill, level = pair.split(';')
+            unmatched_skills_result.append(f'{skill.capitalize()} ({level.capitalize()})')
 
-        if not matched_skills_result:
-            matched_skills_result = 'No matched skills'
-        else:
-            matched_skills_result = ' | '.join(matched_skills_result)
+    if not matched_skills_result:
+        matched_skills_result = 'No matched skills'
+    else:
+        matched_skills_result = ' | '.join(matched_skills_result)
         
-        if not unmatched_skills_result:
-            unmatched_skills_result = 'You meet all the requirements!'
-        else:
-            unmatched_skills_result = ' | '.join(unmatched_skills_result)
+    if not unmatched_skills_result:
+        unmatched_skills_result = 'You meet all the requirements!'
+    else:
+        unmatched_skills_result = ' | '.join(unmatched_skills_result)
+
+    if perms == 'Seeker':
         result_dict = {
             'Job AD ID': job_ad_info[0][0],
             "Company": job_ads_services.find_name_by_id(company_id),
@@ -81,18 +82,21 @@ def create_current_dict(company_id, job_ad_info, value, perms, matched_skills, u
             "Minimum Salary": job_ad_info[0][2],
             "Maximum Salary": job_ad_info[0][3],
             "Match percent based on your CV skills": f'{value}% / 100%',
-            "Matched Skills": matched_skills_result,
+            "Matched Skills from the Company Job AD": matched_skills_result,
             "Not matched Skills": unmatched_skills_result,
         }
         return result_dict
     else:
-        return {
+        result_cv = {
             "Job Seeker": find_name_by_id_for_job_seeker(company_id),
             "Description": job_ad_info[0][3],
             "Minimum Salary": job_ad_info[0][1],
             "Maximum Salary": job_ad_info[0][2],
-            "Match percent based on your Company Requirements": f'{value}% / 100%'
-    }
+            "Match percent based on your Company Requirements": f'{value}% / 100%',
+            "Matched Requirements from the Seeker CV": matched_skills_result,
+            "Not matched Requirements": unmatched_skills_result
+        }
+        return result_cv
 
 
 def find_info_by_id(id:int, perms: str):
