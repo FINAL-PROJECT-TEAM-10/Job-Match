@@ -42,6 +42,7 @@ def company_registration(Company_Name: str = Form(), Password: str = Form(),
                          Company_City: str = Form(), Company_Country: str = Form(), Company_Adress: str = Form(),
                          Telephone_Number: int = Form(),Email_Adress: str = Form(),):
     
+    validate_location(Company_City, Company_Country)
 
     if company_services.check_company_exist(Company_Name):
         return JSONResponse(status_code=409,content=f'Company with this {Company_Name} already exists.')

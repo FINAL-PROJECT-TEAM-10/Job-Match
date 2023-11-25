@@ -12,7 +12,7 @@ from fastapi.responses import HTMLResponse
 
 
 app = FastAPI(title='Skill Sync', description='to be continued')
-templates = Jinja2Templates(directory='job-match-app/static')
+templates = Jinja2Templates(directory='job-match-app/static/html')
 app.mount('/static', StaticFiles(directory='job-match-app/static'), name='static')
 app.include_router(companies_router)
 app.include_router(job_ads_router)
@@ -30,6 +30,14 @@ async def read_root(request: Request):
 @app.get('/job_seeker_register', response_class=HTMLResponse, include_in_schema=False)
 async def read_job_seeker_register(request: Request):
     return templates.TemplateResponse("job_seeker_register.html", {"request": request})
+
+@app.get('/login', response_class=HTMLResponse, include_in_schema=False)
+async def read_login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@app.get('/company_register', response_class=HTMLResponse, include_in_schema=False)
+async def read_login_page(request: Request):
+    return templates.TemplateResponse("company_register.html", {"request": request})
 
 if __name__ == "__main__":
     import uvicorn

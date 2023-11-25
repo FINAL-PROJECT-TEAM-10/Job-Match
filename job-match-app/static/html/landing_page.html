@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/css/landing_page.css">
+    <link rel="shortcut icon" href="/static/images/favicon.ico" type="/x-icon">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <title>SKILL SYNC</title>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>WELCOME TO SKILL SYNC</h1>
+            <nav class="navbar">
+                <ul class="nav-list">
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="header-logo">
+            <a class="site-logo" href="/">
+                <img src="/static/images/logo.png" alt="Homepage">
+            </a>
+        </div>
+    </header>
+    
+    <div class="square-container">
+        <section class="position-selection">
+            <h2>REGISTER AS:</h2>
+            <a href="job_seeker_register" class="button job-seeker">JOB SEEKER</a>
+            <a href="/company_register" class="button company">COMPANY</a>
+            <h2>OR</h2>
+            <a href="/login" class="button company">LOGIN</a>
+            
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let buttons = document.querySelectorAll('.button');
+
+            buttons.forEach(function (button) {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    document.body.classList.add('loading');
+                    let loadingOverlay = document.createElement('div');
+                    loadingOverlay.classList.add('loading-overlay');
+                    let loader = document.createElement('div');
+                    loader.classList.add('loader');
+
+                    loadingOverlay.appendChild(loader);
+
+                    document.body.appendChild(loadingOverlay);
+
+                    setTimeout(function () {
+                        document.body.classList.remove('loading');
+                        loadingOverlay.remove();
+
+                        window.location.href = button.getAttribute('href');
+                    }, 1000);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

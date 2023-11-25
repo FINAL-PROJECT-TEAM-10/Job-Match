@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/job_seeker_register.css">
+    <link rel="shortcut icon" href="static/images/favicon.ico" type="image/x-icon">
+    <script src="/static/js/loading_overlay_home.js"></script>
+    <title>Skill Sync</title>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>JOB SEEKER REGISTRATION</h1>
+            <nav class="navbar">
+                <ul class="nav-list">
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="header-logo">
+            <a class="site-logo" href="/">
+                <img src="/static/images/logo.png" alt="Homepage">
+            </a>
+        </div>
+    </header>
+
+    <div class="form-container">
+        <form id="dataForm">
+            <label for="seeker_username">Username:</label>
+            <input type="text" id="seeker_username" name="seeker_username" placeholder="username" required>
+        
+            <label for="seeker_password">Password:</label>
+            <input type="password" id="seeker_password" name="seeker_password" placeholder="your password" required>
+        
+            <label for="first_name">First Name:</label>
+            <input type="text" id="first_name" name="seeker_first_name" placeholder="first_name" required>
+        
+            <label for="last_name">Last Name:</label>
+            <input type="text" id="last_name" name="seeker_last_name" placeholder="last_name" required>
+        
+            <label for="email">Email:</label>
+            <input type="text" id="email" name="seeker_email_adress" placeholder="seeker_email_adress" required>
+        
+            <label for="city">City:</label>
+            <input type="text" id="city" name="seeker_city" placeholder="seeker_city" required>
+        
+            <label for="Country">Country:</label>
+            <input type="text" id="Country" name="seeker_country" placeholder="seeker_country" required>
+        
+            <div class="button-container">
+                <button type="submit" onclick="submitData(event)">Register</button>
+                <div class="error-container">
+                    <p id="errorMessage"></p>
+                    <p id="okRegister"></p>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function submitData(event) {
+            event.preventDefault();
+            var form = document.getElementById('dataForm');
+            var formData = new FormData(form);
+
+            fetch('http://127.0.0.1:8000/job_seekers/register', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else if (response.status === 409) {
+                return response.json();
+            } else {
+                throw new Error("Fill all information or other error");
+            }
+        })
+        .then(data => {
+            document.getElementById('errorMessage').innerText = '';
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            document.getElementById('okRegister').innerText = 'Registration successfully!';
+            let loadingOverlay = document.createElement('div');
+            loadingOverlay.classList.add('loading-overlay');
+            let loader = document.createElement('div');
+            loader.classList.add('loader');
+
+            loadingOverlay.appendChild(loader);
+            document.body.appendChild(loadingOverlay);
+
+            setTimeout(function () {
+                loadingOverlay.remove();
+                window.location.href = '/';
+            }, 1000);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('errorMessage').innerText = error.message;
+            document.getElementById('okRegister').innerText = '';
+        });
+        }
+    </script>
+</body>
+</html>
