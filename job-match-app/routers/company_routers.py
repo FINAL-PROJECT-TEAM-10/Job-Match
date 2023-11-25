@@ -12,6 +12,8 @@ from common.country_validators_helpers import *
 
 companies_router = APIRouter(prefix='/companies')
 
+
+#TODO: REPLACE ALL JSON RESPONSES WITH HTTP EXCEPTIONS 
 @companies_router.get('/', description= 'You can view every company from here', tags=['Company Section'])
 def view_all_companies(current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'companies':
@@ -45,7 +47,7 @@ def company_registration(Company_Name: str = Form(), Password: str = Form(),
     validate_location(Company_City, Company_Country)
 
     if company_services.check_company_exist(Company_Name):
-        return JSONResponse(status_code=409,content=f'Company with this {Company_Name} already exists.')
+        raise HTTPException(status_code=409,detail=f'Company with this {Company_Name} already exists.')
 
     create_company = company_services.create_company(Company_Name, Password, Company_City, Company_Country, 
                                                      Company_Adress, Telephone_Number, Email_Adress)
