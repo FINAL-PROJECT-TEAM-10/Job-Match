@@ -3,7 +3,7 @@ from fastapi import Response
 from fastapi.responses import JSONResponse
 from app_models.company_models import Company
 from services import admin_services
-from services.authorization_services import get_password_hash
+
 from common.country_validators_helpers import *
 from services import job_seeker_services
 
@@ -68,6 +68,7 @@ def find_company_id_byusername(nickname: str):
 
 def create_company(Company_Name, Password, Company_City, Company_Country, Company_Adress, Telephone_Number,
                    Email_Adress):
+    from services.authorization_services import get_password_hash
     location_id = admin_services.find_location_id(Company_City, Company_Country)
 
     if not location_id:
