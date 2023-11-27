@@ -43,6 +43,10 @@ def view_pending_list(current_user_payload=Depends(get_current_user)):
 def cancel_match_request(job_ad_id: int,
                          current_user_payload=Depends(get_current_user)):
     
+    if current_user_payload['group'] != 'seekers':
+        return HTTPException(status_code=403,
+                            detail='Only seekers can send matches')
+    
     seeker_id = current_user_payload.get('id')
     cv_id = job_seeker_matching_services.get_main_cv(seeker_id)
 

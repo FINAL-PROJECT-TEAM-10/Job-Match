@@ -1,24 +1,29 @@
 from data.database import read_query, insert_query, update_query
 from datetime import datetime
 from fastapi import HTTPException
+from mariadb import IntegrityError
 
 
 def match_ad(job_ad_id: int, mini_cv_id: int, seeker_id: int):
-    
-    if is_matching_exist_pendings(job_ad_id, mini_cv_id):
-        update_query('UPDATE job_ads_has_mini_cvs SET match_status = "Successfull" WHERE job_ad_id = ? AND mini_cv_id = ? AND sender = "Company"',
+    try:
+        if is_matching_exist_pendings(job_ad_id, mini_cv_id):
+            update_query('UPDATE job_ads_has_mini_cvs SET match_status = "Successfull" WHERE job_ad_id = ? AND mini_cv_id = ? AND sender = "Company"',
+                            (job_ad_id, mini_cv_id))
+            
+            update_query('UPDATE job_seekers SET busy = 1 WHERE id = ?', (seeker_id,))
+            #0 - Active 1- Busy
+            raise HTTPException(status_code=200, detail=f'You matched successfully with job ad id: {job_ad_id}')
+        else:
+            date_matched = datetime.now()
+            match_status = 'Pending'
+            sender = 'Seeker'
+            insert_query('INSERT INTO job_ads_has_mini_cvs (job_ad_id, mini_cv_id, date_matched, match_status, sender) VALUES (?,?,?,?,?)',
+                    (job_ad_id, mini_cv_id, date_matched, match_status, sender))
+            raise HTTPException(status_code=200, detail=f'Match request sended to job id : {job_ad_id}')
+    except IntegrityError:
+        data = update_query('UPDATE job_ads_has_mini_cvs SET match_status = "Successfull" WHERE job_ad_id = ? AND mini_cv_id = ? AND sender = "Company" AND match_status = "Pending"',
                         (job_ad_id, mini_cv_id))
-        
-        update_query('UPDATE job_seekers SET busy = 1 WHERE id = ?', (seeker_id,))
-        #0 - Active 1- Busy
-        raise HTTPException(status_code=200, detail=f'You matched successfully with job ad id: {job_ad_id}')
-    else:
-        date_matched = datetime.now()
-        match_status = 'Pending'
-        sender = 'Seeker'
-        insert_query('INSERT INTO job_ads_has_mini_cvs (job_ad_id, mini_cv_id, date_matched, match_status, sender) VALUES (?,?,?,?,?)',
-                 (job_ad_id, mini_cv_id, date_matched, match_status, sender))
-        raise HTTPException(status_code=200, detail=f'Match request sended to job id : {job_ad_id}')
+        raise HTTPException(status_code= 200, detail = 'You have already send out a request to the company')
 
 def get_main_cv(seeker_id):
 
@@ -55,7 +60,7 @@ def is_matching_exist_pendings(job_ad_id, cv_id):
 
 def pending_list(cv_id):
 
-    data = read_query('SELECT * FROM job_ads_has_mini_cvs WHERE mini_cv_id = ? AND match_status = "Pending"', (cv_id,))
+    data = read_query('SELECT * FROM job_ads_has_mini_cvs WHERE mini_cv_id = ? AND match_status = "Pending" AND sender = "Company"', (cv_id,))
 
     if data:
         job_ads = [{'Job AD ID': row[0], 'Job AD Description': job_ad_description(row[0]), 
