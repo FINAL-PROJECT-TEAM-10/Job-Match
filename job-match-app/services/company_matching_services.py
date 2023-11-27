@@ -40,10 +40,10 @@ def get_main_cv(seeker_id):
 
     return bool(cv_id)
 
-#TODO has a problem probably in here
 def matching_exist(job_ad_id, mini_cv_id):
-
-    check = read_query('SELECT * FROM job_ads_has_mini_cvs WHERE job_ad_id = ? AND mini_cv_id = ? AND match_status = "Pending" AND sender = "Seeker"', (job_ad_id, mini_cv_id))
+    
+    check = read_query('SELECT * FROM job_ads_has_mini_cvs WHERE job_ad_id = ? AND mini_cv_id = ? AND match_status = "Pending" AND sender = "Seeker"', 
+                       (job_ad_id, mini_cv_id))
 
     return bool(check)
 
@@ -89,14 +89,20 @@ def mini_cv_date_creation(job_ad_id):
 def cancel_request(job_ad_id, mini_cv_id):
 
     if matching_exist(job_ad_id, mini_cv_id):
-       update_query('UPDATE job_ads_has_mini_cvs SET match_status = "Canceled" WHERE mini_cv_id = ? AND job_ad_id = ? AND sender = "Seeker"',
+       update_query('UPDATE job_ads_has_mini_cvs SET match_status = "Canceled" WHERE job_ad_id = ? AND mini_cv_id = ? AND sender = "Seeker"',
                     (job_ad_id, mini_cv_id))
 
-       raise HTTPException(status_code=200, detail=f'You canceled the match request for cv with id: {job_ad_id}')
+    raise HTTPException(status_code=200, detail=f'You canceled the match request for cv with id: {job_ad_id}')
      
 def check_if_canceled(job_ad_id, mini_cv_id):
 
     data = read_query('SELECT * FROM job_ads_has_mini_cvs WHERE job_ad_id = ? AND mini_cv_id = ? AND match_status = "Canceled"',
                       (job_ad_id, mini_cv_id))
+
+    return bool(data)
+
+def check_request_exist(job_ad_id, mini_cv_id):
+
+    data = read_query('SELECT * FROM job_ads_has_mini_cvs WHERE job_ad_id = ? AND mini_cv_id = ?', (job_ad_id, mini_cv_id))
 
     return bool(data)

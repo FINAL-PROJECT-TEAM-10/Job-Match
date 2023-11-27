@@ -138,7 +138,7 @@ def edit_your_job_ad(job_ad_id: int = Query(), description: str = Query(None), m
 
     return job_ads_services.edit_job_ads(company_id, job_ad_id, arg_min_salary,arg_max_salary,arg_description,requirements_names,requirements_levels)
 
-@job_ads_router.get('/search/cv', tags=['Company Job Ads Matching Section'])
+@job_ads_router.get('/search/cv', tags=['Company Job Ads Searching/Matching Section'])
 def search_cv_from_job_seeker(job_ad_id: int = Query(),status: str =  Query(default='Best',enum=['Best', 'Very Good', 'Good','Bad','Worst']), 
                               current_user_payload=Depends(get_current_user)):
      
@@ -151,7 +151,7 @@ def search_cv_from_job_seeker(job_ad_id: int = Query(),status: str =  Query(defa
      return job_ads_services.calculate_percantage_cv(job_ad_id,status, perms = "Company")
 
 
-@job_ads_router.get('/search/cv/salary', tags=['Company Job Ads Matching Section'])
+@job_ads_router.get('/search/cv/salary', tags=['Company Job Ads Searching/Matching Section'])
 def search_salary_based_on_different_cvs(job_ad_id: int = Query(), minimum_salary: int = Query(), 
                               maximum_salary: int = Query(), current_user_payload=Depends(get_current_user)):
      
