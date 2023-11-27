@@ -40,9 +40,63 @@ def get_main_cv(seeker_id):
 
     return bool(cv_id)
 
-
+#TODO has a problem probably in here
 def matching_exist(job_ad_id, mini_cv_id):
 
     check = read_query('SELECT * FROM job_ads_has_mini_cvs WHERE job_ad_id = ? AND mini_cv_id = ? AND match_status = "Pending" AND sender = "Seeker"', (job_ad_id, mini_cv_id))
 
     return bool(check)
+
+def pending_cvs(job_ad_id):
+
+    data = read_query('SELECT * FROM job_ads_has_mini_cvs WHERE job_ad_id = ? AND match_status = "Pending" AND sender = "Seeker"', (job_ad_id,))
+
+    if data:
+        mini_cv = [{'Mini CV ID': row[1], 'Mini CV Description': mini_cv_description(row[0]), 
+                    'Minimal Salary': mini_cv_mini_salary(row[0]), 'Maximum Salary': mini_cv_max_salary(row[0]), 'CV created on': mini_cv_date_creation(row[0]),
+                    'Date of match request': row[2], 'Status': row[3]
+                     } for row in data]
+        return mini_cv
+    else:
+        raise HTTPException(status_code=404, detail='There are no pending matches.')
+    
+
+def mini_cv_description(job_ad_id):
+
+     desc = read_query('SELECT description FROM mini_cvs WHERE id = ?', (job_ad_id,))
+
+     return desc[0][0]
+
+def mini_cv_mini_salary(job_ad_id):
+
+     min = read_query('SELECT min_salary FROM mini_cvs WHERE id = ?', (job_ad_id,))
+
+     return min[0][0]
+
+def mini_cv_max_salary(job_ad_id):
+
+     max = read_query('SELECT max_salary FROM mini_cvs WHERE id = ?', (job_ad_id,))
+
+     return max[0][0]
+
+def mini_cv_date_creation(job_ad_id):
+
+     date = read_query('SELECT date_posted FROM mini_cvs WHERE id = ?', (job_ad_id,))
+
+     return date[0][0]
+
+
+def cancel_request(job_ad_id, mini_cv_id):
+
+    if matching_exist(job_ad_id, mini_cv_id):
+       update_query('UPDATE job_ads_has_mini_cvs SET match_status = "Canceled" WHERE mini_cv_id = ? AND job_ad_id = ? AND sender = "Seeker"',
+                    (job_ad_id, mini_cv_id))
+
+       raise HTTPException(status_code=200, detail=f'You canceled the match request for cv with id: {job_ad_id}')
+     
+def check_if_canceled(job_ad_id, mini_cv_id):
+
+    data = read_query('SELECT * FROM job_ads_has_mini_cvs WHERE job_ad_id = ? AND mini_cv_id = ? AND match_status = "Canceled"',
+                      (job_ad_id, mini_cv_id))
+
+    return bool(data)
