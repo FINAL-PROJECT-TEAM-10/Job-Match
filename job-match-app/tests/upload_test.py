@@ -9,10 +9,50 @@ from services import upload_services
 
 class UploadServices_Should(unittest.TestCase):
     def test_uploadPictureInCorrectTable(self):
-        pass
+        payload = {'id': 1, 'group': 'admins'}
+        image = b'Blob'
+        with patch('services.upload_services.update_query') as update_query:
+            update_query.return_value = 'admin case'
+            result = upload_services.upload_picture(payload, image)
+
+        self.assertEqual('admin case', result)
+
+        payload['group'] = 'companies'
+        with patch('services.upload_services.update_query') as update_query:
+            update_query.return_value = 'company case'
+            result = upload_services.upload_picture(payload, image)
+
+        self.assertEqual('company case', result)
+
+        payload['group'] = 'seekers'
+        with patch('services.upload_services.update_query') as update_query:
+            update_query.return_value = 'seeker case'
+            result = upload_services.upload_picture(payload, image)
+
+        self.assertEqual('seeker case', result)
 
     def test_getPictureReturnsFromCorrectTable(self):
-        pass
+        user_id = 1
+        user_group = 'admins'
+        with patch('services.upload_services.read_query') as read_query:
+            read_query.return_value = [(b'Blob from admins',)]
+            result = upload_services.get_picture(user_id, user_group)
+
+        self.assertEqual(b'Blob from admins', result)
+
+        user_group = 'companies'
+        with patch('services.upload_services.read_query') as read_query:
+            read_query.return_value = [(b'Blob from companies',)]
+            result = upload_services.get_picture(user_id, user_group)
+
+        self.assertEqual(b'Blob from companies', result)
+
+        user_group = 'seekers'
+        with patch('services.upload_services.read_query') as read_query:
+            read_query.return_value = [(b'Blob from job_seekers',)]
+            result = upload_services.get_picture(user_id, user_group)
+
+        self.assertEqual(b'Blob from job_seekers', result)
 
     def test_isFileJpeg_TrueIfJPG(self):
         cwd = os.path.abspath(os.path.dirname(__file__))

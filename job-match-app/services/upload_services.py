@@ -21,7 +21,7 @@ def get_picture(user_id, user_group):
 
         return next((row[0] for row in image_data), None)
     if user_group == 'companies':
-        image_data = ('''SELECT picture FROM companies WHERE id = ?''',
+        image_data = read_query('''SELECT picture FROM companies WHERE id = ?''',
                           (user_id,))
 
         return next((row[0] for row in image_data), None)
