@@ -5,9 +5,9 @@ from common.auth import get_current_user
 from services import company_services
 from common.separators_validators import parse_skills
 
-job_ads_router = APIRouter(prefix='/job_ads',tags={'Everything available for Job_Ads'})
+job_ads_router = APIRouter(prefix='/job_ads')
 
-@job_ads_router.post('/')
+@job_ads_router.post('/', tags={'Job Ads Section'})
 def create_new_job_ad(description: str = Form(), min_salary: int = Form(),max_salary: int = Form(), 
                       requirements: str = Form(description='Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'),
                       current_user_payload=Depends(get_current_user)):
@@ -40,7 +40,7 @@ def create_new_job_ad(description: str = Form(), min_salary: int = Form(),max_sa
     create_job = job_ads_services.create_job_add(description,min_salary,max_salary,status,company_id[0][0],requirements_names,requirements_levels)
     return create_job
 
-@job_ads_router.get('/companies')
+@job_ads_router.get('/companies', tags={'Job Ads Section'})
 def view_different_company_ads(name_of_company: str = Query(), current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'companies':
@@ -66,7 +66,7 @@ def view_different_company_ads(name_of_company: str = Query(), current_user_payl
 
     return result
 
-@job_ads_router.get('/information')
+@job_ads_router.get('/information', tags={'Job Ads Section'})
 def view_your_company_ads(current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'companies':
@@ -80,7 +80,7 @@ def view_your_company_ads(current_user_payload=Depends(get_current_user)):
 
     return get_company_ads
 
-@job_ads_router.put('/edit/information')
+@job_ads_router.put('/edit/information', tags={'Job Ads Section'})
 def edit_your_job_ad(job_ad_id: int = Query(), description: str = Query(None), min_salary: int = Query(None), 
                      max_salary: int = Query(None), 
                      requirements: str = Query(None, description= 'Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'), 
@@ -138,7 +138,7 @@ def edit_your_job_ad(job_ad_id: int = Query(), description: str = Query(None), m
 
     return job_ads_services.edit_job_ads(company_id, job_ad_id, arg_min_salary,arg_max_salary,arg_description,requirements_names,requirements_levels)
 
-@job_ads_router.get('/search/cv')
+@job_ads_router.get('/search/cv', tags=['Company Job Ads Matching Section'])
 def search_cv_from_job_seeker(job_ad_id: int = Query(),status: str =  Query(default='Best',enum=['Best', 'Very Good', 'Good','Bad','Worst']), 
                               current_user_payload=Depends(get_current_user)):
      
@@ -151,7 +151,7 @@ def search_cv_from_job_seeker(job_ad_id: int = Query(),status: str =  Query(defa
      return job_ads_services.calculate_percantage_cv(job_ad_id,status, perms = "Company")
 
 
-@job_ads_router.get('/search/cv/salary')
+@job_ads_router.get('/search/cv/salary', tags=['Company Job Ads Matching Section'])
 def search_salary_based_on_different_cvs(job_ad_id: int = Query(), minimum_salary: int = Query(), 
                               maximum_salary: int = Query(), current_user_payload=Depends(get_current_user)):
      

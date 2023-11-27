@@ -134,7 +134,7 @@ def get_cv_from_job_seeker(current_user_payload=Depends(get_current_user)):
 
 
 # TODO: test below for companies (low priority)
-@companies_router.get('{id}/avatar')
+@companies_router.get('{id}/avatar', tags=['Company Section'])
 def get_company_avatar(id: int, current_user_payload=Depends(get_current_user)):
     image_data = upload_services.get_picture(id, 'companies')
 
