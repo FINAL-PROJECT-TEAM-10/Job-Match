@@ -7,13 +7,7 @@ from fastapi import HTTPException
 from common.auth import get_current_user
 from routers import admin_routers
 from services import admin_services
-from services.authorization_services import get_password_hash
 from app_models.admin_models import Admin
-
-# mock_admin_services = Mock(spec='services.admin_services')
-# mock_admin_services.create_admin = Mock(return_value='Mocked return')
-#
-# admin_routers.admin_services = mock_admin_services
 
 
 def fake_admin_payload():
