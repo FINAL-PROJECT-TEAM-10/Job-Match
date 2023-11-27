@@ -89,7 +89,7 @@ def create_company(Company_Name, Password, Company_City, Company_Country, Compan
     VALUES (?,?,?,?,?)
     ''', (Email_Adress, Company_Adress, Telephone_Number, location_id, company_id,))
 
-    return JSONResponse(status_code=200, content='Your company has been created')
+    raise HTTPException(status_code=200, detail='Your company has been created')
 
 
 def location_id(contact_id: int):
@@ -138,7 +138,7 @@ def edit_company_information(username: str, description: str, city: str, address
         location_id = job_seeker_services.find_location_id_by_city(city)
         update_query('UPDATE company_contacts SET locations_id = ? WHERE company_id = ?', (location_id, company_id,))
 
-    return JSONResponse(status_code=200, content="You successfully edited your personal company information")
+    raise HTTPException(status_code=200, detailt="You successfully edited your personal company information")
 
 
 def find_company_id_byusername_for_job_seeker(id: int):
@@ -155,4 +155,4 @@ def view_all_cvs():
         return ads
     
     else:
-        return JSONResponse(status_code=404, content='No cvs found!')
+       raise HTTPException(status_code=404, detail='No cvs found!')

@@ -1,9 +1,7 @@
 import io
-from fastapi import APIRouter, Query,Depends
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 from services import company_services, upload_services
-from fastapi import APIRouter, Query,Depends,Form
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Query, Depends, Form, HTTPException
 from services import company_services
 from services import job_ads_services
 from app_models.company_models import Company
@@ -12,13 +10,11 @@ from common.country_validators_helpers import *
 
 companies_router = APIRouter(prefix='/companies')
 
-
-#TODO: REPLACE ALL JSON RESPONSES WITH HTTP EXCEPTIONS 
 @companies_router.get('/', description= 'You can view every company from here', tags=['Company Section'])
 def view_all_companies(current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'companies':
-        return JSONResponse(status_code=403,
-                            content='This option is only available for Companies')
+        raise HTTPException(status_code=403,
+                            detail ='This option is only available for Companies')
     
     get_companies = company_services.read_companies()
     result = []
@@ -47,7 +43,7 @@ def company_registration(Company_Name: str = Form(), Password: str = Form(),
     validate_location(Company_City, Company_Country)
 
     if company_services.check_company_exist(Company_Name):
-        raise HTTPException(status_code=409,detail=f'Company with this {Company_Name} already exists.')
+        raise HTTPException(status_code=409, detail=f'Company with this {Company_Name} already exists.')
 
     create_company = company_services.create_company(Company_Name, Password, Company_City, Company_Country, 
                                                      Company_Adress, Telephone_Number, Email_Adress)
@@ -59,8 +55,8 @@ def company_registration(Company_Name: str = Form(), Password: str = Form(),
 def your_company_information(current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'companies':
-            return JSONResponse(status_code=403,
-                                content='This option is only available for Companies')  
+            raise HTTPException(status_code=403,
+                                detail ='This option is only available for Companies')  
     
     company_name = current_user_payload.get('username')
 
@@ -103,8 +99,8 @@ def edit_your_company_information(description: str = Query(None),
                              ):
      
     if current_user_payload['group'] != 'companies':
-        return JSONResponse(status_code=403,
-                            content='This option is only available for Companies')
+        raise HTTPException(status_code=403,
+                            detail ='This option is only available for Companies')
      
     username = current_user_payload.get('username')
 
@@ -119,7 +115,7 @@ def edit_your_company_information(description: str = Query(None),
     final_company_telephone = telephone or get_company_contacts[0][3]
     
     if not description and not city and not address and not telephone:
-        return JSONResponse(status_code=203,content= "You haven't done any changes to your personal company information")
+        raise HTTPException(status_code=203, detail= "You haven't done any changes to your personal company information")
 
     validate_city(final_company_city)
 
@@ -129,8 +125,8 @@ def edit_your_company_information(description: str = Query(None),
 def get_cv_from_job_seeker(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'companies':
-        return JSONResponse(status_code=403,
-                            content='This option is only available for Companies')
+        raise HTTPException(status_code=403,
+                            detail ='This option is only available for Companies')
 
     return company_services.view_all_cvs()
 
@@ -141,11 +137,11 @@ def get_company_avatar(id: int, current_user_payload=Depends(get_current_user)):
     image_data = upload_services.get_picture(id, 'companies')
 
     if not company_services.company_exists_by_id(id):
-        return JSONResponse(status_code=404,
-                            content='No such company.')
+        raise HTTPException(status_code=404,
+                            detail ='No such company.')
     if image_data is None:
-        return JSONResponse(status_code=404,
-                            content='No picture associated with the company.')
+        raise HTTPException(status_code=404,
+                            detail ='No picture associated with the company.')
 
     return StreamingResponse(io.BytesIO(image_data), media_type="image/jpeg")
 
