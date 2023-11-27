@@ -219,7 +219,7 @@ def add_seeker(seeker_username: str = Form(),
     return new_seeker
 
 
-@job_seekers_router.get('/search/job_ads', tags=['Seeker Section'])
+@job_seekers_router.get('/search/job_ads', tags=['Seeker Matching Section'])
 def search_job_ads_percentage(current_user_payload=Depends(get_current_user),
                               sort_percent: str =  Query(enum=['Best', 'Very good', 'Good', 'Bad', 'Worst'])):
 
@@ -233,7 +233,7 @@ def search_job_ads_percentage(current_user_payload=Depends(get_current_user),
     return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent, perms = 'Seeker')
 
 
-@job_seekers_router.get('/sorting_salary', tags=['Seeker Section'])
+@job_seekers_router.get('/sorting_salary', tags=['Seeker Matching Section'])
 def search_job_ads_by_salary(current_user_payload=Depends(get_current_user),
                               min_salary: int = Query(), max_salary: int = Query()):
 
@@ -259,7 +259,7 @@ def get_job_ads_from_companies(current_user_payload=Depends(get_current_user)):
 
 
 # TODO: Test below (low priority)
-@job_seekers_router.get('{id}/avatar')
+@job_seekers_router.get('{id}/avatar', tags=['Seeker Section'])
 def get_seeker_avatar(id: int, current_user_payload=Depends(get_current_user)):
     image_data = upload_services.get_picture(id, 'admins')
 
