@@ -1,6 +1,4 @@
 import io
-
-from fastapi import APIRouter, Query, Depends
 from fastapi.responses import JSONResponse, StreamingResponse
 from services import job_seeker_services, upload_services
 from fastapi import APIRouter, Query, Depends, Form
@@ -10,7 +8,6 @@ from app_models.job_seeker_models import *
 from common.auth import get_current_user
 from common.country_validators_helpers import validate_location, validate_city
 from common.separators_validators import parse_skills
-from fastapi.responses import HTMLResponse
 
 job_seekers_router = APIRouter(prefix='/job_seekers')
 
@@ -68,7 +65,6 @@ def your_information(current_user_payload=Depends(get_current_user)):
 @job_seekers_router.put('/personal_info/edit', tags=['Seeker Section'])
 def edit_proffesional_info(summary: str = Query(None),
                            city: str = Query(None),
-                           status: str =  Query(enum=['Active', 'Busy']),
                            current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'seekers':
@@ -84,11 +80,10 @@ def edit_proffesional_info(summary: str = Query(None),
     job_seeker.username = username
     job_seeker.summary = summary or db_seeker[0][5]
     job_seeker.city = city or db_location[0][0]
-    job_seeker.status = status
 
     validate_city(job_seeker.city)
     
-    return job_seeker_services.edit_info(job_seeker.username, job_seeker.summary,job_seeker.city,job_seeker.status)
+    return job_seeker_services.edit_info(job_seeker.username, job_seeker.summary,job_seeker.city)
 
 @job_seekers_router.post('/cv', tags=['CV Section'])
 def create_cv(description: str = Query(),

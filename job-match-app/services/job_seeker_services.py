@@ -1,11 +1,11 @@
 from data.database import read_query, insert_query, update_query
 from fastapi.responses import JSONResponse
-from common.job_seeker_status_check import recognize_status, convert_status
 from app_models.job_seeker_models import JobSeekerInfo
 from app_models.job_seeker_models import JobSeeker
 from app_models.cv_models import CvCreation
 from services import admin_services, company_services
 from common.country_validators_helpers import find_country_by_city
+from common.job_seeker_status_check import recognize_status
 from datetime import datetime
 from mariadb import IntegrityError
 from common.percent_jobad_calculator import *
@@ -117,10 +117,9 @@ def find_location_id_by_city(city):
     return location_id[0][0]
 
 
-def edit_info(username: str, summary: str, city: str, status: str):
-    converted_status = convert_status(status)
-    update_query('UPDATE job_seekers SET summary = ?, busy = ? WHERE username = ?',
-                 (summary, converted_status, username))
+def edit_info(username: str, summary: str, city: str):
+    update_query('UPDATE job_seekers SET summary = ? WHERE username = ?',
+                 (summary,username))
 
     if not find_location_by_city(city):
         country = find_country_by_city(city)
@@ -408,11 +407,16 @@ def calculate_percents_job_ad(seeker_id, current_sort, perms, input_salary = Non
     unmatched = {}
     for job_ad_id, requirements in filtered_data.items():
         unmatched[job_ad_id] = find_unmatched(requirements, cv_skills)
-
+    
+    #TODO make it
+    matching_side = False
+    if current_sort == 'Matches':
+        matching_side = True
+        return matched, unmatched
 
     if current_sort != 'All':
         return percent_section_helper(current_sort,matches_per_job_ad, perms, matched, unmatched)
-    else:
+    elif matching_side == False:
         return filter_by_salaries(my_cv_ad_range,salaries_for_job_ad)
 
 
