@@ -66,6 +66,9 @@
             if (data.error) {
                 throw new Error(data.error);
             }
+            console.log(data)
+            const roleUser = data.role
+            const access_token = data.access_token
             document.getElementById('okRegister').innerText = 'Login successfully!';
             let loadingOverlay = document.createElement('div');
             loadingOverlay.classList.add('loading-overlay');
@@ -77,8 +80,13 @@
 
             setTimeout(function () {
                 loadingOverlay.remove();
-                window.location.href = '/';
+                console.log(roleUser)
+                if (roleUser == 'seekers'){
+                    window.location.href = '/seeker_tab'
+                }
             }, 1000);
+
+            localStorage.setItem("access_token", access_token)
         })
         .catch(error => {
             console.error('Error:', error);

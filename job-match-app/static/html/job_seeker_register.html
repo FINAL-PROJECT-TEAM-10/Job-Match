@@ -50,7 +50,7 @@
             <input type="text" id="Country" name="seeker_country" placeholder="seeker_country" required>
         
             <div class="button-container">
-                <button type="submit" onclick="submitData(event)">Register</button>
+                <button type="submit" onclick="submitData(event)">Register & Create CV</button>
                 <div class="error-container">
                     <p id="errorMessage"></p>
                     <p id="okRegister"></p>
@@ -97,7 +97,7 @@
 
             setTimeout(function () {
                 loadingOverlay.remove();
-                window.location.href = '/';
+                window.location.href = '/cv_maker';
             }, 1000);
         })
         .catch(error => {

@@ -41,7 +41,6 @@ def get_all_seekers(current_user_payload=Depends(get_current_user)):
         }
 
         result.append(data_dict)
-    
 
     return result
 
@@ -91,10 +90,10 @@ def edit_proffesional_info(summary: str = Query(None),
     return job_seeker_services.edit_info(job_seeker.username, job_seeker.summary,job_seeker.city,job_seeker.status)
 
 @job_seekers_router.post('/cv', tags=['CV Section'])
-def create_cv(description: str = Query(),
-              min_salary: int = Query(),
-              max_salary: int = Query(),
-              skills: str = Query(description='Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'),
+def create_cv(description: str = Form(),
+              min_salary: int = Form(),
+              max_salary: int = Form(),
+              skills: str = Form(description='Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'),
               current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'seekers':

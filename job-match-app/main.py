@@ -39,6 +39,14 @@ async def read_login_page(request: Request):
 async def read_login_page(request: Request):
     return templates.TemplateResponse("company_register.html", {"request": request})
 
+@app.get('/seeker_tab', response_class=HTMLResponse, include_in_schema=False)
+async def read_seeker_page(request: Request):
+    return templates.TemplateResponse("logged_seeker.html", {"request": request})
+
+@app.get('/cv_maker', response_class=HTMLResponse, include_in_schema=False)
+async def read_cv_maker(request: Request):
+    return templates.TemplateResponse("cv_maker.html", {"request": request})
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run('main:app', host="127.0.0.1", port=8000, reload=True)

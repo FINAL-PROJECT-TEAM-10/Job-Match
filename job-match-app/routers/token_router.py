@@ -14,12 +14,12 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
         user = authenticate_seeker(form_data.username, form_data.password)
         if not user:
             user = authenticate_company(form_data.username, form_data.password)
-
             if not user:
                 raise HTTPException(status_code=401,
                                     detail='Incorrect username or password.',
                                     headers={'WWW-AUTHENTICATE': 'Bearer'})
-
     access_token = create_access_token(user)
+    role = user.group
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    
+    return {"access_token": access_token, "token_type": "bearer", "role": role,}
