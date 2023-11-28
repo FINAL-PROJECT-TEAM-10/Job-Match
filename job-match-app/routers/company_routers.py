@@ -70,6 +70,7 @@ def your_company_information(current_user_payload=Depends(get_current_user)):
     company_location_from_id = company_services.find_location(get_location_id)
     count_active_job_ads = job_ads_services.get_current_active_job_ads(company_id)
     company_contacts = company_services.read_company_adress(company_id)
+    matched_job_ads = company_services.find_matched_job_ads(company_id)
     
     description = get_company_information[0][1]
     
@@ -77,6 +78,7 @@ def your_company_information(current_user_payload=Depends(get_current_user)):
         description = 'There is no current description set for this company'
 
     company_dict = {
+        
          "Company Name": get_company_information[0][0],
          "Company Description": description,
          "Company Email": company_contacts[0][1],
@@ -84,7 +86,8 @@ def your_company_information(current_user_payload=Depends(get_current_user)):
          "Company Telephone": company_contacts[0][3],
          "Company City": company_location_from_id[0][0],
          "Company Country": company_location_from_id[0][1],
-         "Active job ads": count_active_job_ads
+         "Active job ads": count_active_job_ads,
+         "Matched job ads": matched_job_ads
 
     }
 

@@ -156,3 +156,9 @@ def view_all_cvs():
     
     else:
         return JSONResponse(status_code=404, content='No cvs found!')
+
+def find_matched_job_ads(company_id: int):
+
+    data = read_query('SELECT * FROM job_ads WHERE companies_id = ? AND status = "archived"',(company_id,))
+
+    return len(data)

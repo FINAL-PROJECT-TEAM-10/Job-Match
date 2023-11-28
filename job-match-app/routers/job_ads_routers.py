@@ -67,7 +67,7 @@ def view_different_company_ads(name_of_company: str = Query(), current_user_payl
     return result
 
 @job_ads_router.get('/information', tags={'Job Ads Section'})
-def view_your_company_ads(current_user_payload=Depends(get_current_user)):
+def view_active_or_archived_job_ads(status: str = Query(enum= ['active', 'archived']),current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'companies':
         return JSONResponse(status_code=403,
@@ -76,7 +76,7 @@ def view_your_company_ads(current_user_payload=Depends(get_current_user)):
     company_ads = current_user_payload.get('username')
 
     company_id = job_ads_services.find_company(company_ads)
-    get_company_ads = job_ads_services.view_job_ads_by_id(company_id[0][0])
+    get_company_ads = job_ads_services.view_job_ads_by_id(company_id[0][0], status)
 
     return get_company_ads
 

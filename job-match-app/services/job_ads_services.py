@@ -52,16 +52,14 @@ def view_all_job_ads(username: str):
     data = read_query('SELECT * FROM job_ads WHERE companies_id = ?',(company_id[0][0],))
     return data
 
-def view_job_ads_by_id(ads_id: int):
+def view_job_ads_by_id(ads_id: int, status: str):
 
-    data = read_query('SELECT * FROM job_ads WHERE companies_id = ?', (ads_id,))
+    data = read_query('SELECT * FROM job_ads WHERE companies_id = ? AND status = ?',(ads_id, status))
 
     if data:
-        ads = [{'Job Ad ID': row[0],'Job Description': row[1], 'Minimum Salary': row[2], 'Maximum Salary': row[3], 'Status': row[4], 'Date Posted': row[5]} for row in data]
+        ads = [{'Job Ad ID': row[0], 'Job Description': row[1], 'Minimum Salary': row[2],
+                'Maximum Salary': row[3], 'Status': row[4], 'Date Posted': row[5]} for row in data]
         return ads
-    else:
-        return JSONResponse(status_code=404,content='There are no current job ads found')
-
 
 def get_current_active_job_ads(company_id: int):
 
