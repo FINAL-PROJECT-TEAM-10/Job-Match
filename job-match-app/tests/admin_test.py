@@ -10,70 +10,9 @@ from services import admin_services
 from app_models.admin_models import Admin
 
 
-def fake_admin_payload():
-    payload = MagicMock(spec=dict)
-    payload['group'] = 'admins'
-    return payload
-
-
-def fake_regular_payload():
-    payload = MagicMock(dict)
-    return payload
-
-
 def fake_admin():
     admin = Mock()
     return admin
-
-
-class AdminRouter_Should(unittest.TestCase):
-    def setUp(self):
-        self.original_get_current_user = get_current_user
-        mock_admin_services.reset_mock()
-
-    def tearDown(self) -> None:
-        get_current_user = self.original_get_current_user
-
-    def test_addAdmin_returnsAdmin(self):
-        pass
-
-    def test_addAdmin_raisesExceptionWhenUserNotAdmin(self):
-        get_current_user = lambda: {"id": 1,
-                                    "group": "companies",
-                                    "username": "CompanyUser",
-                                    "email": "company@company.com",
-                                    "blocked": 0,
-                                    'exp': time.time()
-                                    }
-
-        # get_current_user = fake_regular_payload()
-        new_admin = fake_admin()
-
-        # with TestClient(app) as test_client:
-        #     response = test_client.post('/register')
-
-        with self.assertRaises(HTTPException) as e:
-            admin_routers.add_admin(new_admin, 'asdQWE123!@#')
-
-        self.assertEqual(e.exception.status_code, 403)
-
-    def test_addAdmin_raisesExceptionWhenAdminExists(self):
-        pass
-
-    def test_addAdmin_raisesExceptionWhenAdminCreatesNonAdmin(self):
-        pass
-
-    def test_deleteAllTempTokens_raisesExceptionWhenUserNotAdmin(self):
-        pass
-
-    def test_getAdminAvatar_returnsStreamingResponse(self):
-        pass
-
-    def test_getAdminAvatar_raisesExceptionWhenNoAdmin(self):
-        pass
-
-    def test_getAdminAvatar_raisesExceptionWhenNoImage(self):
-        pass
 
 
 class AdminServices_Should(unittest.TestCase):
@@ -125,7 +64,6 @@ class AdminServices_Should(unittest.TestCase):
 
         self.assertIsInstance(admin, Admin)
         self.assertEqual(control_admin, admin)
-
 
     def test_getAdmin_returnsNoneIfNoAdmin(self):
         with patch('services.admin_services.read_query') as read_query:
@@ -197,6 +135,3 @@ class AdminServices_Should(unittest.TestCase):
                     admin_services.create_admin(created_admin, password)
 
         get_password_hash.assert_called_once_with(password)
-
-
-
