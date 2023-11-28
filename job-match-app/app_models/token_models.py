@@ -6,7 +6,15 @@ class Token(BaseModel):
     token_type: str
 
 
-class ActivationData(BaseModel):
+# Mainly Used For Testing
+class AccessDataModel(BaseModel):
+    id: int
+    group: str
+    username: str
+    email: str
+
+
+class ActivationDataModel(BaseModel):
     id: int
     email: str
     username: str

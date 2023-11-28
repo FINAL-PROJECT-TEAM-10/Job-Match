@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from jose import ExpiredSignatureError
 
 from app_models.input_models import PasswordUpdater
-from app_models.token_models import ActivationData
+from app_models.token_models import ActivationDataModel
 from common.auth import TokenInfo, get_current_user
 from common.mailing import password_reset_email, password_reset_activation_email
 from services import authorization_services, company_services, job_seeker_services, admin_services, upload_services
@@ -54,7 +54,7 @@ def forgotten_password_activation_link(email: str, user_type: str):
                                     'Categories can be: admins, companies, job_seekers')
 
     if user:
-        activation_data = ActivationData(id=user.id,
+        activation_data = ActivationDataModel(id=user.id,
                                          email=user.email,
                                          username=user.username,
                                          group=user.group,
