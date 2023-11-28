@@ -31,6 +31,7 @@ def calculate_cv_salaries(cv_info):
     
     return result
 
+#TODO fix this calculation
 def calculate_threshold(job_range):
     threshold_percent = 20
 

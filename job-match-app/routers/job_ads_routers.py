@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query,Depends, Form
+from fastapi import APIRouter, Query,Depends, Form , HTTPException
 from services import job_ads_services
 from fastapi.responses import JSONResponse
 from common.auth import get_current_user
@@ -7,7 +7,7 @@ from common.separators_validators import parse_skills
 
 job_ads_router = APIRouter(prefix='/job_ads')
 
-@job_ads_router.post('/', tags={'Job Ads Section'})
+@job_ads_router.post('/', description= 'You can create your company job ads from this section.', tags= {'Job Ads Section'})
 def create_new_job_ad(description: str = Form(), min_salary: int = Form(),max_salary: int = Form(), 
                       requirements: str = Form(description='Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'),
                       current_user_payload=Depends(get_current_user)):
@@ -40,8 +40,8 @@ def create_new_job_ad(description: str = Form(), min_salary: int = Form(),max_sa
     create_job = job_ads_services.create_job_add(description,min_salary,max_salary,status,company_id[0][0],requirements_names,requirements_levels)
     return create_job
 
-@job_ads_router.get('/companies', tags={'Job Ads Section'})
-def view_different_company_ads(name_of_company: str = Query(), current_user_payload=Depends(get_current_user)):
+@job_ads_router.get('/companies', description= 'You can view a specific company job ads from this section.', tags={'Job Ads Section'})
+def view_different_specific_company_job_ads(name_of_company: str = Query(), current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'companies':
         return JSONResponse(status_code=403,
@@ -64,9 +64,12 @@ def view_different_company_ads(name_of_company: str = Query(), current_user_payl
          
         result.append(data_dict)
 
+    if not result:
+        raise HTTPException(status_code=202, detail='There are no current active ads for this Company')
+
     return result
 
-@job_ads_router.get('/information', tags={'Job Ads Section'})
+@job_ads_router.get('/information', description= 'You can view your company active/archived job ads from this section.', tags= {'Job Ads Section'})
 def view_active_or_archived_job_ads(status: str = Query(enum= ['active', 'archived']),current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'companies':
@@ -80,7 +83,7 @@ def view_active_or_archived_job_ads(status: str = Query(enum= ['active', 'archiv
 
     return get_company_ads
 
-@job_ads_router.put('/edit/information', tags={'Job Ads Section'})
+@job_ads_router.put('/edit/information', description= 'You can edit your job ad from this section.', tags={'Job Ads Section'})
 def edit_your_job_ad(job_ad_id: int = Query(), description: str = Query(None), min_salary: int = Query(None), 
                      max_salary: int = Query(None), 
                      requirements: str = Query(None, description= 'Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'), 
@@ -93,7 +96,7 @@ def edit_your_job_ad(job_ad_id: int = Query(), description: str = Query(None), m
     company_id = current_user_payload.get('id')
 
     if not job_ads_services.check_owner_company(job_ad_id,company_id):
-        return JSONResponse(status_code=400, content='That id is not a valid for your job_ads')
+        raise HTTPException(status_code=400, detail= 'That is not a valid id for your job_ads')
     if max_salary and min_salary:
         if max_salary < min_salary:
             return JSONResponse(status_code=400, content='The minimum salary cannot be bigger than the maximum salary')
@@ -105,7 +108,7 @@ def edit_your_job_ad(job_ad_id: int = Query(), description: str = Query(None), m
 
     except IndexError:
         return JSONResponse(status_code=404,content='Invalid input look at the description')
-    
+
     except TypeError:
         getting_requirements = job_ads_services.existing_requirements(job_ad_id)
         requirements_names = []
@@ -122,6 +125,7 @@ def edit_your_job_ad(job_ad_id: int = Query(), description: str = Query(None), m
             requirements_names = []
             requirements_list = []
 
+    #TODO Needs a fix for requirements levels from the database
 
     company_information = job_ads_services.check_company_information(job_ad_id, company_id)
 
@@ -138,35 +142,46 @@ def edit_your_job_ad(job_ad_id: int = Query(), description: str = Query(None), m
 
     return job_ads_services.edit_job_ads(company_id, job_ad_id, arg_min_salary,arg_max_salary,arg_description,requirements_names,requirements_levels)
 
-@job_ads_router.get('/search/cv', tags=['Company Job Ads Searching/Matching Section'])
-def search_cv_from_job_seeker(job_ad_id: int = Query(),status: str =  Query(default='Best',enum=['Best', 'Very Good', 'Good','Bad','Worst']), 
+@job_ads_router.get('/search/cv', description= 'You can view every recommended CV from this section. Choose the right status for your search.', 
+                        tags= ['Company Job Ads Searching/Matching Section'])
+
+def search_recommended_cv_from_job_seeker(job_ad_id: int = Query(description= 'Type your specific job ad id.'),
+                              status: str =  Query(enum= ['Best', 'Very Good', 'Good','Bad','Worst']), 
                               current_user_payload=Depends(get_current_user)):
      
-     if current_user_payload['group'] != 'companies':
-        return JSONResponse(status_code=403,
+    if current_user_payload['group'] != 'companies':
+       return JSONResponse(status_code=403,
                             content='This option is only available for Companies')
      
-     getting_owner = current_user_payload.get('id')
+    getting_owner = current_user_payload.get('id')
 
-     return job_ads_services.calculate_percantage_cv(job_ad_id,status, perms = "Company")
+    if not job_ads_services.find_a_company_owner_by_id(job_ad_id):
+        raise HTTPException(status_code=400, detail= 'That is not a valid id for your job ad')
 
+    return job_ads_services.calculate_percantage_cv(job_ad_id, status, perms = "Company")
 
-@job_ads_router.get('/search/cv/salary', tags=['Company Job Ads Searching/Matching Section'])
+#TODO fix the output by a new parameter 
+
+@job_ads_router.get('/search/cv/salary', description= "You can select different salary range and search for available cv's.", tags= ['Company Job Ads Searching/Matching Section'])
 def search_salary_based_on_different_cvs(job_ad_id: int = Query(), minimum_salary: int = Query(), 
                               maximum_salary: int = Query(), current_user_payload=Depends(get_current_user)):
      
-     if current_user_payload['group'] != 'companies':
-        return JSONResponse(status_code=403,
+    if current_user_payload['group'] != 'companies':
+       return JSONResponse(status_code=403,
                             content='This option is only available for Companies')
      
-     if maximum_salary and minimum_salary:
-        if maximum_salary < minimum_salary:
+    if maximum_salary and minimum_salary:
+       if maximum_salary < minimum_salary:
             return JSONResponse(status_code=400, content='The minimum salary cannot be bigger than the maximum salary')
 
-     getting_owner = current_user_payload.get('id')
-     percantage_based_on_salary = 'All'
-     salary = [minimum_salary,maximum_salary]
-     perms = 'Company'
+    getting_owner = current_user_payload.get('id')
 
-     return job_ads_services.calculate_percantage_cv(job_ad_id, percantage_based_on_salary, perms, salary)
+    if not job_ads_services.find_a_company_owner_by_id(job_ad_id):
+       raise HTTPException(status_code=400, detail= 'That is not a valid id for your job ad')
+    
+    percantage_based_on_salary = 'All'
+    salary = [minimum_salary,maximum_salary]
+    perms = 'Company'
+
+    return job_ads_services.calculate_percantage_cv(job_ad_id, percantage_based_on_salary, perms, salary)
 

@@ -147,7 +147,7 @@ def find_company_id_byusername_for_job_seeker(id: int):
 
 
 def view_all_cvs():
-    data = read_query('SELECT * FROM mini_cvs WHERE status = "Active"')
+    data = read_query('SELECT * FROM mini_cvs WHERE status = "Active" AND main_cv = 1')
 
     if data:
         ads = [{'CV Creator': job_seeker_services.get_username_by_id(row[6]), 'Cv Description': row[3], 'Minimum Salary': row[1], 

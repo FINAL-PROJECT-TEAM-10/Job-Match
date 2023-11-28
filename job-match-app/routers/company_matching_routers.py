@@ -4,7 +4,7 @@ from services import company_matching_services
 
 companies_matching_router = APIRouter(prefix= '/companies_match')
 
-@companies_matching_router.post('/', tags=['Company Job Ads Searching/Matching Section'])
+@companies_matching_router.post('/', description= 'You can match a Cv using your specific Job Ad Id.', tags=['Company Job Ads Searching/Matching Section'])
 
 def match_job_seeker(job_ad_id: int, mini_cv_id: int, current_user_payload = Depends(get_current_user)):
 
@@ -20,7 +20,7 @@ def match_job_seeker(job_ad_id: int, mini_cv_id: int, current_user_payload = Dep
 
     return company_matching_services.match_cv(job_ad_id, mini_cv_id)
     
-@companies_matching_router.get('/requests', tags=['Company Job Ads Searching/Matching Section'])
+@companies_matching_router.get('/requests', description= 'You can view all pending match requests using your Job Ad Id.', tags=['Company Job Ads Searching/Matching Section'])
 
 def view_all_pending_match_requests(job_ad_id: int, current_user_payload = Depends(get_current_user)):
 
@@ -34,7 +34,7 @@ def view_all_pending_match_requests(job_ad_id: int, current_user_payload = Depen
     return company_matching_services.pending_cvs(job_ad_id)
 
 
-@companies_matching_router.put('/cancel', tags=['Company Job Ads Searching/Matching Section'])
+@companies_matching_router.put('/cancel', description= 'You can cancel a specific match request using your Job Ad Id.', tags= ['Company Job Ads Searching/Matching Section'])
 
 def cancel_a_request(job_ad_id: int, mini_cv_id: int, current_user_payload = Depends(get_current_user)):
 

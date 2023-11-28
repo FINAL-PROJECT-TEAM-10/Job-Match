@@ -49,7 +49,7 @@ def check_company_exist(name: str):
 
 def view_all_job_ads(username: str):
     company_id = find_company(username)
-    data = read_query('SELECT * FROM job_ads WHERE companies_id = ?',(company_id[0][0],))
+    data = read_query('SELECT * FROM job_ads WHERE companies_id = ? AND status = "active"',(company_id[0][0],))
     return data
 
 def view_job_ads_by_id(ads_id: int, status: str):
@@ -80,6 +80,11 @@ def check_owner_company(job_ad_id, company_id):
 
     return bool(data)
 
+def find_a_company_owner_by_id(job_ad_id):
+
+    data = read_query('SELECT * FROM job_ads WHERE id = ?', (job_ad_id,))
+
+    return bool(data)
 
 def check_company_information(job_ad_id: int, company_id: str):
 
