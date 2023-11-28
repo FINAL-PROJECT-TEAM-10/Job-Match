@@ -1,3 +1,4 @@
+import string
 import unittest
 
 from unittest.mock import Mock, patch
@@ -7,6 +8,7 @@ import jwt
 from jose import JWTError
 from passlib.context import CryptContext
 
+import services.authorization_services
 from app_models.admin_models import Admin
 from app_models.company_models import Company
 from app_models.job_seeker_models import JobSeeker
@@ -199,7 +201,6 @@ class AuthorizationServices_Should(unittest.TestCase):
         self.assertEqual(user_data.username, result['username'])
         self.assertEqual(user_data.email, result['email'])
 
-
     def test_createActivationTokenCreatesDecodableToken(self):
         user_data = ActivationDataModel(id=1, group='admins', username='username', email='email@email.email',
                                         purpose='password_reset')
@@ -241,7 +242,6 @@ class AuthorizationServices_Should(unittest.TestCase):
         self.assertIsInstance(result, dict)
         self.assertEqual(result['username'], 'username')
 
-
     def test_isAuthenticatedCustomReturnsMeaningfulToken(self):
         # See comment above.
         user_data = ActivationDataModel(id=1, group='admins', username='username', email='email@email.email',
@@ -254,32 +254,119 @@ class AuthorizationServices_Should(unittest.TestCase):
         self.assertEqual(result['username'], 'username')
 
     def test_passwordChangerUpdatesCorrectTable(self):
-        pass
+        payload = {'id': 1, 'group': 'admins'}
+        password = 'password'
+        with patch('services.authorization_services.update_query') as update_query:
+            update_query.return_value = 'admin case'
+            result = authorization_services.password_changer(payload, password)
 
-    def test_isPasswordIdenticalByTypeVerifiesAdminPasswords(self):
-        pass
+        self.assertEqual('admin case', result)
 
-    def test_isPasswordIdenticalByTypeVerifiesSeekerPasswords(self):
-        pass
+        payload['group'] = 'companies'
+        with patch('services.authorization_services.update_query') as update_query:
+            update_query.return_value = 'company case'
+            result = authorization_services.password_changer(payload, password)
 
-    def test_isPasswordIdenticalByTypeVerifiesCompanyPasswords(self):
-        pass
+        self.assertEqual('company case', result)
+
+        payload['group'] = 'seekers'
+        with patch('services.authorization_services.update_query') as update_query:
+            update_query.return_value = 'seeker case'
+            result = authorization_services.password_changer(payload, password)
+
+        self.assertEqual('seeker case', result)
+
+    def test_passwordChangerUsesGetPasswordHash(self):
+        payload = {'id': 1, 'group': 'admins'}
+        password = 'password'
+        with patch('services.authorization_services.update_query') as update_query:
+            update_query.return_value = None
+            with patch('services.authorization_services.get_password_hash') as get_pass:
+                authorization_services.password_changer(payload, password)
+
+        get_pass.assert_called_once_with(password)
+
+    def test_isPasswordIdenticalByTypeUsesVerifyPassword(self):
+        payload = {'id': 1, 'group': 'admins', 'username': 'username'}
+        password = 'password'
+
+        with patch('services.authorization_services.verify_password') as verify_pass:
+            with patch('services.authorization_services._get_pass_by_username_admin') as get_pass:
+                get_pass.return_value = None
+                authorization_services.is_password_identical_by_type(payload, password)
+            payload['group'] = 'companies'
+            with patch('services.authorization_services._get_pass_by_username_company') as get_pass:
+                get_pass.return_value = None
+                authorization_services.is_password_identical_by_type(payload, password)
+            payload['group'] = 'seekers'
+            with patch('services.authorization_services._get_pass_by_username_seeker') as get_pass:
+                get_pass.return_value = None
+                authorization_services.is_password_identical_by_type(payload, password)
+
+        self.assertEqual(3, verify_pass.call_count)
 
     def test_generatePasswordGeneratesDifferentPasswords(self):
-        pass
+        password_one = authorization_services.generate_password()
+        password_two = authorization_services.generate_password()
+
+        self.assertNotEqual(password_one, password_two)
 
     def test_generatePassword_GeneratedPasswordHasLowerUpperNumbersSpecialChars(self):
-        pass
+        generated_pass = authorization_services.generate_password()
+
+        lower_case = string.ascii_lowercase
+        upper_case = string.ascii_uppercase
+        numbers = string.digits
+        special_chars = "@$!%*?&"
+
+        lower_found, upper_found, number_found, special_found = False, False, False, False
+
+        for char in generated_pass:
+            if lower_found is False and char in lower_case:
+                lower_found = True
+            elif upper_found is False and char in upper_case:
+                upper_found = True
+            elif number_found is False and char in numbers:
+                number_found = True
+            elif special_found is False and char in special_chars:
+                special_found = True
+            if lower_found and upper_found and number_found and special_found:
+                break
+
+        self.assertTrue(all((lower_found, upper_found, number_found, special_found)))
+
+    def test_generatePassword_AtLeastFifteenSymbolsLong(self):
+        self.assertGreater(len(authorization_services.generate_password()), 14)
 
     def test_activationTokenExistsReturnsTrueIfToken(self):
-        pass
+        activation_token = None
+        with patch('services.authorization_services.read_query') as read_query:
+            read_query.return_value = [('token_simulation',)]
+            result = authorization_services.activation_token_exists(activation_token)
+
+        self.assertTrue(result)
 
     def test_activationTokenExistsReturnsTrueIfNotFound(self):
-        pass
+        activation_token = None
+        with patch('services.authorization_services.read_query') as read_query:
+            read_query.return_value = []
+            result = authorization_services.activation_token_exists(activation_token)
 
-    # Consider if below is needed
+        self.assertFalse(result)
+
+    # Below is a bit redundant but I do not want to leave a method untested
     def test_storeActivationTokenUsesInsertQuery(self):
-        pass
+        activation_token = None
+        with patch('services.authorization_services.insert_query') as insert_query:
+            insert_query.return_value = None
+            authorization_services.store_activation_token(activation_token)
+
+        insert_query.assert_called()
 
     def test_deleteActivationTokenUsesUpdateQuery(self):
-        pass
+        activation_token = None
+        with patch('services.authorization_services.update_query') as update_query:
+            update_query.return_value = None
+            authorization_services.delete_activation_token(activation_token)
+
+        update_query.assert_called()
