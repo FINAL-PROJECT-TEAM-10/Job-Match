@@ -87,10 +87,12 @@ def edit_proffesional_info(summary: str = Query(None),
     return job_seeker_services.edit_info(job_seeker.username, job_seeker.summary,job_seeker.city)
 
 @job_seekers_router.post('/cv', tags=['CV Section'])
-def create_cv(description: str = Query(),
-              min_salary: int = Query(),
-              max_salary: int = Query(),
-              skills: str = Query(description='Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'),
+def create_cv(description: str = Form(),
+              min_salary: int = Form(),
+              max_salary: int = Form(),
+              location: str = Form(None),
+              is_remote: str = Form(enum=['Yes', 'No']),
+              skills: str = Form(description='Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'),
               current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'seekers':
@@ -119,7 +121,7 @@ def create_cv(description: str = Query(),
     if len(skill_list) > 5:
         return JSONResponse(status_code=400, content='The maximum skill limit of 5 has been reached!')
     
-    return job_seeker_services.create_cv(description,min_salary,max_salary,status,seeker_id[0][0], skill_names, skill_levels, is_main_cv)
+    return job_seeker_services.create_cv(description, location, is_remote, min_salary,max_salary,status,seeker_id[0][0], skill_names, skill_levels, is_main_cv)
 
 @job_seekers_router.put('/cv/edit', tags=['CV Section'])
 def edit_cv(cv_id: int = Query(),description: str = Query(None), min_salary: int = Query(None),

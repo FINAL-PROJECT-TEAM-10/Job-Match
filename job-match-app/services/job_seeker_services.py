@@ -217,15 +217,36 @@ def find_skill_id_by_name(name: str):
 
     return skill_id[0][0]
 
-def create_cv(description: str, min_salary: int, max_salary: int, 
+def create_cv(description: str, location: str, remote_location : str,
+              min_salary: int, max_salary: int, 
               status: str, job_seeker_id: int, list_skills: list, 
               skill_levels: list, is_main_cv: bool): #['python','js']
 
     date_posted = datetime.now()
+    location_id = read_query('SELECT id FROM locations WHERE city = ?',(location,))
 
-    cv = insert_query('''INSERT INTO mini_cvs (min_salary, max_salary, description, status, date_posted, job_seekers_id, main_cv)
+    if location:
+        cv_create_id = insert_query('''INSERT INTO mini_cvs (min_salary, max_salary, description, status, date_posted, job_seekers_id, main_cv)
                         VALUES (?,?,?,?,?,?,?)
                       ''', (min_salary, max_salary, description, status, date_posted, job_seeker_id, is_main_cv))
+        if remote_location == "No":
+            remote_status = False
+            specific_location_without_remote = insert_query('INSERT INTO mini_cv_has_locations(mini_cv_id, locations_id, remote_status) VALUES (?,?,?)',
+                                             (cv_create_id, location_id[0][0], remote_status,))
+        else:
+            remote_status = True
+            remote_with_specific_location = insert_query('INSERT INTO mini_cv_has_locations(mini_cv_id, locations_id, remote_status) VALUES (?,?,?)',
+                                                (cv_create_id, location_id[0][0], remote_status,))
+    else:
+        if remote_location == "Yes":
+           cv_create_id = insert_query('''INSERT INTO mini_cvs (min_salary, max_salary, description, status, date_posted, job_seekers_id, main_cv)
+                        VALUES (?,?,?,?,?,?,?)
+                      ''', (min_salary, max_salary, description, status, date_posted, job_seeker_id, is_main_cv))
+           remote_status = True
+           remote_has_specific_location = insert_query('INSERT INTO mini_cv_has_locations(mini_cv_id, remote_status) VALUES (?,?)',
+                                                (cv_create_id, remote_status,))
+        else:
+            raise HTTPException(status_code=404, detail="You have to choose a location. City / Remote or Both ")
     
     cv_id = find_cv_by_seeker_id_description(job_seeker_id, description)
     try:
@@ -242,8 +263,16 @@ def create_cv(description: str, min_salary: int, max_salary: int,
                     (cv_id, skill_id, converted_level))
     except IntegrityError:
         raise HTTPException(status_code=400, detail='You are using the same information from your previous CV')
+    
+    try:
 
-    return CvCreation(description=description, min_salary=min_salary, max_salary=max_salary, status=status,
+        location_name = company_services.find_location(location_id[0][0])
+        location_name = location_name[0][0]
+
+    except IndexError:
+        location_name = "No location Set"
+
+    return CvCreation(description=description,location_name=location_name, remote_status=remote_status, min_salary=min_salary, max_salary=max_salary, status=status,
                       date_posted=date_posted)
 
 

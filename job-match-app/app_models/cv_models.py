@@ -6,6 +6,8 @@ from datetime import datetime
 
 class CvCreation(BaseModel):
     description: str
+    location_name: str
+    remote_status: bool
     min_salary: int
     max_salary: int
     status: str
