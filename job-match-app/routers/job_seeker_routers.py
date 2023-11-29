@@ -187,9 +187,8 @@ def view_personal_cvs(current_user_payload=Depends(get_current_user)):
                             content='Only seekers can view cvs')
     
 
-    username = current_user_payload.get('username')
-    seeker_id = job_seeker_services.get_job_seeker_info(username)
-    return job_seeker_services.view_personal_cvs(seeker_id[0][0])
+    seeker_id = current_user_payload.get('id')
+    return job_seeker_services.view_personal_cvs(seeker_id)
 
 
 @job_seekers_router.post('/register', tags=['Seeker & Company Signup'])

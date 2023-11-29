@@ -280,11 +280,32 @@ def view_personal_cvs(seeker_id: int):
     data = read_query('SELECT * FROM mini_cvs WHERE job_seekers_id = ?', (seeker_id,))
 
     if data:
-        ads = [{'Cv ID': row[0], 'Cv Description': row[3], 'Minimum Salary': row[1], 'Maximum Salary': row[2],
+        ads = [{'Cv ID': row[0], 'Cv Description': row[3], 'Minimum Salary': row[1], 'Maximum Salary': row[2], 
+                'Location': get_cv_location_name(get_cv_location_id(row[0])),
                 'Status': row[4], 'Date Posted': row[5]} for row in data]
         return ads
     else:
         raise HTTPException(status_code=404, detail='No cvs found!')
+
+def get_cv_location_id(cv_id):
+
+    try:
+        cv_location = read_query('SELECT locations_id FROM mini_cv_has_locations WHERE mini_cv_id = ?', (cv_id,))
+        cv_location = cv_location[0][0]
+    except IndexError:
+        cv_location = 0
+
+    return cv_location
+
+def get_cv_location_name(location_id):
+    
+    try:
+        location_name = read_query('SELECT city FROM locations WHERE id = ?', (location_id,))
+        location_name = location_name[0][0]
+    except IndexError:
+        location_name = 'Remote'
+
+    return location_name
 
 
 def check_owner_cv(cv_id, seeker_id):
