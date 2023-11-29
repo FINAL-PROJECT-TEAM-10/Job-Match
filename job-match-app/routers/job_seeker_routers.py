@@ -8,6 +8,7 @@ from app_models.job_seeker_models import *
 from common.auth import get_current_user
 from common.country_validators_helpers import validate_location, validate_city
 from common.separators_validators import parse_skills
+from fastapi import HTTPException
 
 job_seekers_router = APIRouter(prefix='/job_seekers')
 
@@ -165,6 +166,7 @@ def edit_cv(cv_id: int = Query(),description: str = Query(None), min_salary: int
     if min_salary:
         if min_salary > cv_info[0][2]:
             return JSONResponse(status_code=400, content="Your maximum salary is low change it if you wan't to change the minimum")
+        
 
     arg_min_salary = min_salary or cv_info[0][1]
     arg_max_salary = max_salary or cv_info[0][2]
@@ -235,18 +237,22 @@ def search_job_ads_percentage(current_user_payload=Depends(get_current_user),
 
 @job_seekers_router.get('/sorting_salary', tags=['Seeker Matching Section'])
 def search_job_ads_by_salary(current_user_payload=Depends(get_current_user),
-                              min_salary: int = Query(), max_salary: int = Query()):
+                              min_salary: int = Query(), max_salary: int = Query(),
+                              threshold_percent: int = Query()):
 
     if current_user_payload['group'] != 'seekers':
         return JSONResponse(status_code=403,
                             content='Only seekers can search job ads')
+    
+    if threshold_percent > 100:
+        raise HTTPException(status_code=400, detail='The threshold should be lower than 100%')
 
     job_seeker_id = current_user_payload.get('id')
     sort_percent = 'All'
     salary_input = [min_salary, max_salary]
     perms = 'Seeker'
 
-    return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent,perms, salary_input)
+    return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent,perms,threshold_percent, salary_input)
     
 
 @job_seekers_router.get('/companies/job_ads',tags=['Seeker Section'])
