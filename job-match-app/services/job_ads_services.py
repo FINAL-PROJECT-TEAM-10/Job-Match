@@ -2,7 +2,7 @@ from data.database import read_query, insert_query, update_query
 from datetime import date,datetime
 from app_models.job_ads_models import Job_ad
 from fastapi.responses import JSONResponse
-from services import job_seeker_services
+from services import job_seeker_services, company_services
 from mariadb import IntegrityError
 from common.percent_sections import percent_section_helper, find_names
 from common.salary_threshold_calculator_seeker import calculate_cv_salaries
@@ -18,13 +18,34 @@ def find_name_by_id(id: int):
     data = read_query('SELECT username from companies WHERE id = ?',(id,))
     return data[0][0]
 
-def create_job_add(description: str, min_salary: int, max_salary: int, status: str,company_id: int, requirements_names: list, requirements_levels: list) -> Job_ad:
+def create_job_add(description: str, location: str, remote_location: str, min_salary: int, 
+                   max_salary: int, status: str,company_id: int, requirements_names: list, requirements_levels: list) -> Job_ad:
 
     date_posted = datetime.now()
     
-    create_job = insert_query('INSERT INTO job_ads(description,min_salary,max_salary,status,date_posted,companies_id) VALUES (?,?,?,?,?,?)', 
-                              (description,min_salary,max_salary,status,date_posted,company_id,))
-    
+    location_id = read_query('SELECT id FROM locations WHERE city = ?',(location,))
+
+    if location:
+        job_id = insert_query('INSERT INTO job_ads(description, min_salary, max_salary, status, date_posted, companies_id) VALUES (?,?,?,?,?,?)', 
+                              (description, min_salary, max_salary, status, date_posted, company_id,))
+        if remote_location == "No":
+            remote_status = False
+            specific_location_without_remote = insert_query('INSERT INTO job_ads_has_locations(job_ads_id, locations_id, remote_status) VALUES (?,?,?)',
+                                             (job_id, location_id[0][0], remote_status,))
+        else:
+            remote_status = True
+            remote_with_specific_location = insert_query('INSERT INTO job_ads_has_locations(job_ads_id, locations_id, remote_status) VALUES (?,?,?)',
+                                                (job_id, location_id[0][0], remote_status,))
+    else:
+        if remote_location == "Yes":
+           job_id = insert_query('INSERT INTO job_ads(description, min_salary, max_salary, status, date_posted, companies_id) VALUES (?,?,?,?,?,?)', 
+                              (description, min_salary, max_salary, status, date_posted, company_id,))
+           remote_status = True
+           remote_has_specific_location = insert_query('INSERT INTO job_ads_has_locations(job_ads_id, remote_status) VALUES (?,?)',
+                                                (job_id, remote_status,))
+        else:
+            raise HTTPException(status_code=404, detail="You have to choose a location. City / Remote or Both ")
+
     job_ad_id = find_job_ad_by_id(company_id, description)
 
     try:
@@ -40,7 +61,16 @@ def create_job_add(description: str, min_salary: int, max_salary: int, status: s
     except IntegrityError:
         return JSONResponse(status_code=404,content="Duplicating description or requirements")
 
-    return Job_ad(description=description, min_salary=min_salary, max_salary=max_salary, date_posted=date_posted, status = status)
+    try:
+
+        location_name = company_services.find_location(location_id[0][0])
+        location_name = location_name[0][0]
+
+    except IndexError:
+        location_name = "No location Set"
+
+    return Job_ad(description=description, location_name=location_name, remote_status= remote_status, 
+                  min_salary=min_salary, max_salary=max_salary, date_posted=date_posted, status = status)
 
 
 

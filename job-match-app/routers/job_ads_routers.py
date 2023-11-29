@@ -8,7 +8,8 @@ from common.separators_validators import parse_skills
 job_ads_router = APIRouter(prefix='/job_ads')
 
 @job_ads_router.post('/', description= 'You can create your company job ads from this section.', tags= {'Job Ads Section'})
-def create_new_job_ad(description: str = Form(), min_salary: int = Form(),max_salary: int = Form(), 
+def create_new_job_ad(description: str = Form(), location: str = Form(None), remote_location: str = Form(enum=['Yes',"No"]),
+                       min_salary: int = Form(),max_salary: int = Form(), 
                       requirements: str = Form(description='Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'),
                       current_user_payload=Depends(get_current_user)):
     
@@ -37,7 +38,8 @@ def create_new_job_ad(description: str = Form(), min_salary: int = Form(),max_sa
     company_username = current_user_payload.get('username')
     company_id = job_ads_services.find_company(company_username)
 
-    create_job = job_ads_services.create_job_add(description,min_salary,max_salary,status,company_id[0][0],requirements_names,requirements_levels)
+    create_job = job_ads_services.create_job_add(description,location, remote_location, min_salary, max_salary, status, 
+                                                 company_id[0][0], requirements_names, requirements_levels)
     return create_job
 
 @job_ads_router.get('/companies', description= 'You can view a specific company job ads from this section.', tags={'Job Ads Section'})
