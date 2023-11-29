@@ -7,6 +7,7 @@ from mariadb import IntegrityError
 from common.percent_sections import percent_section_helper, find_names
 from common.salary_threshold_calculator_seeker import calculate_cv_salaries
 from common.percent_jobad_calculator import *
+from fastapi import HTTPException
 
 def find_company(name_of_company):
     
@@ -104,6 +105,8 @@ def edit_job_ads(company_id:int, job_ads_id: int, min_salary: int, max_salary: i
 
             if level.isnumeric():
                 level = int(level)
+                if level > 3:
+                    raise HTTPException(status_code=400, detail='Invalid level of skill provided!')
                 converted_level = job_seeker_services.convert_level(level)
 
             else:
@@ -188,7 +191,7 @@ def get_current_job_ad(job_ads_id:int):
     return result_pairs
 
 
-def calculate_percantage_cv(job_ad_id, sorting, perms, salary = None):
+def calculate_percantage_cv(job_ad_id, sorting, perms, threshold_percent, salary = None):
 
     ads = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_ad_id,))
 
@@ -200,7 +203,7 @@ def calculate_percantage_cv(job_ad_id, sorting, perms, salary = None):
 
     if sorting == 'All':
         cv_range = salary
-        salary_based_on_cv = calculate_cv_salaries(get_main_cv)
+        salary_based_on_cv = calculate_cv_salaries(get_main_cv, threshold_percent)
 
     for current_mini_cv in get_main_cv:
         current_cv_skills = get_main_cv_skills(current_mini_cv[0])
@@ -271,6 +274,7 @@ def filter_by_cv_salaries(job_ad_range, cvs_calculated_salaries):
             max_salary_cv = value[1]
             seeker_id = find_name_for_job_seeker(key)
             description = read_query('SELECT description FROM mini_cvs WHERE id = ? AND job_seekers_id = ?', (key, seeker_id))
+            original_cv_salary_range = read_query('SELECT min_salary, max_salary FROM mini_cvs WHERE id = ?', (key,))
 
 
             if job_ad_min_salary >= min_salary_cv and job_ad_max_salary <= max_salary_cv:
@@ -279,8 +283,8 @@ def filter_by_cv_salaries(job_ad_range, cvs_calculated_salaries):
                     'CV ID': key,
                     'Job Seeker Name': find_username_job_seeker(seeker_id),
                     'Description': description[0][0],
-                    'Minimum Salary': min_salary_cv,
-                    'Maximum Salary': max_salary_cv
+                    'Original Salary Range':  f'{original_cv_salary_range[0][0]} - {original_cv_salary_range[0][1]}',
+                    'Threshold Salary Range': f'{int(min_salary_cv)} - {int(max_salary_cv)}',
                     }
                     result.append(filtered_ads)
 

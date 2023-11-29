@@ -164,7 +164,8 @@ def search_recommended_cv_from_job_seeker(job_ad_id: int = Query(description= 'T
 
 @job_ads_router.get('/search/cv/salary', description= "You can select different salary range and search for available cv's.", tags= ['Company Job Ads Searching/Matching Section'])
 def search_salary_based_on_different_cvs(job_ad_id: int = Query(), minimum_salary: int = Query(), 
-                              maximum_salary: int = Query(), current_user_payload=Depends(get_current_user)):
+                              maximum_salary: int = Query(), threshold_percent : int = Query(),
+                                current_user_payload=Depends(get_current_user)):
      
     if current_user_payload['group'] != 'companies':
        return JSONResponse(status_code=403,
@@ -179,9 +180,12 @@ def search_salary_based_on_different_cvs(job_ad_id: int = Query(), minimum_salar
     if not job_ads_services.find_a_company_owner_by_id(job_ad_id):
        raise HTTPException(status_code=400, detail= 'That is not a valid id for your job ad')
     
+    if threshold_percent > 100:
+        raise HTTPException(status_code=400, detail='The threshold should be lower than 100%')
+    
     percantage_based_on_salary = 'All'
     salary = [minimum_salary,maximum_salary]
     perms = 'Company'
 
-    return job_ads_services.calculate_percantage_cv(job_ad_id, percantage_based_on_salary, perms, salary)
+    return job_ads_services.calculate_percantage_cv(job_ad_id, percantage_based_on_salary, perms, threshold_percent, salary)
 
