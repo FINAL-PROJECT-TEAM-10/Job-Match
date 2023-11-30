@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="static/css/landing_page.css">
     <link rel="shortcut icon" href="/static/images/favicon.ico" type="/x-icon">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="/static/js/button_click_loader.js"></script>
     <title>SKILL SYNC</title>
 </head>
 <body>
@@ -36,34 +36,6 @@
             
         </section>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            let buttons = document.querySelectorAll('.button');
-
-            buttons.forEach(function (button) {
-                button.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    document.body.classList.add('loading');
-                    let loadingOverlay = document.createElement('div');
-                    loadingOverlay.classList.add('loading-overlay');
-                    let loader = document.createElement('div');
-                    loader.classList.add('loader');
-
-                    loadingOverlay.appendChild(loader);
-
-                    document.body.appendChild(loadingOverlay);
-
-                    setTimeout(function () {
-                        document.body.classList.remove('loading');
-                        loadingOverlay.remove();
-
-                        window.location.href = button.getAttribute('href');
-                    }, 1000);
-                });
-            });
-        });
-    </script>
 </body>
 </html>
 

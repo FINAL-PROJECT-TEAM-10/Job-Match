@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/personal_info_seeker.css">
+    <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
+    <script src="/static/js/loading_overlay_home.js"></script>
+    <script src="/static/js/get_username.js"></script>
+    <script src="/static/js/button_click_loader.js"></script>
+    <title>Skill Sync</title>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <h1 id="usernameHeader"></h1>
+            <h3>Your Personal Info</h3>
+            <nav class="navbar">
+                <ul class="nav-list">
+                    <!-- Add navigation links here if needed -->
+                </ul>
+            </nav>
+        </div>
+        <div class="header-logo">
+            <a class="site-logo" href="/">
+                <img src="/static/images/logo.png" alt="Homepage">
+            </a>
+        </div>
+    </header>
+
+    <div class="sections-container">
+        <!-- Seeker Section -->
+        <section class="position-selection">
+            <h2>View Personal Info</h2>
+            <a href="#" class="button" id="viewButtonInfo">View</a>
+            <div id="personalInfoContainer"></div>
+        </div>
+        </section>
+
+        <!-- CV Section -->
+        <div class="sections-container">
+        <section class="position-selection">
+            <h2>Edit Personal Info</h2>
+            <a href="/seeker_section/personal_info/edit" class="button">Edit</a>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('viewButtonInfo').addEventListener('click', async function () {
+                try {
+                    const access_token = localStorage.getItem("access_token");
+
+                    const response = await fetch('http://127.0.0.1:8000/job_seekers/personal_info', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${access_token}`,
+                            'Content-Type': 'application/json'
+                        },
+                    });
+
+                    const data = await response.json();
+                    console.log(data)
+
+                    const personalInfoContainer = document.getElementById('personalInfoContainer');
+                    personalInfoContainer.innerHTML = '<h3>Your Personal Info</h3>';
+
+                    personalInfoContainer.innerHTML += `<p>Current Summary: ${data.summary}</p>`;
+                    personalInfoContainer.innerHTML += `<p>Current Location: ${data.location}</p>`;
+                    personalInfoContainer.innerHTML += `<p>Current Status: ${data.status}</p>`;
+                } catch (error) {
+                    console.error('Error fetching personal info:', error);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

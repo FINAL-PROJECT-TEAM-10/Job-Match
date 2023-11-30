@@ -65,9 +65,9 @@ def your_information(current_user_payload=Depends(get_current_user)):
 
 
 @job_seekers_router.put('/personal_info/edit', tags=['Seeker Section'])
-def edit_proffesional_info(summary: str = Query(None),
-                           city: str = Query(None),
-                           status: str =  Query(enum=['Active', 'Busy']),
+def edit_proffesional_info(summary: str = Form(None),
+                           city: str = Form(None),
+                           status: str =  Form(enum=['Active', 'Busy']),
                            current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'seekers':

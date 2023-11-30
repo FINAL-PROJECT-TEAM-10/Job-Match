@@ -47,6 +47,26 @@ async def read_seeker_page(request: Request):
 async def read_cv_maker(request: Request):
     return templates.TemplateResponse("cv_maker.html", {"request": request})
 
+@app.get('/seeker_section', response_class=HTMLResponse, include_in_schema=False)
+async def read_seeker_section(request: Request):
+    return templates.TemplateResponse("seeker_section.html", {"request": request})
+
+@app.get('/seeker_section/personal_info', response_class=HTMLResponse, include_in_schema=False)
+async def read_seeker_personal_info(request: Request):
+    return templates.TemplateResponse("personal_info_seeker.html", {"request": request})
+
+@app.get('/seeker_section/personal_info/edit', response_class=HTMLResponse, include_in_schema=False)
+async def read_seeker_edit_info(request: Request):
+    return templates.TemplateResponse("edit_seeker_info.html", {"request": request})
+
+@app.get('/seeker_section/searching', response_class=HTMLResponse, include_in_schema=False)
+async def read_searching_page(request: Request):
+    return templates.TemplateResponse("searching_seeker.html", {"request": request})
+
+@app.get('/seeker_section/searching/percantage', response_class=HTMLResponse, include_in_schema=False)
+async def read_searching_percent_page(request: Request):
+    return templates.TemplateResponse("percentage_search_seeker.html", {"request": request})
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run('main:app', host="127.0.0.1", port=8000, reload=True)

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/percentage_search_seeker.css">
+    <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
+    <script src="/static/js/loading_overlay_home.js"></script>
+    <script src="/static/js/get_username.js"></script>
+    <script src="/static/js/button_click_loader.js"></script>
+    <title>Skill Sync</title>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <h1 id="usernameHeader"></h1>
+            <h3>Check where you can match and apply</h3>
+            <nav class="navbar">
+                <ul class="nav-list">
+                    <!-- Add navigation links here if needed -->
+                </ul>
+            </nav>
+        </div>
+        <div class="header-logo">
+            <a class="site-logo" href="/">
+                <img src="/static/images/logo.png" alt="Homepage">
+            </a>
+        </div>
+    </header>
+    <div class="form-container">
+        <form id="dataForm">
+            <label>Sort matches by:</label>
+            <br>
+            <br>
+            <div id="statusButtons">
+                <input type="radio" id="bestRadio" name="status" value="Best" onclick="setStatus('Best')">
+                <label for="bestRadio">Best</label>
+                
+                <input type="radio" id="veryGoodRadio" name="status" value="Very good" onclick="setStatus('Very good')">
+                <label for="veryGoodRadio">Very good</label>
+
+                <input type="radio" id="goodRadio" name="status" value="Good" onclick="setStatus('Good')">
+                <label for="goodRadio">Good</label>
+
+                <input type="radio" id="badRadio" name="status" value="Bad" onclick="setStatus('Bad')">
+                <label for="badRadio">Bad</label>
+
+                <input type="radio" id="worstRadio" name="status" value="Worst" onclick="setStatus('Worst')">
+                <label for="worstRadio">Worst</label>
+
+            </div>
+
+            <div class="button-container">
+                <button type="submit" onclick="submitData(event)">Search</button>
+            </div>
+
+        </form>
+
+        <div class="sections-container">
+            <div class="job-ad-card">
+            </div>
+            <script>
+                async function submitData(event) {
+                    try {
+                        event.preventDefault(); // Prevent the default form submission
+            
+                        var form = document.getElementById('dataForm');
+                        var formData = new FormData(form);
+                        const access_token = localStorage.getItem("access_token");
+            
+                        // Convert FormData to URLSearchParams and set the desired parameter name
+                        const queryParams = new URLSearchParams(formData);
+                        queryParams.set('sort_percent', queryParams.get('status'));
+                        queryParams.delete('status');
+            
+                        const url = `http://127.0.0.1:8000/job_seekers/search/job_ads?${queryParams}`;
+            
+                        const response = await fetch(url, {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${access_token}`,
+                                'Content-Type': 'application/json'
+                            },
+                        });
+            
+                        const data = await response.json();
+            
+                        // Call a function to display job ads with the provided styling
+                        displayJobAds(data);
+                    } catch (error) {
+                        console.error('Error fetching personal info:', error);
+                    }
+                }
+            
+                // Function to create and append a job ad card to the DOM
+                function createJobAdCard(jobAd) {
+                const cardContainer = document.createElement('div');
+                cardContainer.className = 'job-ad-card square-container'; // Add the 'square-container' class
+
+                // Create and append elements for each property in the job ad
+                for (const key in jobAd) {
+                    const value = jobAd[key];
+                    const propertyElement = document.createElement('p');
+                    propertyElement.textContent = `${key}: ${value}`;
+                    cardContainer.appendChild(propertyElement);
+                }
+
+                document.body.appendChild(cardContainer); // Append the card to the body (you can change this to a different container)
+}
+            
+                // Function to display job ads with the provided styling
+                function displayJobAds(data) {
+                    // Clear existing job ads (if any)
+                    const existingJobAds = document.querySelectorAll('.job-ad-card');
+                    existingJobAds.forEach((card) => card.remove());
+            
+                    // Loop through each job ad in the data and create a card for it
+                    data.forEach(createJobAdCard);
+                }
+            
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Additional initialization code if needed
+                });
+            </script>
+
+
+<script>
+    function setStatus(status) {
+        selectedStatus = status;
+    
+        // Get all radio buttons
+        const radioButtons = document.getElementsByName('status');
+    
+        for (const radio of radioButtons) {
+            const label = radio.nextElementSibling;
+            if (radio.value === status) {
+                radio.checked = true;
+                label.classList.add('clicked');
+            } else {
+                radio.checked = false; 
+                label.classList.remove('clicked');
+            }
+        }
+    }
+    </script>
+    
+    
+    
+    
+    
+
+</body>
+
+</html>
