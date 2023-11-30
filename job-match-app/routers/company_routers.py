@@ -12,7 +12,7 @@ from common.country_validators_helpers import *
 
 companies_router = APIRouter(prefix='/companies')
 
-@companies_router.get('/', description= 'You can view every company from here', tags=['Company Section'])
+@companies_router.get('/', description= 'You can view every company from this section.', tags=['Company Section'])
 def view_all_companies(current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'companies':
         return JSONResponse(status_code=403,
@@ -37,7 +37,7 @@ def view_all_companies(current_user_payload=Depends(get_current_user)):
 
     return result
 
-@companies_router.post('/register', response_model=Company, tags=['Seeker & Company Signup'])
+@companies_router.post('/register', description= 'You can register your company from this section.', response_model= Company, tags= ['Seeker & Company Signup'])
 def company_registration(Company_Name: str = Form(), Password: str = Form(), 
                          Company_City: str = Form(), Company_Country: str = Form(), Company_Adress: str = Form(),
                          Telephone_Number: int = Form(),Email_Adress: str = Form(),):
@@ -53,7 +53,7 @@ def company_registration(Company_Name: str = Form(), Password: str = Form(),
     return create_company
 
 
-@companies_router.get('/information', tags=['Company Section'])
+@companies_router.get('/information', description= 'You can view your company private information from this section.', tags= ['Company Section'])
 def your_company_information(current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'companies':
@@ -70,6 +70,7 @@ def your_company_information(current_user_payload=Depends(get_current_user)):
     company_location_from_id = company_services.find_location(get_location_id)
     count_active_job_ads = job_ads_services.get_current_active_job_ads(company_id)
     company_contacts = company_services.read_company_adress(company_id)
+    matched_job_ads = company_services.find_matched_job_ads(company_id)
     
     description = get_company_information[0][1]
     
@@ -77,6 +78,7 @@ def your_company_information(current_user_payload=Depends(get_current_user)):
         description = 'There is no current description set for this company'
 
     company_dict = {
+
          "Company Name": get_company_information[0][0],
          "Company Description": description,
          "Company Email": company_contacts[0][1],
@@ -84,7 +86,8 @@ def your_company_information(current_user_payload=Depends(get_current_user)):
          "Company Telephone": company_contacts[0][3],
          "Company City": company_location_from_id[0][0],
          "Company Country": company_location_from_id[0][1],
-         "Active job ads": count_active_job_ads
+         "Active job ads": count_active_job_ads,
+         "Matched job ads": matched_job_ads
 
     }
 
@@ -92,7 +95,7 @@ def your_company_information(current_user_payload=Depends(get_current_user)):
 
     return all_information
 
-@companies_router.put('/information/edit', tags=['Company Section'])
+@companies_router.put('/information/edit', description= 'You can edit your private company information from this section.', tags= ['Company Section'])
 def edit_your_company_information(description: str = Query(None),
                              city: str = Query(None),
                              address: str = Query(None),
@@ -123,8 +126,8 @@ def edit_your_company_information(description: str = Query(None),
 
     return company_services.edit_company_information(username, final_company_description, final_company_city, final_company_adress, final_company_telephone)
 
-@companies_router.get('/job_seekers/cv', tags=['Company Section'])
-def get_cv_from_job_seeker(current_user_payload=Depends(get_current_user)):
+@companies_router.get('/job_seekers/cv', description= 'You can view every job seeker cv from this section.', tags= ['Company Section'])
+def get_main_cv_from_job_seeker(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'companies':
         return JSONResponse(status_code=403,
@@ -134,7 +137,7 @@ def get_cv_from_job_seeker(current_user_payload=Depends(get_current_user)):
 
 
 # TODO: test below for companies (low priority)
-@companies_router.get('{id}/avatar')
+@companies_router.get('{id}/avatar', description= 'You can view your company profile avatar from here.', tags=['Company Section'])
 def get_company_avatar(id: int, current_user_payload=Depends(get_current_user)):
     image_data = upload_services.get_picture(id, 'companies')
 

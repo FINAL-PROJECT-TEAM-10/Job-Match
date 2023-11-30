@@ -1,16 +1,16 @@
 from data.database import read_query, insert_query, update_query
-from fastapi.responses import JSONResponse
-from common.job_seeker_status_check import recognize_status, convert_status
 from app_models.job_seeker_models import JobSeekerInfo
 from app_models.job_seeker_models import JobSeeker
 from app_models.cv_models import CvCreation
 from services import admin_services, company_services
 from common.country_validators_helpers import find_country_by_city
+from common.job_seeker_status_check import recognize_status
 from datetime import datetime
 from mariadb import IntegrityError
 from common.percent_jobad_calculator import *
 from common.percent_sections import percent_section_helper, find_names
 from common.salary_threshold_calculator_seeker import calculate_salaries
+from fastapi import HTTPException
 
 
 def convert_level(level):
@@ -117,10 +117,9 @@ def find_location_id_by_city(city):
     return location_id[0][0]
 
 
-def edit_info(username: str, summary: str, city: str, status: str):
-    converted_status = convert_status(status)
-    update_query('UPDATE job_seekers SET summary = ?, busy = ? WHERE username = ?',
-                 (summary, converted_status, username))
+def edit_info(username: str, summary: str, city: str):
+    update_query('UPDATE job_seekers SET summary = ? WHERE username = ?',
+                 (summary,username))
 
     if not find_location_by_city(city):
         country = find_country_by_city(city)
@@ -133,7 +132,7 @@ def edit_info(username: str, summary: str, city: str, status: str):
         location_id = find_location_id_by_city(city)
         update_query('UPDATE employee_contacts SET locations_id = ? WHERE id = ?', (location_id, contact_id))
 
-    return JSONResponse(status_code=200, content='You successfully edited your personal info')
+    raise HTTPException(status_code=200, detail='You successfully edited your personal info')
 
 
 def get_job_seeker_info(username: str):
@@ -198,7 +197,7 @@ def create_seeker(username, password, first_name, last_name, email, city, countr
     ''', (username, password, first_name, last_name, busy, blocked, approved, new_contact)
                               )
 
-    return JSONResponse(status_code=200, content='Seeker was created')
+    raise HTTPException(status_code=200, detail='Seeker was created')
 
 
 def check_skill_exist(skill_name: str):
@@ -218,22 +217,43 @@ def find_skill_id_by_name(name: str):
 
     return skill_id[0][0]
 
-def create_cv(description: str, min_salary: int, max_salary: int, 
+def create_cv(description: str, location: str, remote_location : str,
+              min_salary: int, max_salary: int, 
               status: str, job_seeker_id: int, list_skills: list, 
               skill_levels: list, is_main_cv: bool): #['python','js']
 
     date_posted = datetime.now()
+    location_id = read_query('SELECT id FROM locations WHERE city = ?',(location,))
 
-    cv = insert_query('''INSERT INTO mini_cvs (min_salary, max_salary, description, status, date_posted, job_seekers_id, main_cv)
+    if location:
+        cv_create_id = insert_query('''INSERT INTO mini_cvs (min_salary, max_salary, description, status, date_posted, job_seekers_id, main_cv)
                         VALUES (?,?,?,?,?,?,?)
                       ''', (min_salary, max_salary, description, status, date_posted, job_seeker_id, is_main_cv))
+        if remote_location == "No":
+            remote_status = False
+            specific_location_without_remote = insert_query('INSERT INTO mini_cv_has_locations(mini_cv_id, locations_id, remote_status) VALUES (?,?,?)',
+                                             (cv_create_id, location_id[0][0], remote_status,))
+        else:
+            remote_status = True
+            remote_with_specific_location = insert_query('INSERT INTO mini_cv_has_locations(mini_cv_id, locations_id, remote_status) VALUES (?,?,?)',
+                                                (cv_create_id, location_id[0][0], remote_status,))
+    else:
+        if remote_location == "Yes":
+           cv_create_id = insert_query('''INSERT INTO mini_cvs (min_salary, max_salary, description, status, date_posted, job_seekers_id, main_cv)
+                        VALUES (?,?,?,?,?,?,?)
+                      ''', (min_salary, max_salary, description, status, date_posted, job_seeker_id, is_main_cv))
+           remote_status = True
+           remote_has_specific_location = insert_query('INSERT INTO mini_cv_has_locations(mini_cv_id, remote_status) VALUES (?,?)',
+                                                (cv_create_id, remote_status,))
+        else:
+            raise HTTPException(status_code=404, detail="You have to choose a location. City / Remote or Both ")
     
     cv_id = find_cv_by_seeker_id_description(job_seeker_id, description)
     try:
         for skill, level in zip(list_skills, skill_levels):
             level = int(level)
             if not check_skill_exist(skill):
-                return JSONResponse(status_code=404,
+                raise HTTPException(status_code=404,
                                     detail='''That is not a valid skill name. You can send a ticket suggestion for this skill to our moderation team''')
             else:
                 converted_level = convert_level(level)
@@ -242,9 +262,17 @@ def create_cv(description: str, min_salary: int, max_salary: int,
                     'INSERT INTO mini_cvs_has_skills (mini_cvs_id, skills_or_requirements_id, level) VALUES (?,?,?)',
                     (cv_id, skill_id, converted_level))
     except IntegrityError:
-        return JSONResponse(status_code=400, content='You are using the same information from your previous CV')
+        raise HTTPException(status_code=400, detail='You are using the same information from your previous CV')
+    
+    try:
 
-    return CvCreation(description=description, min_salary=min_salary, max_salary=max_salary, status=status,
+        location_name = company_services.find_location(location_id[0][0])
+        location_name = location_name[0][0]
+
+    except IndexError:
+        location_name = "No location Set"
+
+    return CvCreation(description=description,location_name=location_name, remote_status=remote_status, min_salary=min_salary, max_salary=max_salary, status=status,
                       date_posted=date_posted)
 
 
@@ -252,15 +280,32 @@ def view_personal_cvs(seeker_id: int):
     data = read_query('SELECT * FROM mini_cvs WHERE job_seekers_id = ?', (seeker_id,))
 
     if data:
-        ads = [{'Cv ID': row[0], 'Cv Description': row[3], 'Minimum Salary': row[1], 'Maximum Salary': row[2],
+        ads = [{'Cv ID': row[0], 'Cv Description': row[3], 'Minimum Salary': row[1], 'Maximum Salary': row[2], 
+                'Location': get_cv_location_name(get_cv_location_id(row[0])),
                 'Status': row[4], 'Date Posted': row[5]} for row in data]
         return ads
     else:
-        return JSONResponse(status_code=404, content='No cvs found!')
+        raise HTTPException(status_code=404, detail='No cvs found!')
 
+def get_cv_location_id(cv_id):
 
-def get_all_requirements():
-    ...
+    try:
+        cv_location = read_query('SELECT locations_id FROM mini_cv_has_locations WHERE mini_cv_id = ?', (cv_id,))
+        cv_location = cv_location[0][0]
+    except IndexError:
+        cv_location = 0
+
+    return cv_location
+
+def get_cv_location_name(location_id):
+    
+    try:
+        location_name = read_query('SELECT city FROM locations WHERE id = ?', (location_id,))
+        location_name = location_name[0][0]
+    except IndexError:
+        location_name = 'Remote'
+
+    return location_name
 
 
 def check_owner_cv(cv_id, seeker_id):
@@ -280,6 +325,8 @@ def edit_cv(job_seeker_id: int, cv_id: int, min_salary: int, max_salary: int,
         for skill,level in zip(skill_names, skill_levels):
             if level.isnumeric():
                 level = int(level)
+                if level > 3:
+                    raise HTTPException(status_code=400, detail='Invalid level of skill provided!')
                 converted_level = convert_level(level)
             else:
                 level_num = convert_level_name(level)
@@ -297,7 +344,7 @@ def edit_cv(job_seeker_id: int, cv_id: int, min_salary: int, max_salary: int,
                                 (converted_level, cv_id, skill_id))
     
 
-    return JSONResponse(status_code=200, content='You successfully edited your selected CV.')
+    raise HTTPException(status_code=200, detail='You successfully edited your selected CV.')
 
 
 def get_cv_info(seeker_id: int, cv_id: str):
@@ -315,7 +362,7 @@ def get_all_job_ads():
                    'Date Posted': row[5]} for row in data]
         return jb_ads
     else:
-        return JSONResponse(status_code=404, content='There is no such company with this job ad')
+        raise HTTPException(status_code=404, detail='There is no such company with this job ad')
 
 
 def get_existing_skills(cv_id: int):
@@ -359,19 +406,19 @@ def update_main_cv(cv_id, seeker_id):
     
     update_query('UPDATE mini_cvs SET main_cv = 1 WHERE id = ? AND job_seekers_id = ?', (cv_id, seeker_id))
 
-    return JSONResponse(status_code=200, content=f'You successfully choose a main CV with id: {cv_id}')
+    raise HTTPException(status_code=200, detail=f'You successfully choose a main CV with id: {cv_id}')
 
 def get_main_cv_id(seeker_id):
     cv_id = read_query('SELECT id FROM mini_cvs WHERE main_cv = 1 AND job_seekers_id = ?', (seeker_id,))
 
     return cv_id[0][0]
 
-def calculate_percents_job_ad(seeker_id, current_sort, perms, input_salary = None):
+def calculate_percents_job_ad(seeker_id, current_sort, perms, threshold_percent, input_salary = None):
 
     try:
         cv_id = get_main_cv_id(seeker_id)
     except IndexError:
-        return JSONResponse(status_code=404, content='You have to select a main CV to use this option!')
+        raise HTTPException(status_code=404, detail='You have to select a main CV to use this option!')
     
     cv_skills = get_current_cv_skills(cv_id)
 
@@ -380,7 +427,7 @@ def calculate_percents_job_ad(seeker_id, current_sort, perms, input_salary = Non
 
     if current_sort == 'All':
         my_cv_ad_range = input_salary
-        salaries_for_job_ad = calculate_salaries(all_job_ads)
+        salaries_for_job_ad = calculate_salaries(all_job_ads, threshold_percent)
     
         
     result = []
@@ -408,11 +455,16 @@ def calculate_percents_job_ad(seeker_id, current_sort, perms, input_salary = Non
     unmatched = {}
     for job_ad_id, requirements in filtered_data.items():
         unmatched[job_ad_id] = find_unmatched(requirements, cv_skills)
-
+    
+    #TODO make it
+    matching_side = False
+    if current_sort == 'Matches':
+        matching_side = True
+        return matched, unmatched
 
     if current_sort != 'All':
         return percent_section_helper(current_sort,matches_per_job_ad, perms, matched, unmatched)
-    else:
+    elif matching_side == False:
         return filter_by_salaries(my_cv_ad_range,salaries_for_job_ad)
 
 
@@ -473,7 +525,6 @@ def filter_by_salaries(current_cv_range, job_ads_calculated_salaries): #[2000, 5
     cv_min_salary = current_cv_range[0]
     cv_max_salary = current_cv_range[1]
 
-
     result = []
     for current_dict_ad in job_ads_calculated_salaries:
         for key,value in current_dict_ad.items():
@@ -482,14 +533,15 @@ def filter_by_salaries(current_cv_range, job_ads_calculated_salaries): #[2000, 5
             max_salary_ad = value[1]
             company_id = find_company_id(key)
             description = read_query('SELECT description FROM job_ads WHERE id = ?', (key,))
+            original_salary_range_info = original_salary_info(key)
 
             if cv_min_salary >= min_salary_ad and cv_max_salary <= max_salary_ad:
                     filtered_ads = {
                     'Job AD ID': key,
                     'Company Name': company_services.find_company_id_byusername_for_job_seeker(company_id),
                     'Description': description[0][0],
-                    'Minimum Salary': min_salary_ad,
-                    'Maximum Salary': max_salary_ad
+                    'Original Salary Range':  f'{original_salary_range_info[0][0]} - {original_salary_range_info[0][1]}',
+                    'Threshold Salary Range': f'{int(min_salary_ad)} - {int(max_salary_ad)}',
                     }
                     result.append(filtered_ads)
     return result
@@ -506,3 +558,9 @@ def is_main_already(cv_id):
     check = read_query('SELECT min_salary FROM mini_cvs WHERE id = ? AND main_cv = 1', (cv_id,))
 
     return bool(check)
+
+def original_salary_info(job_ad_id: int):
+
+    data = read_query('SELECT min_salary, max_salary FROM job_ads WHERE id = ?', (job_ad_id,))
+
+    return data
