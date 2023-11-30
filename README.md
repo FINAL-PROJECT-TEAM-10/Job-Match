@@ -15,7 +15,31 @@ Borislav Bonev, Ivaylo Petrov, Andrey Filipov
 [To be finalized]
 
 ## 🗺️ Database Overview 🗺️
-[To be finalized]
+![Entity Relationship Diagram](./images/job_match_final.png)
+### Legend
+- Table Connections: primary keys and related foreign keys are in the same color
+  - admins: blue
+  - job seekers: dark teal
+  - companies: dark blue
+  - job ads: light blue
+  - mini cvs: teal
+  - skills and requirements: green
+  - locations: dark green
+- Conditionals: columns that are used in some sort of conditional logic
+  - status, blocked status, approval status*, sender, level, career type*, main cv
+  remote status: magenta
+  - date posted* and date matched*: dark yellow
+  - min_ salary, max salary: dark red
+- Long Blob data: columns that are used to store large files
+  - picture, logo: dark orange
+- String data: columns that contain string information necessary for application functionality
+  - username, password, description, etc.: grey
+- Unconnected data: primary keys that do not interact with other tables but are necessary for Skill-Sync
+  - temporary tokens (id): purple
+
+Note*: approval status, career type, date posted, and date matched logic has not been
+implemented in the backend but remains for future work. See [future work](#future-work).
+
 
 ### Things to Note
 [To be finalized]
@@ -146,7 +170,8 @@ There are four types of queries that are written out in _database.py_
 
 
 
-## 🔬 Future Work 🔬
+## 🔬 <a name="future work">Future Work</a> 🔬
+
 ### 🔐 Password reset 🔐
 A possible addition to the database is to track when a password is last modified and prompt the user to change
 their password once a certain threshold has been passed.
