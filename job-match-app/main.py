@@ -7,6 +7,7 @@ from routers.skills_router import skills_router
 from routers.token_router import token_router
 from routers.profile_router import profile_router
 from routers.company_matching_routers import companies_matching_router
+from routers.job_seeker_matching_routers import job_seekers_matching_router
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
@@ -23,6 +24,7 @@ app.include_router(job_seekers_router)
 app.include_router(profile_router)
 app.include_router(skills_router)
 app.include_router(companies_matching_router)
+app.include_router(job_seekers_matching_router)
 
 
 @app.get('/', response_class= HTMLResponse, include_in_schema=False)

@@ -1,11 +1,11 @@
-def calculate_salaries(job_ads_info):
+def calculate_salaries(job_ads_info, threshold_percent):
 
     result = []
     for job_ad in job_ads_info:
         current_job_range = []
         current_job_range.append(job_ad[2])
         current_job_range.append(job_ad[3])
-        threshold_result = calculate_threshold(current_job_range)
+        threshold_result = calculate_threshold(current_job_range, threshold_percent)
 
         data_dict = {
             job_ad[0]: threshold_result,
