@@ -42,7 +42,7 @@ Borislav Bonev, Ivaylo Petrov, Andrey Filipov
 Note*: approval status, career type, date posted, and date matched logic has not been
 implemented in the backend but remains for future work. See [future work](README.md#-future-work-).
 
-## 📑 Explanation 📑
+### 📑 Explanation 📑
 Our database supports functionality for three types of users: Admins, Job Seekers, and Companies.
 Admins are slightly simpler than job seekers because they do not require the
 full functionality of the user experience. They are taken out in a separate table from
