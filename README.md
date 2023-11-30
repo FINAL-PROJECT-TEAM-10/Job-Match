@@ -15,8 +15,10 @@ Borislav Bonev, Ivaylo Petrov, Andrey Filipov
 [To be finalized]
 
 ## 🗺️ Database Overview 🗺️
+
+### 📷 Diagram 📷
 ![Entity Relationship Diagram](./images/job_match_final.png)
-### Legend
+### 📌 Legend 📌
 - Table Connections: primary keys and related foreign keys are in the same color
   - admins: blue
   - job seekers: dark teal
@@ -40,12 +42,69 @@ Borislav Bonev, Ivaylo Petrov, Andrey Filipov
 Note*: approval status, career type, date posted, and date matched logic has not been
 implemented in the backend but remains for future work. See [future work](README.md#-future-work-).
 
+## 📑 Explanation 📑
+Our database supports functionality for three types of users: Admins, Job Seekers, and Companies.
+Admins are slightly simpler than job seekers because they do not require the
+full functionality of the user experience. They are taken out in a separate table from
+other people (job seekers) because admin and job seeker functionality might diverge
+even further from the current point of time and it is, thus, logical to separate them as early
+as possible in database formation.
 
-### Things to Note
-[To be finalized]
+Both admins and seekers were deemed to require the same contact information, which would
+allow other users (and in the case of admins: developers) to contact them. This is why
+their contacts converge in the _employee_contacts_ table.
 
-#### ➕ _Junction Tables_ ➕
+Similarly, to these users, companies also have contacts,
+however one company is allowed more than one address. Currently, database entries only have one
+address because some form of conditional logic must be added to choose which address should be
+taken from the database. (see [future work](README.md#-future-work-)).
 
+All contacts must have a broader location (city, country), which is validated in the
+back-end before input. Location logic is also necessary for job ads and CVs as
+they reveal where a company or job seeker (respectively) would like the job to be done.
+_job_ads_has_locations_ and _mini_cv_has_locations_ are linking tables which are involved
+in the logic if a job ad matches a CV.
+
+The meat of our project is the matching functionality. This is achieved by having many
+job ads belonging to one company and many CVs belonging to one job seeker. Then, depending
+on whether a job ads requires certain professional skills (_job_ads_has_requirements_)
+or a CV advertises that a job seeker already possesses these skills (_mini_cvs_has_skills_)
+and what level are these at, an additional link is created to the junction table
+_skills_or_requirements_.
+
+There, all the requirements or skills that could be used by job ads or CVs reside.
+Currently, the skill/requirement pool is controlled by admins who can add and delete skills
+based on user feedback. The reason for this pool is so that when using our front-end,
+businesses and seekers can simply cherrypick required skills,
+while admins have moderation control over the database.
+
+Skills versus requirements are used to evaluate matches in the backend
+so that users receive quantified results in percentages in terms of how good a match was.
+After matches pass the match request threshold (which can be set by the user, e.g. "Best",
+"Good", etc.) they are recorded in _job_ads_has_mini_cvs_, which also records
+who initiated the request (a company or a job seeker) and the match status (at first: "Pending").
+
+The "Pending" match status allows for a user, for example, a company to post a match
+request. If a professional then requests the same match, after the back-end retrieves
+the "Pending" status, it will set the match as succesful, essentially completing
+the essential functionality of the project.
+
+Throughout the database there are numerous conditional columns such as match status and sender
+(see [the diagram](README.md#-diagram-) above), who are similarly used or can be used
+to expand selection criteria of different services.
+
+Perhaps of greatest importance is that the search for matches can be adjusted by salary,
+and users can be blocked.
+
+The database also supports some form of user expression as users can write summaries/descriptions
+and images (only 1 MB JPEGs are allowed) can be stored in the database as Large Blobs.
+These images can be used as pictures for job seekers and admins and logos as companies,
+although, admittedly, there is no logic to differentiate pictures from logos in the back-end.
+The difference arises from the naming.
+
+As a side note: job ads and CVs also have a remote status in _job_ads_has_locations_
+and _mini_cv_has_locations_ which allows for extended matching. In other words,
+an ad or a CV is not limited to its actual location if remote.
 
 
 ## 🏭 API Structure ️🏭
