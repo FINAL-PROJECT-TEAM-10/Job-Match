@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query,Depends, Form , HTTPException
 from services import job_ads_services
 from fastapi.responses import JSONResponse
 from common.auth import get_current_user
-from services import company_services
+from services import company_services, job_seeker_services, job_ads_services
 from common.separators_validators import parse_skills
 
 job_ads_router = APIRouter(prefix='/job_ads')
@@ -60,6 +60,7 @@ def view_different_specific_company_job_ads(name_of_company: str = Query(), curr
             "Description": data[1],
             "Minimum Salary": data[2],
             "Maximum Salary": data[3],
+            "Location": job_seeker_services.get_cv_location_name(job_ads_services.get_cv_location_id(data[0])),
             "Status": data[4],
             "Date Posted": data[5]
         }
@@ -148,7 +149,7 @@ def edit_your_job_ad(job_ad_id: int = Query(), description: str = Query(None), m
                         tags= ['Company Job Ads Searching/Matching Section'])
 
 def search_recommended_cv_from_job_seeker(job_ad_id: int = Query(description= 'Type your specific job ad id.'),
-                              status: str =  Query(enum= ['Best', 'Very Good', 'Good','Bad','Worst']), 
+                              status: str =  Query(enum= ['Best', 'Very Good', 'Good', 'Bad', 'Worst']),
                               current_user_payload=Depends(get_current_user)):
      
     if current_user_payload['group'] != 'companies':
@@ -158,11 +159,10 @@ def search_recommended_cv_from_job_seeker(job_ad_id: int = Query(description= 'T
     getting_owner = current_user_payload.get('id')
 
     if not job_ads_services.find_a_company_owner_by_id(job_ad_id):
-        raise HTTPException(status_code=400, detail= 'That is not a valid id for your job ad')
+        raise HTTPException(status_code=400, detail= "The job ad you chose is archived or its invalid")
 
-    return job_ads_services.calculate_percantage_cv(job_ad_id, status, perms = "Company")
+    return job_ads_services.calculate_percantage_cv(job_ad_id, status, threshold_percent = None, perms = "Company")
 
-#TODO fix the output by a new parameter 
 
 @job_ads_router.get('/search/cv/salary', description= "You can select different salary range and search for available cv's.", tags= ['Company Job Ads Searching/Matching Section'])
 def search_salary_based_on_different_cvs(job_ad_id: int = Query(), minimum_salary: int = Query(), 
@@ -172,19 +172,19 @@ def search_salary_based_on_different_cvs(job_ad_id: int = Query(), minimum_salar
     if current_user_payload['group'] != 'companies':
        return JSONResponse(status_code=403,
                             content='This option is only available for Companies')
-     
+
     if maximum_salary and minimum_salary:
        if maximum_salary < minimum_salary:
             return JSONResponse(status_code=400, content='The minimum salary cannot be bigger than the maximum salary')
 
     getting_owner = current_user_payload.get('id')
-
-    if not job_ads_services.find_a_company_owner_by_id(job_ad_id):
-       raise HTTPException(status_code=400, detail= 'That is not a valid id for your job ad')
     
     if threshold_percent > 100:
         raise HTTPException(status_code=400, detail='The threshold should be lower than 100%')
     
+    if not job_ads_services.find_a_company_owner_by_id(job_ad_id):
+       raise HTTPException(status_code=400, detail= "The job ad you chose is archived or its invalid")
+
     percantage_based_on_salary = 'All'
     salary = [minimum_salary,maximum_salary]
     perms = 'Company'

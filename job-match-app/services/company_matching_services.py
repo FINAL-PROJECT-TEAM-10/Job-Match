@@ -2,6 +2,7 @@ from data.database import read_query, insert_query, update_query
 from datetime import date,datetime
 from fastapi import HTTPException
 from mariadb import IntegrityError
+from services import job_seeker_services
 
 def check_job_ad_exist(job_ad_id):
 
@@ -106,3 +107,13 @@ def check_request_exist(job_ad_id, mini_cv_id):
     data = read_query('SELECT * FROM job_ads_has_mini_cvs WHERE job_ad_id = ? AND mini_cv_id = ?', (job_ad_id, mini_cv_id))
 
     return bool(data)
+
+def successfull_matches():
+
+    data = read_query('SELECT * FROM job_ads_has_mini_cvs WHERE match_status = "Successfull"')
+
+    if data:
+        mini_cv = [{'Mini CV ID': row[1],
+                    'Date of match request': row[2], 'Status': row[3]
+                     } for row in data]
+        return mini_cv

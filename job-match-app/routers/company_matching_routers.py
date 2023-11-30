@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query,Depends,Form , HTTPException
 from common.auth import get_current_user
-from services import company_matching_services
+from services import company_matching_services,company_services
 
 companies_matching_router = APIRouter(prefix= '/companies_match')
 
@@ -55,3 +55,13 @@ def cancel_a_request(job_ad_id: int, mini_cv_id: int, current_user_payload = Dep
         raise HTTPException(status_code=400, detail='You already canceled this request')
     
     return company_matching_services.cancel_request(job_ad_id, mini_cv_id)
+
+@companies_matching_router.get('/requests/matched', description= 'You can view all successfull matches using your Job Ad Id.', tags=['Company Job Ads Searching/Matching Section'])
+
+def view_all_successfull_matches(current_user_payload = Depends(get_current_user)):
+
+    if current_user_payload['group'] != 'companies':
+        return HTTPException(status_code=403,
+                            detail= 'This option is only available for Companies')
+
+    return company_matching_services.successfull_matches()

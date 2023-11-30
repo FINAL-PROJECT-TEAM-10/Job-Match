@@ -151,7 +151,8 @@ def view_all_cvs():
 
     if data:
         ads = [{'CV Creator': job_seeker_services.get_username_by_id(row[6]), 'Cv Description': row[3], 'Minimum Salary': row[1], 
-                'Maximum Salary': row[2], 'Status': row[4], 'Date Posted': row[5]} for row in data]
+                'Maximum Salary': row[2], 'Location': job_seeker_services.get_cv_location_name(job_seeker_services.get_cv_location_id(data[0])), 
+                'Status': row[4], 'Date Posted': row[5]} for row in data]
         return ads
     
     else:

@@ -89,7 +89,8 @@ def view_job_ads_by_id(ads_id: int, status: str):
 
     if data:
         ads = [{'Job Ad ID': row[0], 'Job Description': row[1], 'Minimum Salary': row[2],
-                'Maximum Salary': row[3], 'Status': row[4], 'Date Posted': row[5]} for row in data]
+                'Maximum Salary': row[3], "Location": job_seeker_services.get_cv_location_name(get_cv_location_id(row[0])),
+                  'Status': row[4], 'Date Posted': row[5]} for row in data]
         return ads
 
 def get_current_active_job_ads(company_id: int):
@@ -113,7 +114,7 @@ def check_owner_company(job_ad_id, company_id):
 
 def find_a_company_owner_by_id(job_ad_id):
 
-    data = read_query('SELECT * FROM job_ads WHERE id = ?', (job_ad_id,))
+    data = read_query('SELECT * FROM job_ads WHERE id = ? AND status = "active"', (job_ad_id,))
 
     return bool(data)
 
@@ -313,6 +314,7 @@ def filter_by_cv_salaries(job_ad_range, cvs_calculated_salaries):
                     'CV ID': key,
                     'Job Seeker Name': find_username_job_seeker(seeker_id),
                     'Description': description[0][0],
+                    "Preferred Location": job_seeker_services.get_cv_location_name(get_cv_location_id([0])),
                     'Original Salary Range':  f'{original_cv_salary_range[0][0]} - {original_cv_salary_range[0][1]}',
                     'Threshold Salary Range': f'{int(min_salary_cv)} - {int(max_salary_cv)}',
                     }
@@ -330,3 +332,13 @@ def find_name_for_job_seeker(id_of_name: int):
 def find_username_job_seeker(id: int):
     data = read_query('SELECT username FROM job_seekers WHERE id = ?',(id,))
     return data[0][0]
+
+def get_cv_location_id(cv_id):
+
+    try:
+        cv_location = read_query('SELECT locations_id FROM job_ads_has_locations WHERE job_ads_id = ?', (cv_id,))
+        cv_location = cv_location[0][0]
+    except IndexError:
+        cv_location = 0
+
+    return cv_location
