@@ -170,7 +170,7 @@ There are four types of queries that are written out in _database.py_
 
 
 
-## 🔬 <a name="future work">Future Work</a> 🔬
+## 🔬 <a name="future-work">Future Work</a> 🔬
 
 ### 🔐 Password reset 🔐
 A possible addition to the database is to track when a password is last modified and prompt the user to change
