@@ -38,7 +38,7 @@ Borislav Bonev, Ivaylo Petrov, Andrey Filipov
   - temporary tokens (id): purple
 
 Note*: approval status, career type, date posted, and date matched logic has not been
-implemented in the backend but remains for future work. See [future work](#future-work).
+implemented in the backend but remains for future work. See [future work](README.md#-future-work-).
 
 
 ### Things to Note
@@ -170,7 +170,7 @@ There are four types of queries that are written out in _database.py_
 
 
 
-## 🔬 <a name="future-work">Future Work</a> 🔬
+## 🔬 Future Work 🔬
 
 ### 🔐 Password reset 🔐
 A possible addition to the database is to track when a password is last modified and prompt the user to change
