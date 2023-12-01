@@ -106,8 +106,7 @@ def find_info_by_id(id:int, perms: str):
     if perms == 'Seeker':
         data = read_query('SELECT * FROM job_ads WHERE id = ? AND status = "active"', (id,))
     else:
-        #TODO Ivo da fixne sled napravata na cv status active i tuka
-        data = read_query('SELECT * FROM mini_cvs WHERE id = ?', (id,))
+        data = read_query('SELECT * FROM mini_cvs WHERE id = ? AND status = "Active"', (id,))
 
     if data:
         return data

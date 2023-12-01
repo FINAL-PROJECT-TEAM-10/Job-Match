@@ -226,7 +226,7 @@ def calculate_percantage_cv(job_ad_id, sorting, perms, threshold_percent, salary
 
     ads = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_ad_id,))
 
-    get_main_cv = read_query('SELECT * FROM mini_cvs WHERE main_cv = 1')
+    get_main_cv = read_query('SELECT * FROM mini_cvs WHERE main_cv = 1 AND status != "Matched"')
 
     current_job_ad = get_current_job_ad(job_ad_id)
 

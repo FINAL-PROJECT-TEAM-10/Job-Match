@@ -10,6 +10,7 @@ def match_ad(job_ad_id: int, mini_cv_id: int, seeker_id: int):
         if is_matching_exist_pendings(job_ad_id, mini_cv_id):
             update_query('UPDATE job_ads_has_mini_cvs SET match_status = "Successfull" WHERE job_ad_id = ? AND mini_cv_id = ? AND sender = "Company"',
                             (job_ad_id, mini_cv_id))
+            update_query('UPDATE mini_cvs SET status = "Matched" WHERE id = ?', (mini_cv_id,))
             
             update_query('UPDATE job_seekers SET busy = 1 WHERE id = ?', (seeker_id,))
             #0 - Active 1- Busy

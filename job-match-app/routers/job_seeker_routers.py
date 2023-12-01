@@ -102,7 +102,7 @@ def create_cv(description: str = Form(),
         return JSONResponse(status_code=403,
                             content='Only seekers can create cv')
     
-    status = 'Active'
+    status = 'Private'
     is_main_cv = False
     seeker_username = current_user_payload.get('username')
     seeker_id = current_user_payload.get('id')
@@ -128,7 +128,7 @@ def create_cv(description: str = Form(),
 
 @job_seekers_router.put('/cv/edit', description= 'You can edit your cvs from this section.', tags =['CV Section'])
 def edit_cv(cv_id: int = Query(),description: str = Query(None), min_salary: int = Query(None),
-            max_salary: int = Query(None), status: str =  Query(enum=['Active', 'Hidden', 'Private']),
+            max_salary: int = Query(None), status: str =  Query(None, enum=['Active', 'Hidden', 'Private']),
             skills: str = Query(None),
             current_user_payload=Depends(get_current_user)):
 
@@ -137,7 +137,13 @@ def edit_cv(cv_id: int = Query(),description: str = Query(None), min_salary: int
                             content='Only seekers can create cv')
     
     seeker_id = current_user_payload.get('id')
+
     
+    if job_seeker_services.check_is_matched(cv_id) and status:
+        raise HTTPException(status_code=400, detail='You cant modify your status when is matched already')
+    
+    if not status:
+        status = job_seeker_services.get_existing_status(cv_id)
 
     if not job_seeker_services.check_owner_cv(cv_id,seeker_id):
         return JSONResponse(status_code=400, content='That id is not a valid for your cvs')
