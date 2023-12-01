@@ -54,7 +54,7 @@
             document.getElementById('viewButtonInfo').addEventListener('click', async function () {
                 try {
 
-                    const response = await fetch('http://127.0.0.1:8000/job_seekers/personal_info', {
+                    const response = await fetch('http://127.0.0.1:8000/seekers/information', {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${access_token}`,

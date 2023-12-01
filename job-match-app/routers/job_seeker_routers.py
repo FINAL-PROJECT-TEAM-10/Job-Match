@@ -12,7 +12,7 @@ from common.country_validators_helpers import validate_location, validate_city
 from common.separators_validators import parse_skills
 from fastapi import HTTPException
 
-job_seekers_router = APIRouter(prefix='/job_seekers')
+job_seekers_router = APIRouter(prefix='/seekers')
 
 
 @job_seekers_router.get('/', description= 'All functions for job seekers', tags=['Seeker Section'])
@@ -45,7 +45,7 @@ def get_all_seekers(current_user_payload=Depends(get_current_user)):
     return result
 
 
-@job_seekers_router.get('/personal_info', tags=['Seeker Section'])
+@job_seekers_router.get('/information', tags=['Seeker Section'])
 def your_information(current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'seekers':
@@ -64,7 +64,7 @@ def your_information(current_user_payload=Depends(get_current_user)):
     return current_job_seeker_info
 
 
-@job_seekers_router.put('/personal_info/edit', tags=['Seeker Section'])
+@job_seekers_router.put('/information/edit', tags=['Seeker Section'])
 def edit_proffesional_info(summary: str = Form(None),
                            city: str = Form(None),
                            status: str =  Form(enum=['Active', 'Busy']),
@@ -179,7 +179,7 @@ def edit_cv(cv_id: int = Query(),description: str = Query(None), min_salary: int
     return job_seeker_services.edit_cv(seeker_id, cv_id, arg_min_salary,arg_max_salary,arg_description, status, skill_names, skill_levels)
 
 
-@job_seekers_router.get('/cv', tags=['CV Section'])
+@job_seekers_router.get('/personal/cv', tags=['CV Section'])
 def view_personal_cvs(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'seekers':
@@ -237,7 +237,7 @@ def search_job_ads_percentage(current_user_payload=Depends(get_current_user),
     return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent, perms = 'Seeker')
 
 
-@job_seekers_router.get('/sorting_salary', tags=['Seeker Section'])
+@job_seekers_router.get('/search/salary', tags=['Seeker Section'])
 def search_job_ads_by_salary(current_user_payload=Depends(get_current_user),
                               min_salary: int = Query(), max_salary: int = Query()):
 
@@ -276,7 +276,7 @@ def get_seeker_avatar(id: int, current_user_payload=Depends(get_current_user)):
 
     return StreamingResponse(io.BytesIO(image_data), media_type="image/jpeg")
 
-@job_seekers_router.put('/main_cv', tags=['CV Section'])
+@job_seekers_router.put('/main/cv', tags=['CV Section'])
 def select_main_cv(cv_id: int = Query(), current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'seekers':

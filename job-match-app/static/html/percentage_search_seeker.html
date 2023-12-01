@@ -72,7 +72,7 @@
                         queryParams.set('sort_percent', queryParams.get('status'));
                         queryParams.delete('status');
             
-                        const url = `http://127.0.0.1:8000/job_seekers/search/job_ads?${queryParams}`;
+                        const url = `http://127.0.0.1:8000/seekers/search/job_ads?${queryParams}`;
             
                         const response = await fetch(url, {
                             method: 'GET',

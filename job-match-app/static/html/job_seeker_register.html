@@ -65,7 +65,7 @@
             var form = document.getElementById('dataForm');
             var formData = new FormData(form);
 
-            fetch('http://127.0.0.1:8000/job_seekers/register', {
+            fetch('http://127.0.0.1:8000/seekers/register', {
                 method: 'POST',
                 body: formData,
             })
