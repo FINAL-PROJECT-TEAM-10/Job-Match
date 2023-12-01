@@ -13,7 +13,7 @@ from fastapi import HTTPException
 job_seekers_router = APIRouter(prefix='/job_seekers')
 
 
-@job_seekers_router.get('/', description= 'All functions for job seekers', tags=['Seeker Section'])
+@job_seekers_router.get('/', description= 'You can view every available job seeker in this section.', tags=['Seeker Section'])
 def get_all_seekers(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'seekers':
@@ -44,7 +44,7 @@ def get_all_seekers(current_user_payload=Depends(get_current_user)):
     return result
 
 
-@job_seekers_router.get('/personal_info', tags=['Seeker Section'])
+@job_seekers_router.get('/personal_info', description= 'You can view your personal information in this section.', tags=['Seeker Section'])
 def your_information(current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'seekers':
@@ -63,7 +63,7 @@ def your_information(current_user_payload=Depends(get_current_user)):
     return current_job_seeker_info
 
 
-@job_seekers_router.put('/personal_info/edit', tags=['Seeker Section'])
+@job_seekers_router.put('/personal_info/edit', description= 'You can edit your personal information in this section.', tags=['Seeker Section'])
 def edit_proffesional_info(summary: str = Query(None),
                            city: str = Query(None),
                            current_user_payload=Depends(get_current_user)):
@@ -82,11 +82,14 @@ def edit_proffesional_info(summary: str = Query(None),
     job_seeker.summary = summary or db_seeker[0][5]
     job_seeker.city = city or db_location[0][0]
 
+    if not summary and not city:
+        raise HTTPException(status_code=203,detail= "You haven't done any changes to your personal information")
+
     validate_city(job_seeker.city)
     
     return job_seeker_services.edit_info(job_seeker.username, job_seeker.summary,job_seeker.city)
 
-@job_seekers_router.post('/cv', tags=['CV Section'])
+@job_seekers_router.post('/cv', description= 'You can create your cvs from this section.', tags =['CV Section'])
 def create_cv(description: str = Form(),
               min_salary: int = Form(),
               max_salary: int = Form(),
@@ -123,7 +126,7 @@ def create_cv(description: str = Form(),
     
     return job_seeker_services.create_cv(description, location, is_remote, min_salary,max_salary,status,seeker_id[0][0], skill_names, skill_levels, is_main_cv)
 
-@job_seekers_router.put('/cv/edit', tags=['CV Section'])
+@job_seekers_router.put('/cv/edit', description= 'You can edit your cvs from this section.', tags =['CV Section'])
 def edit_cv(cv_id: int = Query(),description: str = Query(None), min_salary: int = Query(None),
             max_salary: int = Query(None), status: str =  Query(enum=['Active', 'Hidden', 'Private']),
             skills: str = Query(None),
@@ -173,13 +176,11 @@ def edit_cv(cv_id: int = Query(),description: str = Query(None), min_salary: int
     arg_min_salary = min_salary or cv_info[0][1]
     arg_max_salary = max_salary or cv_info[0][2]
     arg_description = description or cv_info[0][3]
-    if not description and not min_salary and not max_salary and not skills:
-        return JSONResponse(status_code=202, content="You haven't done any changes to your CV information")
 
     return job_seeker_services.edit_cv(seeker_id, cv_id, arg_min_salary,arg_max_salary,arg_description, status, skill_names, skill_levels)
 
 
-@job_seekers_router.get('/cv', tags=['CV Section'])
+@job_seekers_router.get('/cv', description= 'You can view your cvs from this section.', tags =['CV Section'])
 def view_personal_cvs(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'seekers':
@@ -191,7 +192,7 @@ def view_personal_cvs(current_user_payload=Depends(get_current_user)):
     return job_seeker_services.view_personal_cvs(seeker_id)
 
 
-@job_seekers_router.post('/register', tags=['Seeker & Company Signup'])
+@job_seekers_router.post('/register', description= 'You can register with your personal information in this section.', tags=['Seeker & Company Signup'])
 def add_seeker(seeker_username: str = Form(),
               seeker_password: str = Form(),
               seeker_first_name: str = Form(), 
@@ -222,8 +223,8 @@ def add_seeker(seeker_username: str = Form(),
     return new_seeker
 
 
-@job_seekers_router.get('/search/job_ads', tags=['Seeker Matching Section'])
-def search_job_ads_percentage(current_user_payload=Depends(get_current_user),
+@job_seekers_router.get('/search/job_ads', description= 'You can search specific job ads in this section by their salary.', tags=['Seeker Matching Section'])
+def search_job_ads_by_status(current_user_payload=Depends(get_current_user),
                               sort_percent: str =  Query(enum=['Best', 'Very good', 'Good', 'Bad', 'Worst'])):
 
     if current_user_payload['group'] != 'seekers':
@@ -233,10 +234,10 @@ def search_job_ads_percentage(current_user_payload=Depends(get_current_user),
     job_seeker_id = current_user_payload.get('id')
 
 
-    return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent, perms = 'Seeker')
+    return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent, threshold_percent= None, perms = 'Seeker')
 
 
-@job_seekers_router.get('/sorting_salary', tags=['Seeker Matching Section'])
+@job_seekers_router.get('/sorting_salary', description= 'You can search job ads by salary range in this section.', tags =['Seeker Matching Section'])
 def search_job_ads_by_salary(current_user_payload=Depends(get_current_user),
                               min_salary: int = Query(), max_salary: int = Query(),
                               threshold_percent: int = Query()):
@@ -256,17 +257,18 @@ def search_job_ads_by_salary(current_user_payload=Depends(get_current_user),
     return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent,perms,threshold_percent, salary_input)
     
 
-@job_seekers_router.get('/companies/job_ads',tags=['Seeker Section'])
+@job_seekers_router.get('/companies/job_ads', description= 'You can view every specific company job ad from this section.', tags =['Seeker Section'])
 def get_job_ads_from_companies(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'seekers':
         return JSONResponse(status_code=403,
                             content='This option is only available for Job_Seekers')
+    
     return job_seeker_services.get_all_job_ads()
 
 
 # TODO: Test below (low priority)
-@job_seekers_router.get('{id}/avatar', tags=['Seeker Section'])
+@job_seekers_router.get('{id}/avatar', description= 'You can view a specific job seeker avatar from this section.', tags=['Seeker Section'])
 def get_seeker_avatar(id: int, current_user_payload=Depends(get_current_user)):
     image_data = upload_services.get_picture(id, 'admins')
 
@@ -279,7 +281,7 @@ def get_seeker_avatar(id: int, current_user_payload=Depends(get_current_user)):
 
     return StreamingResponse(io.BytesIO(image_data), media_type="image/jpeg")
 
-@job_seekers_router.put('/main_cv', tags=['CV Section'])
+@job_seekers_router.put('/main_cv', description= 'You can choose a main cv from this section.', tags=['CV Section'])
 def select_main_cv(cv_id: int = Query(), current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'seekers':

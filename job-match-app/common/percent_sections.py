@@ -1,6 +1,7 @@
 from fastapi.responses import JSONResponse
 from data.database import read_query
-from services import job_seeker_services
+from services import job_seeker_services, job_ads_services
+from fastapi import HTTPException
 
 def percent_section_helper(current_sort, list_of_percentages, perms, matched_skills, unmatched_skills): 
 
@@ -75,11 +76,13 @@ def create_current_dict(company_id, job_ad_info, value, perms, matched_skills, u
 
     if perms == 'Seeker':
         result_dict = {
+            
             'Job AD ID': job_ad_info[0][0],
             "Company": job_ads_services.find_name_by_id(company_id),
             "Description": job_ad_info[0][1],
             "Minimum Salary": job_ad_info[0][2],
             "Maximum Salary": job_ad_info[0][3],
+            "Prefered Location": job_seeker_services.get_cv_location_name(job_ads_services.get_cv_location_id(job_ad_info[0][0])),
             "Match percent based on your CV skills": f'{value}% / 100%',
             "Matched Skills from the Company Job AD": matched_skills_result,
             "Not matched Skills": unmatched_skills_result,
@@ -87,11 +90,12 @@ def create_current_dict(company_id, job_ad_info, value, perms, matched_skills, u
         return result_dict
     else:
         result_cv = {
+
             "Job Seeker": find_name_by_id_for_job_seeker(company_id),
             "CV Description": job_ad_info[0][3],
             "Minimum Salary": job_ad_info[0][1],
             "Maximum Salary": job_ad_info[0][2],
-            "Prefered Location": job_seeker_services.get_cv_location_name(job_seeker_services.get_cv_location_id([0])),
+            "Prefered Location": job_seeker_services.get_cv_location_name(job_seeker_services.get_cv_location_id(job_ad_info[0][0])),
             "Match percent based on your Company Requirements": f'{value}% / 100%',
             "Matched Requirements from the Seeker CV": matched_skills_result,
             "Not matched Requirements": unmatched_skills_result
@@ -100,12 +104,18 @@ def create_current_dict(company_id, job_ad_info, value, perms, matched_skills, u
 
 def find_info_by_id(id:int, perms: str):
     if perms == 'Seeker':
-        data = read_query('SELECT * FROM job_ads WHERE id = ?', (id,))
+        data = read_query('SELECT * FROM job_ads WHERE id = ? AND status = "active"', (id,))
     else:
+        #TODO Ivo da fixne sled napravata na cv status active i tuka
         data = read_query('SELECT * FROM mini_cvs WHERE id = ?', (id,))
-    return data
+
+    if data:
+        return data
+    else:
+        raise HTTPException(status_code=404, detail="No job ads/cvs found in this section")
 
 def find_names(id, perms: str):
+
     if perms == 'Seeker':
         data = read_query('SELECT companies_id FROM job_ads WHERE id = ?', (id,))
     else:
