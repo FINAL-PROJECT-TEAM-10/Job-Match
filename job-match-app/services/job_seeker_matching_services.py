@@ -72,9 +72,11 @@ def pending_list(cv_id):
     data = read_query('''
                     SELECT ja.id, ja.description, ja.min_salary, ja.max_salary,
                     l.city, ja.date_posted, jamc.date_matched, jamc.match_status, jamc.sender                    
-                    FROM job_ads as ja, locations as l, job_ads_has_mini_cvs as jamc, job_ads_has_locations as jal
-                    WHERE l.id= jal.locations_id AND jal.job_ads_id = ja.id
-                    AND jamc.match_status = "Pending" AND jamc.sender = "Company"
+                    FROM job_ads as ja
+                    JOIN job_ads_has_locations AS jal ON ja.id = jal.job_ads_id
+                    JOIN locations AS l ON l.id = jal.locations_id
+                    JOIN job_ads_has_mini_cvs AS jamc ON jamc.mini_cv_id = ja.id
+                    WHERE jamc.match_status = "Pending" AND jamc.sender = "Company"
                     AND ja.id = ?''', (cv_id,))
 
 
