@@ -121,3 +121,9 @@ def job_date_creation(job_ad_id):
      date = read_query('SELECT date_posted FROM job_ads WHERE id = ?', (job_ad_id,))
 
      return date[0][0]
+
+def find_matched_cvs(cv_id: int):
+
+    data = read_query('SELECT * FROM mini_cvs WHERE job_seekers_id = ? AND status = "Private"',(cv_id,))
+
+    return len(data)

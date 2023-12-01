@@ -2,7 +2,7 @@ from data.database import read_query, insert_query, update_query
 from app_models.job_seeker_models import JobSeekerInfo
 from app_models.job_seeker_models import JobSeeker
 from app_models.cv_models import CvCreation
-from services import admin_services, company_services, job_ads_services
+from services import admin_services, company_services, job_ads_services , job_seeker_matching_services
 from common.country_validators_helpers import find_country_by_city
 from common.job_seeker_status_check import recognize_status
 from datetime import datetime
@@ -67,6 +67,8 @@ def location_finder(location_id: int):
 def job_seeker_info_username(username: str):
     job_seeker = read_query('SELECT summary, employee_contacts_id, busy FROM job_seekers WHERE username = ?',
                             (username,))
+    data = read_query('SELECT id FROM job_seekers WHERE username = ?', (username,))
+
     status = recognize_status(job_seeker[0][2])
     location_id_contacts = location_id_from_contacts(job_seeker[0][1])
     location_seeker = location_finder(location_id_contacts)
@@ -76,7 +78,7 @@ def job_seeker_info_username(username: str):
     if not summary:
         summary = 'No summary'
 
-    return JobSeekerInfo(summary=summary, location=location, status=status)
+    return JobSeekerInfo(summary=summary, location=location, status=status, number_of_matches_from_diffrent_cvs=job_seeker_matching_services.find_matched_cvs(data[0][0]))
 
 
 def check_seeker_exists(username: str):
