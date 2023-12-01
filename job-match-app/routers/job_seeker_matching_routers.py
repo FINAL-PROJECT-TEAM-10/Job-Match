@@ -7,7 +7,7 @@ from fastapi import HTTPException
 job_seekers_matching_router = APIRouter(prefix='/job_seekers_match', tags=['Seeker Matching Section'])
 
 
-@job_seekers_matching_router.post('/company')
+@job_seekers_matching_router.post('/company', description= 'You can match your cv with a specific Job Ad.')
 def match_job_ad(job_ad_id: int, 
                   current_user_payload=Depends(get_current_user)):
     
@@ -28,7 +28,7 @@ def match_job_ad(job_ad_id: int,
 
     return job_seeker_matching_services.match_ad(job_ad_id, cv_id, seeker_id)
 
-@job_seekers_matching_router.get('/pending_list')
+@job_seekers_matching_router.get('/pending_list', description= 'You can view pending requests coming from different job ads.')
 def view_pending_list(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'seekers':
@@ -39,7 +39,7 @@ def view_pending_list(current_user_payload=Depends(get_current_user)):
     cv_id = job_seeker_matching_services.get_main_cv(seeker_id)
     return job_seeker_matching_services.pending_list(cv_id)
 
-@job_seekers_matching_router.put('/cancel')
+@job_seekers_matching_router.put('/cancel', description= 'You can cancel incoming match requests.')
 def cancel_match_request(job_ad_id: int,
                          current_user_payload=Depends(get_current_user)):
     

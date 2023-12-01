@@ -2,6 +2,7 @@ from data.database import read_query, insert_query, update_query
 from datetime import datetime
 from fastapi import HTTPException
 from mariadb import IntegrityError
+from services import job_ads_services,job_seeker_services
 
 
 def match_ad(job_ad_id: int, mini_cv_id: int, seeker_id: int):
@@ -64,7 +65,9 @@ def pending_list(cv_id):
 
     if data:
         job_ads = [{'Job AD ID': row[0], 'Job AD Description': job_ad_description(row[0]), 
-                    'Minimal Salary': job_min_salary(row[0]), 'Maximum Salary': job_max_salary(row[0]), 'AD created on': job_date_creation(row[0]),
+                    'Minimal Salary': job_min_salary(row[0]), 'Maximum Salary': job_max_salary(row[0]),
+                    "Preferred Location": job_seeker_services.get_cv_location_name(job_ads_services.get_cv_location_id(row[0])),
+                    'AD created on': job_date_creation(row[0]),
                     'Date of match request': row[2], 'Status': row[3],
                      'Sender': row[4]} for row in data]
         return job_ads
@@ -118,3 +121,9 @@ def job_date_creation(job_ad_id):
      date = read_query('SELECT date_posted FROM job_ads WHERE id = ?', (job_ad_id,))
 
      return date[0][0]
+
+def find_matched_cvs(cv_id: int):
+
+    data = read_query('SELECT * FROM mini_cvs WHERE job_seekers_id = ? AND status = "Private"',(cv_id,))
+
+    return len(data)

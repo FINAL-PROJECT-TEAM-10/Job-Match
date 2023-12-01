@@ -314,7 +314,7 @@ def filter_by_cv_salaries(job_ad_range, cvs_calculated_salaries):
                     'CV ID': key,
                     'Job Seeker Name': find_username_job_seeker(seeker_id),
                     'Description': description[0][0],
-                    "Preferred Location": job_seeker_services.get_cv_location_name(get_cv_location_id([0])),
+                    "Preferred Location": job_seeker_services.get_cv_location_name(get_cv_location_id(key)),
                     'Original Salary Range':  f'{original_cv_salary_range[0][0]} - {original_cv_salary_range[0][1]}',
                     'Threshold Salary Range': f'{int(min_salary_cv)} - {int(max_salary_cv)}',
                     }
