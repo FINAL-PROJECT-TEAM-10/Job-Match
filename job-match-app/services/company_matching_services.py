@@ -54,7 +54,9 @@ def pending_cvs(job_ad_id):
 
     if data:
         mini_cv = [{'Mini CV ID': row[1], 'Mini CV Description': mini_cv_description(row[0]), 
-                    'Minimal Salary': mini_cv_mini_salary(row[0]), 'Maximum Salary': mini_cv_max_salary(row[0]), 'CV created on': mini_cv_date_creation(row[0]),
+                    'Minimal Salary': mini_cv_mini_salary(row[0]), 'Maximum Salary': mini_cv_max_salary(row[0]), 
+                    "Preferred Location": job_seeker_services.get_cv_location_name(job_seeker_services.get_cv_location_id(row[0])),
+                    'CV created on': mini_cv_date_creation(row[0]),
                     'Date of match request': row[2], 'Status': row[3]
                      } for row in data]
         return mini_cv

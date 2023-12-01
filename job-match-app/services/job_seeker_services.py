@@ -2,7 +2,7 @@ from data.database import read_query, insert_query, update_query
 from app_models.job_seeker_models import JobSeekerInfo
 from app_models.job_seeker_models import JobSeeker
 from app_models.cv_models import CvCreation
-from services import admin_services, company_services
+from services import admin_services, company_services, job_ads_services
 from common.country_validators_helpers import find_country_by_city
 from common.job_seeker_status_check import recognize_status
 from datetime import datetime
@@ -358,7 +358,8 @@ def get_all_job_ads():
 
     if data:
         jb_ads = [{'Company': company_services.find_company_id_byusername_for_job_seeker(row[6]),
-                   'Job_Ad Description': row[1], 'Minimum Salary': row[2], 'Maximum Salary': row[3], 'Status': row[4],
+                   'Job_Ad Description': row[1], 'Minimum Salary': row[2], 'Maximum Salary': row[3], 
+                   "Preferred Location": get_cv_location_name(job_ads_services.get_cv_location_id(row[0])), 'Status': row[4],
                    'Date Posted': row[5]} for row in data]
         return jb_ads
     else:
@@ -521,7 +522,7 @@ def get_min_salary_and_max(cv_id):
     return salary
 
 
-def filter_by_salaries(current_cv_range, job_ads_calculated_salaries): #[2000, 5000] CV RANGE
+def filter_by_salaries(current_cv_range, job_ads_calculated_salaries):
     cv_min_salary = current_cv_range[0]
     cv_max_salary = current_cv_range[1]
 
@@ -540,10 +541,15 @@ def filter_by_salaries(current_cv_range, job_ads_calculated_salaries): #[2000, 5
                     'Job AD ID': key,
                     'Company Name': company_services.find_company_id_byusername_for_job_seeker(company_id),
                     'Description': description[0][0],
+                    "Prefered Location": get_cv_location_name(job_ads_services.get_cv_location_id(key)),
                     'Original Salary Range':  f'{original_salary_range_info[0][0]} - {original_salary_range_info[0][1]}',
                     'Threshold Salary Range': f'{int(min_salary_ad)} - {int(max_salary_ad)}',
                     }
                     result.append(filtered_ads)
+
+    if not result:
+        raise HTTPException(status_code=404, detail="There are no found cv's in this salary search range")
+        
     return result
 
 

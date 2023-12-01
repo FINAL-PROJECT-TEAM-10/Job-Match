@@ -1,6 +1,6 @@
 from fastapi.responses import JSONResponse
 from data.database import read_query
-from services import job_seeker_services
+from services import job_seeker_services, job_ads_services
 
 def percent_section_helper(current_sort, list_of_percentages, perms, matched_skills, unmatched_skills): 
 
@@ -80,6 +80,7 @@ def create_current_dict(company_id, job_ad_info, value, perms, matched_skills, u
             "Description": job_ad_info[0][1],
             "Minimum Salary": job_ad_info[0][2],
             "Maximum Salary": job_ad_info[0][3],
+            "Prefered Location": job_seeker_services.get_cv_location_name(job_ads_services.get_cv_location_id([0])),
             "Match percent based on your CV skills": f'{value}% / 100%',
             "Matched Skills from the Company Job AD": matched_skills_result,
             "Not matched Skills": unmatched_skills_result,
