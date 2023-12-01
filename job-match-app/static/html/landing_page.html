@@ -13,9 +13,11 @@
         <div class="header-content">
             <h1>WELCOME TO SKILL SYNC</h1>
             <nav class="navbar">
-                <ul class="nav-list">
-                    <li><a href="#">About</a></li>
-                    <li><a href="#">Contact</a></li>
+                <ul class="nav-list" id="navbarList">
+                    <li id="personalDashboard"><a href="/seeker_tab">Personal Dashboard</a></li>
+                    <li id="personalInfo"><a href="/seeker_section/personal_info">Personal Info</a></li>
+                    <li id="companyDashboard"><a href="/company_tab">Company Dashboard</a></li>
+                    <li id="companyInfo"><a href="#">Company Info</a></li>
                 </ul>
             </nav>
         </div>
@@ -32,12 +34,76 @@
             <a href="job_seeker_register" class="button job-seeker">JOB SEEKER</a>
             <a href="/company_register" class="button company">COMPANY</a>
             <h2>OR</h2>
-            <a href="/login" class="button company">LOGIN</a>
-            
+            <a href="/login" class="button company" id="loginButton">LOGIN</a>
+            <a href="#" class="button company" id="logoutButton">LOGOUT</a>
         </section>
     </div>
+
+    <script>
+        function updateNavigation() {
+            const navbarList = document.getElementById("navbarList");
+            const personalDashboard = document.getElementById("personalDashboard");
+            const personalInfo = document.getElementById("personalInfo");
+            const companyDashboard = document.getElementById("companyDashboard");
+            const companyInfo = document.getElementById("companyInfo");
+
+            const token = localStorage.getItem("access_token");
+            console.log(token)
+    
+            if (token) {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+    
+                const userRole = payload.group;
+                console.log(userRole)
+    
+                personalDashboard.style.display = "none";
+                personalInfo.style.display = "none";
+                companyDashboard.style.display = "none";
+                companyInfo.style.display = "none";
+    
+                if (userRole === "seekers") {
+                    personalDashboard.style.display = "block";
+                    personalInfo.style.display = "block";
+                } else if (userRole === "companies") {
+                    companyDashboard.style.display = "block";
+                    companyInfo.style.display = "block";
+                }
+            } else {
+                navbarList.style.display = "none";
+            }
+        }
+    
+        window.addEventListener("load", updateNavigation);
+    </script>
+
+        <!-- Logout logic -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const accessToken = localStorage.getItem("access_token");
+            
+                const loginButton = document.getElementById("loginButton");
+                const logoutButton = document.getElementById("logoutButton");
+            
+                if (accessToken) {
+                    loginButton.style.display = "none";
+                    logoutButton.style.display = "inline-block";
+                } else {
+                    loginButton.style.display = "inline-block";
+                    logoutButton.style.display = "none";
+                }
+            
+                logoutButton.addEventListener("click", function() {
+                    localStorage.removeItem("access_token");
+            
+                    window.location.href = '/'
+                    loginButton.style.display = "inline-block";
+                    logoutButton.style.display = "none";
+                });
+            });
+            </script>
 </body>
 </html>
+
 
 
 

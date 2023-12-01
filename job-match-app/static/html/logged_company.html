@@ -4,21 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/css/seeker_section.css">
+    <link rel="stylesheet" href="/static/css/logged_company.css">
     <link rel="shortcut icon" href="static/images/favicon.ico" type="image/x-icon">
     <script src="/static/js/loading_overlay_home.js"></script>
-    <script src="/static/js/get_username.js"></script>
+    <script src="/static/js/get_username_company.js"></script>
     <script src="/static/js/button_click_loader.js"></script>
     <title>Skill Sync</title>
 </head>
 
 <body>
+    <script>
+        const token = localStorage.getItem('access_token');
+
+        if (!token) {
+            window.location.href = '/login';
+        }
+    </script>
+
+
     <header>
         <div class="header-content">
             <h1 id="usernameHeader"></h1>
-            <h3>Seeker Dashboard</h3>
             <nav class="navbar">
                 <ul class="nav-list">
+                    <h3>Welcome to your company dashboard</h3>
                 </ul>
             </nav>
         </div>
@@ -30,28 +39,28 @@
     </header>
 
     <div class="sections-container">
-        <!-- Personal Info  -->
+        <!-- Company Section -->
         <section class="position-selection">
-            <h2>Personal Info</h2>
-            <a href="/seeker_section/personal_info" class="button">View, edit your personal info</a>
+            <h2>Company Section</h2>
+            <a href="/company_section" class="button">Everything for your company</a>
         </section>
 
-        <!-- Searching -->
+        <!-- Job Ad Section -->
         <section class="position-selection">
-            <h2>Searching</h2>
-            <a href="/seeker_section/searching" class="button">Search for Job Ads with filters</a>
+            <h2>Job Ad Section</h2>
+            <a href="#" class="button">Everything for your ADS</a>
         </section>
 
         <!-- Matching Section -->
         <section class="position-selection">
-            <h2>Test</h2>
-            <a href="#" class="button">Find Matching Jobs</a>
+            <h2>Matching Section</h2>
+            <a href="#" class="button">Find Employees</a>
         </section>
 
-        <!-- Image Section -->
+        <!-- Profile Section -->
         <section class="position-selection">
             <h2>Profile Section</h2>
-            <a href="/profile" class="button">Manage your profile</a>
+            <a href="#" class="button">Manage your profile</a>
         </section>
     </div>
 

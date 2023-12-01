@@ -58,19 +58,16 @@
 
         </form>
 
-        <div class="sections-container">
-            <div class="job-ad-card">
-            </div>
+        <ul id="show" class="professionals"></ul>
             <script>
+                const access_token = localStorage.getItem("access_token");
                 async function submitData(event) {
+                    event.preventDefault();
                     try {
-                        event.preventDefault(); // Prevent the default form submission
             
                         var form = document.getElementById('dataForm');
                         var formData = new FormData(form);
-                        const access_token = localStorage.getItem("access_token");
             
-                        // Convert FormData to URLSearchParams and set the desired parameter name
                         const queryParams = new URLSearchParams(formData);
                         queryParams.set('sort_percent', queryParams.get('status'));
                         queryParams.delete('status');
@@ -86,71 +83,56 @@
                         });
             
                         const data = await response.json();
+                        console.log(data)
             
-                        // Call a function to display job ads with the provided styling
                         displayJobAds(data);
                     } catch (error) {
                         console.error('Error fetching personal info:', error);
                     }
                 }
             
-                // Function to create and append a job ad card to the DOM
-                function createJobAdCard(jobAd) {
-                const cardContainer = document.createElement('div');
-                cardContainer.className = 'job-ad-card square-container'; // Add the 'square-container' class
+            function displayJobAds(data) {
+                            const showContainer = document.getElementById('show');
+                            showContainer.innerHTML = ''; // Clear existing content
 
-                // Create and append elements for each property in the job ad
-                for (const key in jobAd) {
-                    const value = jobAd[key];
-                    const propertyElement = document.createElement('p');
-                    propertyElement.textContent = `${key}: ${value}`;
-                    cardContainer.appendChild(propertyElement);
-                }
+                            data.forEach((jobAd) => {
+                                const listItem = document.createElement('li');
+                                listItem.className = 'job-ad-card';
 
-                document.body.appendChild(cardContainer); // Append the card to the body (you can change this to a different container)
-}
-            
-                // Function to display job ads with the provided styling
-                function displayJobAds(data) {
-                    // Clear existing job ads (if any)
-                    const existingJobAds = document.querySelectorAll('.job-ad-card');
-                    existingJobAds.forEach((card) => card.remove());
-            
-                    // Loop through each job ad in the data and create a card for it
-                    data.forEach(createJobAdCard);
-                }
-            
-                document.addEventListener('DOMContentLoaded', function () {
-                    // Additional initialization code if needed
-                });
+                                for (const key in jobAd) {
+                                    const value = jobAd[key];
+                                    const propertyElement = document.createElement('p');
+                                    propertyElement.textContent = `${key}: ${value}`;
+                                    listItem.appendChild(propertyElement);
+                                }
+
+                                showContainer.appendChild(listItem);
+                            });
+            }
             </script>
 
 
-<script>
-    function setStatus(status) {
-        selectedStatus = status;
-    
-        // Get all radio buttons
-        const radioButtons = document.getElementsByName('status');
-    
-        for (const radio of radioButtons) {
-            const label = radio.nextElementSibling;
-            if (radio.value === status) {
-                radio.checked = true;
-                label.classList.add('clicked');
-            } else {
-                radio.checked = false; 
-                label.classList.remove('clicked');
-            }
-        }
-    }
-    </script>
-    
-    
-    
-    
-    
+        <script>
+            function setStatus(status) {
+                selectedStatus = status;
 
+                const radioButtons = document.getElementsByName('status');
+            
+                for (const radio of radioButtons) {
+                    const label = radio.nextElementSibling;
+                    if (radio.value === status) {
+                        radio.checked = true;
+                        label.classList.add('clicked');
+                    } else {
+                        radio.checked = false; 
+                        label.classList.remove('clicked');
+                    }
+                }
+            }
+            </script>
+    
+    
+    
 </body>
 
 </html>

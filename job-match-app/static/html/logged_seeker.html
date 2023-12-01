@@ -13,12 +13,21 @@
 </head>
 
 <body>
+    <script>
+        const token = localStorage.getItem('access_token');
+
+        if (!token) {
+            window.location.href = '/login';
+        }
+    </script>
+
+
     <header>
         <div class="header-content">
             <h1 id="usernameHeader"></h1>
             <nav class="navbar">
                 <ul class="nav-list">
-                    <!-- Add navigation links here if needed -->
+                    <h3>Welcome to your dashboard</h3>
                 </ul>
             </nav>
         </div>

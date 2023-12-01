@@ -67,6 +67,32 @@ async def read_searching_page(request: Request):
 async def read_searching_percent_page(request: Request):
     return templates.TemplateResponse("percentage_search_seeker.html", {"request": request})
 
+#COMPANY SECTION FROM HERE
+@app.get('/company_tab', response_class=HTMLResponse, include_in_schema=False)
+async def read_company_tab(request: Request):
+    return templates.TemplateResponse("logged_company.html", {"request": request})
+
+@app.get('/company_section', response_class=HTMLResponse, include_in_schema=False)
+async def read_company_section(request: Request):
+    return templates.TemplateResponse("company_section.html", {"request": request})
+
+@app.get('/company_section/personal_info', response_class=HTMLResponse, include_in_schema=False)
+async def read_company_personal_info(request: Request):
+    return templates.TemplateResponse("personal_info_company.html", {"request": request})
+
+
+#PROFILE SECTION
+@app.get('/profile', response_class=HTMLResponse, include_in_schema=False)
+async def read_profile_tab(request: Request):
+    return templates.TemplateResponse("profile_section.html", {"request": request})
+
+
+#FORGOT PASSWORD
+@app.get('/login/forgot_password', response_class=HTMLResponse, include_in_schema=False)
+async def read_forgot_password_page(request: Request):
+    return templates.TemplateResponse("forgot_password.html", {"request": request})
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run('main:app', host="127.0.0.1", port=8000, reload=True)

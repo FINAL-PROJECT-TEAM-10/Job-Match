@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/profile_section.css">
+    <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
+    <script src="/static/js/loading_overlay_home.js"></script>
+    <script src="/static/js/get_username.js"></script>
+    <script src="/static/js/button_click_loader.js"></script>
+    <title>Skill Sync</title>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <h1 id="usernameHeader"></h1>
+            <h3>This Your Profile Dashboard</h3>
+            <nav class="navbar">
+                <ul class="nav-list">
+                    <!-- Add navigation links here if needed -->
+                </ul>
+            </nav>
+        </div>
+        <div class="header-logo">
+            <a class="site-logo" href="/">
+                <img src="/static/images/logo.png" alt="Homepage">
+            </a>
+        </div>
+    </header>
+    <section class="profile-section">
+        <h2>Your Profile</h2>
+        <div class="profile-info">
+            <div class="profile-picture">
+            </div>
+            <div class="profile-details">
+                <h3 id="profileName"></h3>
+                <h3 id="profileEmail"></h3>
+            </div>
+        </div>
+
+        <form id="uploadForm">
+            <label for="imageInput">Upload Profile Picture:</label>
+            <input type="file" id="imageInput" name="image_file" accept="image/*">
+            <button type="button" id="uploadButton">Upload</button>
+        </form>
+
+        <div class="error-container">
+            <p id="errorMessage"></p>
+            <p id="okRegister"></p>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('uploadButton').addEventListener('click', function () {
+                uploadPicture();
+            });
+        });
+    
+        function triggerFileInput() {
+            document.getElementById('imageInput').click();
+        }
+    
+        document.getElementById('imageInput').addEventListener('change', function () {
+        });
+    
+        function uploadPicture() {
+            var imageFileInput = document.getElementById('imageInput');
+            var imageFile = imageFileInput.files[0];
+    
+            if (imageFile) {
+                var formData = new FormData();
+                formData.append('image_file', imageFile);
+                const access_token = localStorage.getItem("access_token");
+                console.log(formData)
+    
+                fetch('profile/picture', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Authorization': `Bearer ${access_token}`
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error('Something went wrong');
+                        }
+                    })
+                    .then(data => {
+                        console.log(data);
+    
+                        document.getElementById('errorMessage').innerText = '';
+                        document.getElementById('okRegister').innerText = 'Image uploaded successfully.';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+    
+                        document.getElementById('okRegister').innerText = '';
+                        document.getElementById('errorMessage').innerText = 'Error uploading picture. Please try again.';
+                    });
+            }
+        }
+    </script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const access_token = localStorage.getItem("access_token");
+            fetch('/profile/picture',{
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${access_token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch profile picture');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const imageUrl = URL.createObjectURL(blob);
+                    console.log(imageUrl)
+
+                    document.querySelector('.profile-picture').innerHTML = `<img src="${imageUrl}" />`;
+                })
+                .catch(error => {
+                    console.error('Error:', error.message);
+                });
+        });
+    </script>
+
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+                    const access_token = localStorage.getItem("access_token");
+                    fetch('/profile/info',{
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${access_token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch profile picture');
+                        }
+                        return response.json()
+                    }).then(data =>{
+                        document.getElementById('profileName').innerText = `Username: ${data.username}`;
+                        document.getElementById('profileEmail').innerText = `Email: ${data.email}`;
+                    }).catch(error => {
+                        console.error(error);
+        });
+        })
+    </script>
+
+
+    
+</body>
+</html>

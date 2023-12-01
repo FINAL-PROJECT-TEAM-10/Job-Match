@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/css/personal_info_seeker.css">
+    <link rel="stylesheet" href="/static/css/personal_info_company.css">
     <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
     <script src="/static/js/loading_overlay_home.js"></script>
-    <script src="/static/js/get_username.js"></script>
+    <script src="/static/js/get_username_company.js"></script>
     <script src="/static/js/button_click_loader.js"></script>
     <title>Skill Sync</title>
 </head>
@@ -16,7 +16,7 @@
     <header>
         <div class="header-content">
             <h1 id="usernameHeader"></h1>
-            <h3>Your Personal Info</h3>
+            <h3>Your Company Personal Info</h3>
             <nav class="navbar">
                 <ul class="nav-list">
                     <!-- Add navigation links here if needed -->
@@ -33,7 +33,7 @@
     <div class="sections-container">
         <!-- Seeker Section -->
         <section class="position-selection">
-            <h2>View Personal Info</h2>
+            <h2>View Company Info</h2>
             <a href="#" class="button" id="viewButtonInfo">View</a>
             <div id="personalInfoContainer"></div>
         </div>
@@ -54,7 +54,7 @@
             document.getElementById('viewButtonInfo').addEventListener('click', async function () {
                 try {
 
-                    const response = await fetch('http://127.0.0.1:8000/job_seekers/personal_info', {
+                    const response = await fetch('http://127.0.0.1:8000/companies/information', {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${access_token}`,
@@ -68,11 +68,19 @@
                     console.log(data)
 
                     const personalInfoContainer = document.getElementById('personalInfoContainer');
-                    personalInfoContainer.innerHTML = '<h3>Your Personal Info</h3>';
+                    personalInfoContainer.innerHTML = '<h3>Your Company Info</h3>';
 
-                    personalInfoContainer.innerHTML += `<p>Current Summary: ${data.summary}</p>`;
-                    personalInfoContainer.innerHTML += `<p>Current Location: ${data.location}</p>`;
-                    personalInfoContainer.innerHTML += `<p>Current Status: ${data.status}</p>`;
+                    const data_info = data[0]; // Assuming there's only one company in the array
+                    console.log(data_info)
+
+                    personalInfoContainer.innerHTML += `<p>Company Name: ${data_info["Company Name"]}</p>`;
+                    personalInfoContainer.innerHTML += `<p>Company Description: ${data_info["Company Description"]}</p>`;
+                    personalInfoContainer.innerHTML += `<p>Company Email: ${data_info["Company Email"]}</p>`;
+                    personalInfoContainer.innerHTML += `<p>Company Address: ${data_info["Company Address"]}</p>`;
+                    personalInfoContainer.innerHTML += `<p>Company Telephone: ${data_info["Company Telephone"]}</p>`;
+                    personalInfoContainer.innerHTML += `<p>Company City: ${data_info["Company City"]}</p>`;
+                    personalInfoContainer.innerHTML += `<p>Company Country: ${data_info["Company Country"]}</p>`;
+                    personalInfoContainer.innerHTML += `<p>Active job ads: ${data_info["Active job ads"]}</p>`;
                 } catch (error) {
                     console.error('Error fetching personal info:', error);
                 }

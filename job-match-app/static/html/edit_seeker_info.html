@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/static/css/edit_personal_seeker.css">
     <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
     <script src="/static/js/loading_overlay_home.js"></script>
+    <script src="/static/js/button_click_loader.js"></script>
     <title>Skill Sync</title>
 </head>
 <body>
@@ -77,7 +78,6 @@
             },
     })
     .then(response => {
-        // Remove the "clicked" class after a delay
         setTimeout(() => {
             event.target.classList.remove('clicked');
         }, 300);
@@ -86,6 +86,8 @@
             return response.json();
         } else if (response.status == 422) {
             throw new Error("Fill all information");
+        } else if (response.status == 307){
+            window.location.href = '/login'
         } else {
             return response.json().then(data => {
                 throw new Error(data.detail || "An unexpected error occurred.");

@@ -1,6 +1,6 @@
 import io
 from time import time
-from http.client import HTTPException
+from fastapi import HTTPException
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Body, Query, UploadFile, File
@@ -20,8 +20,8 @@ profile_router = APIRouter(prefix='/profile', tags={'Profile info and password m
 @profile_router.get('/info', response_model=TokenInfo,
                     responses={200: {"description": "Informs the user of basic info, which is included in the token."}})
 def get_self(current_user_payload=Depends(get_current_user)):
-    return JSONResponse(status_code=200,
-                        content=current_user_payload)
+    
+    return current_user_payload
 
 
 @profile_router.patch('/password')
@@ -40,7 +40,7 @@ def update_password(credentials: PasswordUpdater,
 
 
 @profile_router.patch('/password/forgotten')
-def forgotten_password_activation_link(email: str, user_type: str):
+def forgotten_password_activation_link(email: str = Query(), user_type: str = Query()):
     fake_payload = {}
     if user_type == 'admins':
         user = admin_services.get_admin_by_email(email)
@@ -49,8 +49,8 @@ def forgotten_password_activation_link(email: str, user_type: str):
     elif user_type == 'job_seekers':
         user = job_seeker_services.get_seeker_by_email(email)
     else:
-        return JSONResponse(status_code=400,
-                            content='Invalid user type category.'
+        raise HTTPException(status_code=400,
+                            detail='Invalid user type category.'
                                     'Categories can be: admins, companies, job_seekers')
 
     if user:
@@ -63,8 +63,8 @@ def forgotten_password_activation_link(email: str, user_type: str):
         authorization_services.store_activation_token(activation_token)
         password_reset_activation_email(user, activation_token)
 
-    return JSONResponse(status_code=200,
-                        content='If there is a user with such an email, an email will be sent.')
+    raise HTTPException(status_code=200,
+                        detail='If there is a user with such an email, an email will be sent.')
 
 
 @profile_router.get('/password/reset/')
@@ -94,8 +94,6 @@ def password_reset(activation_token: str = Query()):
 
     return JSONResponse(status_code=200,
                         content='Your password has been updated. A new password has been sent to your email.')
-    # return JSONResponse(status_code=200,
-    #                     content=response.json())
 
 
 

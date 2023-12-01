@@ -33,7 +33,7 @@ async function getUsernameData() {
     })
     .then(data => {
         const usernameHeader = document.getElementById('usernameHeader');
-        usernameHeader.textContent = `Hello ${data.username}`;
+        usernameHeader.textContent = `Your company: ${data.username}`;
     })
     .catch(error => {
         console.error('Error', error);
