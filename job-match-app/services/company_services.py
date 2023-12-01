@@ -8,6 +8,8 @@ from common.country_validators_helpers import *
 from services import job_seeker_services
 
 
+# TODO: Consider using models to process data selects:
+
 def read_companies():
     data = read_query('SELECT * FROM companies')
     return data
@@ -142,6 +144,7 @@ def edit_company_information(username: str, description: str, city: str, address
     return JSONResponse(status_code=200, content="You successfully edited your personal company information")
 
 
+# TODO: rename: this returns username by id, not the other way around
 def find_company_id_byusername_for_job_seeker(id: int):
     data = read_query('SELECT username FROM companies WHERE id = ?', (id,))
     return data[0][0]

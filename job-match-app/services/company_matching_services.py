@@ -35,6 +35,8 @@ def match_cv(job_ad_id: int, mini_cv_id: int):
                         (job_ad_id, mini_cv_id))
         raise HTTPException(status_code= 200, detail = 'You have already send out a request to the job seeker')
 
+
+# TODO: Should be renamed to "is_main_cv"
 def get_main_cv(seeker_id):
 
     cv_id = read_query('SELECT id FROM mini_cvs WHERE id = ? AND main_cv = 1', (seeker_id,))

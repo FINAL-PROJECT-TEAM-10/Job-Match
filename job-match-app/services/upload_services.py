@@ -7,7 +7,7 @@ def upload_picture(payload, image_data):
         return update_query('''UPDATE admins SET picture = ? WHERE id = ?''',
                             (image_data, payload['id']))
     if payload['group'] == 'companies':
-        return update_query('''UPDATE companies SET picture = ? WHERE id = ?''',
+        return update_query('''UPDATE companies SET logo = ? WHERE id = ?''',
                             (image_data, payload['id']))
     if payload['group'] == 'seekers':
         return update_query('''UPDATE job_seekers SET picture = ? WHERE id = ?''',
@@ -21,13 +21,13 @@ def get_picture(user_id, user_group):
 
         return next((row[0] for row in image_data), None)
     if user_group == 'companies':
-        image_data = read_query('''SELECT picture FROM companies WHERE id = ?''',
-                          (user_id,))
+        image_data = read_query('''SELECT logo FROM companies WHERE id = ?''',
+                                (user_id,))
 
         return next((row[0] for row in image_data), None)
     if user_group == 'seekers':
         image_data = read_query('''SELECT picture FROM job_seekers WHERE id = ?''',
-                          (user_id,))
+                                (user_id,))
 
         return next((row[0] for row in image_data), None)
 

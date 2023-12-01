@@ -55,10 +55,10 @@ def forgotten_password_activation_link(email: str, user_type: str):
 
     if user:
         activation_data = ActivationDataModel(id=user.id,
-                                         email=user.email,
-                                         username=user.username,
-                                         group=user.group,
-                                         purpose='forgotten_password')
+                                              email=user.email,
+                                              username=user.username,
+                                              group=user.group,
+                                              purpose='forgotten_password')
         activation_token = authorization_services.create_activation_token(activation_data)
         authorization_services.store_activation_token(activation_token)
         password_reset_activation_email(user, activation_token)
@@ -96,8 +96,6 @@ def password_reset(activation_token: str = Query()):
                         content='Your password has been updated. A new password has been sent to your email.')
     # return JSONResponse(status_code=200,
     #                     content=response.json())
-
-
 
 
 @profile_router.get('/picture')
