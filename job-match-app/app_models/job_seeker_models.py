@@ -14,6 +14,7 @@ class JobSeekerInfo(BaseModel):
     summary: Optional[str]
     location : Optional[str]
     status: Optional[str]
+    number_of_matches_from_diffrent_cvs: Optional[int]
 
 class JobSeekerOptionalInfo:
     username: Optional[str] = None

@@ -2,7 +2,7 @@ from data.database import read_query, insert_query, update_query
 from datetime import date,datetime
 from app_models.job_ads_models import Job_ad
 from fastapi.responses import JSONResponse
-from services import job_seeker_services
+from services import job_seeker_services, company_services
 from mariadb import IntegrityError
 from common.percent_sections import percent_section_helper, find_names
 from common.salary_threshold_calculator_seeker import calculate_cv_salaries
@@ -18,13 +18,34 @@ def find_name_by_id(id: int):
     data = read_query('SELECT username from companies WHERE id = ?',(id,))
     return data[0][0]
 
-def create_job_add(description: str, min_salary: int, max_salary: int, status: str,company_id: int, requirements_names: list, requirements_levels: list) -> Job_ad:
+def create_job_add(description: str, location: str, remote_location: str, min_salary: int, 
+                   max_salary: int, status: str,company_id: int, requirements_names: list, requirements_levels: list) -> Job_ad:
 
     date_posted = datetime.now()
     
-    create_job = insert_query('INSERT INTO job_ads(description,min_salary,max_salary,status,date_posted,companies_id) VALUES (?,?,?,?,?,?)', 
-                              (description,min_salary,max_salary,status,date_posted,company_id,))
-    
+    location_id = read_query('SELECT id FROM locations WHERE city = ?',(location,))
+
+    if location:
+        job_id = insert_query('INSERT INTO job_ads(description, min_salary, max_salary, status, date_posted, companies_id) VALUES (?,?,?,?,?,?)', 
+                              (description, min_salary, max_salary, status, date_posted, company_id,))
+        if remote_location == "No":
+            remote_status = False
+            specific_location_without_remote = insert_query('INSERT INTO job_ads_has_locations(job_ads_id, locations_id, remote_status) VALUES (?,?,?)',
+                                             (job_id, location_id[0][0], remote_status,))
+        else:
+            remote_status = True
+            remote_with_specific_location = insert_query('INSERT INTO job_ads_has_locations(job_ads_id, locations_id, remote_status) VALUES (?,?,?)',
+                                                (job_id, location_id[0][0], remote_status,))
+    else:
+        if remote_location == "Yes":
+           job_id = insert_query('INSERT INTO job_ads(description, min_salary, max_salary, status, date_posted, companies_id) VALUES (?,?,?,?,?,?)', 
+                              (description, min_salary, max_salary, status, date_posted, company_id,))
+           remote_status = True
+           remote_has_specific_location = insert_query('INSERT INTO job_ads_has_locations(job_ads_id, remote_status) VALUES (?,?)',
+                                                (job_id, remote_status,))
+        else:
+            raise HTTPException(status_code=404, detail="You have to choose a location. City / Remote or Both ")
+
     job_ad_id = find_job_ad_by_id(company_id, description)
 
     try:
@@ -40,7 +61,16 @@ def create_job_add(description: str, min_salary: int, max_salary: int, status: s
     except IntegrityError:
         raise HTTPException(status_code=404, detail="Duplicating description or requirements")
 
-    return Job_ad(description=description, min_salary=min_salary, max_salary=max_salary, date_posted=date_posted, status = status)
+    try:
+
+        location_name = company_services.find_location(location_id[0][0])
+        location_name = location_name[0][0]
+
+    except IndexError:
+        location_name = "No location Set"
+
+    return Job_ad(description=description, location_name=location_name, remote_status= remote_status, 
+                  min_salary=min_salary, max_salary=max_salary, date_posted=date_posted, status = status)
 
 
 
@@ -50,15 +80,17 @@ def check_company_exist(name: str):
 
 def view_all_job_ads(username: str):
     company_id = find_company(username)
-    data = read_query('SELECT * FROM job_ads WHERE companies_id = ?',(company_id[0][0],))
+    data = read_query('SELECT * FROM job_ads WHERE companies_id = ? AND status = "active"',(company_id[0][0],))
     return data
 
-def view_job_ads_by_id(ads_id: int):
+def view_job_ads_by_id(ads_id: int, status: str):
 
-    data = read_query('SELECT * FROM job_ads WHERE companies_id = ?', (ads_id,))
+    data = read_query('SELECT * FROM job_ads WHERE companies_id = ? AND status = ?',(ads_id, status))
 
     if data:
-        ads = [{'Job Ad ID': row[0],'Job Description': row[1], 'Minimum Salary': row[2], 'Maximum Salary': row[3], 'Status': row[4], 'Date Posted': row[5]} for row in data]
+        ads = [{'Job Ad ID': row[0], 'Job Description': row[1], 'Minimum Salary': row[2],
+                'Maximum Salary': row[3], "Location": job_seeker_services.get_cv_location_name(get_cv_location_id(row[0])),
+                  'Status': row[4], 'Date Posted': row[5]} for row in data]
         return ads
     else:
         raise HTTPException(status_code=404, detail='There are no current job ads found')
@@ -83,6 +115,11 @@ def check_owner_company(job_ad_id, company_id):
 
     return bool(data)
 
+def find_a_company_owner_by_id(job_ad_id):
+
+    data = read_query('SELECT * FROM job_ads WHERE id = ? AND status = "active"', (job_ad_id,))
+
+    return bool(data)
 
 def check_company_information(job_ad_id: int, company_id: str):
 
@@ -102,6 +139,8 @@ def edit_job_ads(company_id:int, job_ads_id: int, min_salary: int, max_salary: i
 
             if level.isnumeric():
                 level = int(level)
+                if level > 3:
+                    raise HTTPException(status_code=400, detail='Invalid level of skill provided!')
                 converted_level = job_seeker_services.convert_level(level)
 
             else:
@@ -186,7 +225,7 @@ def get_current_job_ad(job_ads_id:int):
     return result_pairs
 
 
-def calculate_percantage_cv(job_ad_id, sorting, perms, salary = None):
+def calculate_percantage_cv(job_ad_id, sorting, perms, threshold_percent, salary = None):
 
     ads = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_ad_id,))
 
@@ -198,7 +237,7 @@ def calculate_percantage_cv(job_ad_id, sorting, perms, salary = None):
 
     if sorting == 'All':
         cv_range = salary
-        salary_based_on_cv = calculate_cv_salaries(get_main_cv)
+        salary_based_on_cv = calculate_cv_salaries(get_main_cv, threshold_percent)
 
     for current_mini_cv in get_main_cv:
         current_cv_skills = get_main_cv_skills(current_mini_cv[0])
@@ -269,6 +308,7 @@ def filter_by_cv_salaries(job_ad_range, cvs_calculated_salaries):
             max_salary_cv = value[1]
             seeker_id = find_name_for_job_seeker(key)
             description = read_query('SELECT description FROM mini_cvs WHERE id = ? AND job_seekers_id = ?', (key, seeker_id))
+            original_cv_salary_range = read_query('SELECT min_salary, max_salary FROM mini_cvs WHERE id = ?', (key,))
 
 
             if job_ad_min_salary >= min_salary_cv and job_ad_max_salary <= max_salary_cv:
@@ -277,8 +317,9 @@ def filter_by_cv_salaries(job_ad_range, cvs_calculated_salaries):
                     'CV ID': key,
                     'Job Seeker Name': find_username_job_seeker(seeker_id),
                     'Description': description[0][0],
-                    'Minimum Salary': min_salary_cv,
-                    'Maximum Salary': max_salary_cv
+                    "Preferred Location": job_seeker_services.get_cv_location_name(get_cv_location_id(key)),
+                    'Original Salary Range':  f'{original_cv_salary_range[0][0]} - {original_cv_salary_range[0][1]}',
+                    'Threshold Salary Range': f'{int(min_salary_cv)} - {int(max_salary_cv)}',
                     }
                     result.append(filtered_ads)
 
@@ -294,3 +335,13 @@ def find_name_for_job_seeker(id_of_name: int):
 def find_username_job_seeker(id: int):
     data = read_query('SELECT username FROM job_seekers WHERE id = ?',(id,))
     return data[0][0]
+
+def get_cv_location_id(cv_id):
+
+    try:
+        cv_location = read_query('SELECT locations_id FROM job_ads_has_locations WHERE job_ads_id = ?', (cv_id,))
+        cv_location = cv_location[0][0]
+    except IndexError:
+        cv_location = 0
+
+    return cv_location
