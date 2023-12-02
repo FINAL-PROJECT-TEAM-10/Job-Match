@@ -13,6 +13,7 @@ class Company(BaseModel):
     country: str
     city: str
     blocked: Optional[bool] = 0
+    approved: Optional[bool] = 1
 
     @classmethod
     def from_query_result(cls, id, username, email,

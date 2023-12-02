@@ -98,6 +98,7 @@ class AdminServices_Should(unittest.TestCase):
         self.assertEqual(None, result)
 
     def test_createAdmin_ReturnsAdmin(self):
+        # This test is a bit slow because pass is hashed and solved in the service
         created_admin = Admin(username='testing_admin', first_name='first_name',
                               last_name='last_name', email='email@email.email',
                               address='111 address lane', phone='5551234',
