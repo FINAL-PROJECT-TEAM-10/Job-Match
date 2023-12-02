@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/css/percentage_search_seeker.css">
+    <link rel="stylesheet" href="/static/css/pending_matches_seeker.css">
     <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
     <script src="/static/js/loading_overlay_home.js"></script>
     <script src="/static/js/get_username.js"></script>
@@ -16,7 +16,7 @@
     <header>
         <div class="header-content">
             <h1 id="usernameHeader"></h1>
-            <h3>Check where you can match and apply</h3>
+            <h3>View all pending requests for match you have</h3>
             <nav class="navbar">
                 <ul class="nav-list">
                     <li><a href="/seeker_section/searching">Back To Searching</li></a>
@@ -32,29 +32,15 @@
     </header>
     <div class="form-container">
         <form id="dataForm">
-            <label>Sort matches by:</label>
+            <label>All pending requests</label>
             <br>
             <br>
             <div id="statusButtons">
-                <input type="radio" id="bestRadio" name="status" value="Best" onclick="setStatus('Best')">
-                <label for="bestRadio">Best</label>
-                
-                <input type="radio" id="veryGoodRadio" name="status" value="Very good" onclick="setStatus('Very good')">
-                <label for="veryGoodRadio">Very good</label>
-
-                <input type="radio" id="goodRadio" name="status" value="Good" onclick="setStatus('Good')">
-                <label for="goodRadio">Good</label>
-
-                <input type="radio" id="badRadio" name="status" value="Bad" onclick="setStatus('Bad')">
-                <label for="badRadio">Bad</label>
-
-                <input type="radio" id="worstRadio" name="status" value="Worst" onclick="setStatus('Worst')">
-                <label for="worstRadio">Worst</label>
 
             </div>
 
             <div class="button-container">
-                <button type="submit" onclick="submitData(event)">Search</button>
+                <button type="submit" onclick="submitData(event)">View</button>
             </div>
 
         </form>
@@ -71,14 +57,7 @@
                     event.preventDefault();
                     try {
             
-                        var form = document.getElementById('dataForm');
-                        var formData = new FormData(form);
-            
-                        const queryParams = new URLSearchParams(formData);
-                        queryParams.set('sort_percent', queryParams.get('status'));
-                        queryParams.delete('status');
-            
-                        const url = `http://127.0.0.1:8000/seekers/search/job_ads?${queryParams}`;
+                        const url = `http://127.0.0.1:8000/seekers/`;
             
                         const response = await fetch(url, {
                             method: 'GET',
@@ -177,26 +156,6 @@
                     localStorage.setItem('currentPage', page);
                 }
             </script>
-
-
-        <script>
-            function setStatus(status) {
-                selectedStatus = status;
-
-                const radioButtons = document.getElementsByName('status');
-            
-                for (const radio of radioButtons) {
-                    const label = radio.nextElementSibling;
-                    if (radio.value === status) {
-                        radio.checked = true;
-                        label.classList.add('clicked');
-                    } else {
-                        radio.checked = false; 
-                        label.classList.remove('clicked');
-                    }
-                }
-            }
-            </script> 
 </body>
 
 </html>

@@ -63,6 +63,10 @@ async def read_seeker_edit_info(request: Request):
 async def read_searching_page(request: Request):
     return templates.TemplateResponse("searching_seeker.html", {"request": request})
 
+@app.get('/seeker_section/searching/pending_requests', response_class=HTMLResponse, include_in_schema=False)
+async def read_pending_page(request: Request):
+    return templates.TemplateResponse("pending_matches_seeker.html", {"request": request})
+
 @app.get('/seeker_section/searching/percantage', response_class=HTMLResponse, include_in_schema=False)
 async def read_searching_percent_page(request: Request):
     return templates.TemplateResponse("percentage_search_seeker.html", {"request": request})
