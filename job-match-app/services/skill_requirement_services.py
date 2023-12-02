@@ -26,7 +26,7 @@ def create_skill(skill: SkillRequirement):
 def get_all_skills():
     skill_data = read_query('''SELECT * FROM skills_or_requirements''')
 
-    return (SkillRequirement.from_query_results(*row) for row in skill_data)
+    return list(SkillRequirement.from_query_results(*row) for row in skill_data)
 
 
 def get_skill_by_id(id: int):
