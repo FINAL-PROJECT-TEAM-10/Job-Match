@@ -17,6 +17,11 @@ header {
     align-items: center;
 }
 
+#errorContainer {
+    color: red;
+    margin-top: 10px;
+}
+
 header h1 {
     color: #2ecc71;
 }

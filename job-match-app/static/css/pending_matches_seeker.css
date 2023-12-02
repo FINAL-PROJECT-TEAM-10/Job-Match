@@ -21,6 +21,11 @@ header h1 {
     color: #2ecc71;
 }
 
+#errorContainer {
+    color: red;
+    margin-top: 10px; /* Optional: Add some space between errors and other content */
+}
+
 body {
     font-family: 'Arial', sans-serif;
     margin: 0;

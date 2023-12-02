@@ -32,9 +32,7 @@
     </header>
     <div class="form-container">
         <form id="dataForm">
-            <label>All pending requests</label>
-            <br>
-            <br>
+            <p>*CLICK* View all pending requests *CLICK*</p>
             <div id="statusButtons">
 
             </div>
@@ -50,14 +48,14 @@
         </div>
 
         <div id="pagination"></div>
+        <div id="errorContainer"></div>
         
             <script>
                 const access_token = localStorage.getItem("access_token");
                 async function submitData(event) {
                     event.preventDefault();
                     try {
-            
-                        const url = `http://127.0.0.1:8000/seekers/`;
+                        const url = `http://127.0.0.1:8000/seekers/match/pending`;
             
                         const response = await fetch(url, {
                             method: 'GET',
@@ -68,7 +66,6 @@
                         });
             
                         const data = await response.json();
-                        console.log(data)
             
                         displayJobAds(data);
                     } catch (error) {
@@ -88,10 +85,27 @@
 
                 const currentPage = parseInt(localStorage.getItem('currentPage')) || 1;
 
+                if (!Array.isArray(data)) {
+                    const noAdsMessage = document.createElement('div');
+                    noAdsMessage.className = 'job-ad-card'
+                    noAdsMessage.textContent = 'No pending ads';
+                    showContainer.appendChild(noAdsMessage);
+                    return;
+                }
                 data.forEach((jobAd, index) => {
                     const page = Math.ceil((index + 1) / itemsPerPage);
                     const listItem = document.createElement('div');
                     listItem.className = `job-ad-card page-${page}`;
+
+                    const matchButton = document.createElement('button');
+                    matchButton.textContent = 'Match';
+                    matchButton.addEventListener('click', () => handleMatch('match', jobAd["Job AD ID"]));
+                    listItem.appendChild(matchButton);
+
+                    const cancelButton = document.createElement('button');
+                    cancelButton.textContent = 'Cancel';
+                    cancelButton.addEventListener('click', () => cancelMatch('cancel', jobAd["Job AD ID"]));
+                    listItem.appendChild(cancelButton);
 
                     for (const key in jobAd) {
                         const value = jobAd[key];
@@ -105,13 +119,9 @@
                         keyElement.textContent = `${key}: `;
                         valueElement.textContent = value;
 
-                        if (key.toLowerCase().includes('matched')) {
-                            const isMatched = key.toLowerCase().includes('matched skills from');
-                            const all_requirements = value.toLowerCase().includes('you meet all the');
-                            valueElement.style.color = isMatched ? '#2ecc71' : '#e74c3c';
-                            if (all_requirements) {
-                                valueElement.style.color = all_requirements ? '#2ecc71' : '#e74c3c';
-                            }
+                        if (key.toLowerCase().includes('status')) {
+                            const isMatched = key.toLowerCase().includes('status');
+                            valueElement.style.color = isMatched ? '#F4E406' : '#e74c3c';
                         }
 
                         pairContainer.appendChild(keyElement);
@@ -123,38 +133,93 @@
                     showContainer.appendChild(listItem);
                 });
 
-                for (let page = 1; page <= totalPages; page++) {
-                    const pageButton = document.createElement('button');
-                    pageButton.textContent = page;
-                    pageButton.addEventListener('click', () => showPage(page));
-                    paginationContainer.appendChild(pageButton);
+                        for (let page = 1; page <= totalPages; page++) {
+                            const pageButton = document.createElement('button');
+                            pageButton.textContent = page;
+                            pageButton.addEventListener('click', () => showPage(page));
+                            paginationContainer.appendChild(pageButton);
 
-                    if (page === currentPage) {
-                        pageButton.classList.add('active');
+                            if (page === currentPage) {
+                                pageButton.classList.add('active');
+                            }
+                        }
                     }
-                }
-            }
 
-                    function showPage(page) {
-                    const currentPage = parseInt(localStorage.getItem('currentPage')) || 1;
+                    async function handleMatch(action, jobId) {
+                        try {
+                            const url = `http://127.0.0.1:8000/seekers/match/company?job_ad_id=${jobId}`;
 
-                    const allAds = document.querySelectorAll('.job-ad-card');
-                    allAds.forEach((ad) => {
-                        ad.style.display = 'none';
-                    });
+                            const response = await fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${access_token}`,
+                                    'Content-Type': 'application/json',
+                                },
+                            });
 
-                    const newAds = document.querySelectorAll(`.job-ad-card.page-${page}`);
-                    newAds.forEach((ad) => {
-                        ad.style.display = 'block';
-                    });
+                            const data = await response.json();
+                            console.log(data);
 
-                    const paginationButtons = document.querySelectorAll('#pagination button');
-                    paginationButtons.forEach((button, index) => {
-                        button.classList.toggle('active', index + 1 === page);
-                    });
+                            await reloadCards();
 
-                    localStorage.setItem('currentPage', page);
-                }
+                            if (action === 'match') {
+                                alert('Matched successfully!');
+                            } else if (action === 'cancel') {
+                                alert('Cancelled successfully!');
+                            }
+                        } catch (error) {
+                            console.error(`Error ${action}ing job ad:`, error);
+                        }
+                    }
+
+                    async function cancelMatch(action, jobId) {
+                        try {
+                            const url = `http://127.0.0.1:8000/seekers/match/cancel?job_ad_id=${jobId}`;
+
+                            const response = await fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${access_token}`,
+                                    'Content-Type': 'application/json',
+                                },
+                            });
+
+                            const data = await response.json();
+                            console.log(data);
+
+
+                            await reloadCards();
+
+                            if (action === 'cancel') {
+                                alert('Cancelled successfully!');
+                            } else if (action === 'match') {
+                                alert('Matched successfully!');
+                            }
+                        } catch (error) {
+                            console.error(`Error ${action}ing job ad:`, error);
+                        }
+                    }
+
+                    async function reloadCards() {
+                        try {
+                            const url = `http://127.0.0.1:8000/seekers/match/pending`;
+
+                            const response = await fetch(url, {
+                                method: 'GET',
+                                headers: {
+                                    'Authorization': `Bearer ${access_token}`,
+                                    'Content-Type': 'application/json'
+                                },
+                            });
+
+                            const data = await response.json();
+                            console.log(data);
+
+                            displayJobAds(data);
+                        } catch (error) {
+                            console.error('Error reloading cards:', error);
+                        }
+                    }
             </script>
 </body>
 

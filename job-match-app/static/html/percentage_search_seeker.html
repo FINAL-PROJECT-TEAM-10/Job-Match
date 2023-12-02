@@ -64,6 +64,7 @@
         </div>
 
         <div id="pagination"></div>
+        <div id="errorContainer"></div>
         
             <script>
                 const access_token = localStorage.getItem("access_token");
@@ -89,9 +90,8 @@
                         });
             
                         const data = await response.json();
-                        console.log(data)
-            
-                        displayJobAds(data);
+
+                        displayJobAds(data)
                     } catch (error) {
                         console.error('Error fetching personal info:', error);
                     }
@@ -109,10 +109,23 @@
 
                 const currentPage = parseInt(localStorage.getItem('currentPage')) || 1;
 
+                if (!Array.isArray(data) || data.length === 0) {
+                    const noAdsMessage = document.createElement('div');
+                    noAdsMessage.className = 'job-ad-card';
+                    noAdsMessage.textContent = 'No pending ads';
+                    showContainer.appendChild(noAdsMessage);
+                    return;
+                }
+
                 data.forEach((jobAd, index) => {
                     const page = Math.ceil((index + 1) / itemsPerPage);
                     const listItem = document.createElement('div');
                     listItem.className = `job-ad-card page-${page}`;
+
+                    const matchButton = document.createElement('button');
+                    matchButton.textContent = 'Match';
+                    matchButton.addEventListener('click', () => handleMatch('match', jobAd["Job AD ID"]));
+                    listItem.appendChild(matchButton);
 
                     for (const key in jobAd) {
                         const value = jobAd[key];
@@ -176,6 +189,32 @@
 
                     localStorage.setItem('currentPage', page);
                 }
+
+                async function handleMatch(action, jobId) {
+                        try {
+                            const url = `http://127.0.0.1:8000/seekers/match/company?job_ad_id=${jobId}`;
+
+                            const response = await fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${access_token}`,
+                                    'Content-Type': 'application/json',
+                                },
+                            });
+
+                            const data = await response.json();
+                            console.log(data);
+
+
+                            if (response.status !== 200) {
+                            const errorContainer = document.getElementById('errorContainer');
+                            errorContainer.innerHTML = `<p>Error ${action}ing job ad: ${data.detail}</p>`;
+                            return;
+                            }
+                        } catch (error) {
+                            console.error(`Error ${action}ing job ad:`, error);
+                        }
+                    }
             </script>
 
 

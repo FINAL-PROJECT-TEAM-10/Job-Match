@@ -4,7 +4,7 @@ from services import job_seeker_matching_services
 from fastapi import HTTPException
 
 
-job_seekers_matching_router = APIRouter(prefix='/job_seekers_match', tags=['Seeker Matching Section'])
+job_seekers_matching_router = APIRouter(prefix='/seekers/match', tags=['Seeker Matching Section'])
 
 
 @job_seekers_matching_router.post('/company', description= 'You can match your cv with a specific Job Ad.')
@@ -28,7 +28,7 @@ def match_job_ad(job_ad_id: int,
 
     return job_seeker_matching_services.match_ad(job_ad_id, cv_id, seeker_id)
 
-@job_seekers_matching_router.get('/pending_list', description= 'You can view pending requests coming from different job ads.')
+@job_seekers_matching_router.get('/pending', description= 'You can view pending requests coming from different job ads.')
 def view_pending_list(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'seekers':
