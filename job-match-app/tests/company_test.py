@@ -378,13 +378,12 @@ class CompanyServices_Should(unittest.TestCase):
         # Once we begin to pass the argument as object the find patches should
         # be removed.
         with (patch('services.company_services.update_query') as update_query, \
-                patch('services.company_services.update_queries_transaction') as update_queries_transaction, \
-                patch('services.company_services.insert_query') as insert_query, \
-                patch('services.company_services.find_company_id_byusername') as fcib, \
-                patch('services.company_services.find_country_by_city') as fcbc, \
-                patch('services.job_seeker_services.find_location_id_by_city_country') as flibcc, \
-                patch('services.job_seeker_services.find_location_id_by_city') as flibc):
-
+              patch('services.company_services.update_queries_transaction') as update_queries_transaction, \
+              patch('services.company_services.insert_query') as insert_query, \
+              patch('services.company_services.find_company_id_byusername') as fcib, \
+              patch('services.company_services.find_country_by_city') as fcbc, \
+              patch('services.job_seeker_services.find_location_id_by_city_country') as flibcc, \
+              patch('services.job_seeker_services.find_location_id_by_city') as flibc):
             update_query.return_value = None
             insert_query.return_value = None
             fcib.return_value = 1
@@ -394,7 +393,6 @@ class CompanyServices_Should(unittest.TestCase):
 
             with patch('services.job_seeker_services.find_location_by_city') as find_location_by_city:
                 find_location_by_city.return_value = True
-
 
         self.assertIsInstance(company, Company)
 
@@ -440,7 +438,6 @@ class CompanyServices_Should(unittest.TestCase):
                 # Update query below has to include both this cases calls and the previous cases calls
                 # That is where the magic number comes from instead of 3
                 self.assertTrue(update_query.call_count == 6 or update_queries_transaction.call_count == 1)
-
 
     def test_editCompanyInformationUsesInsertQuery_IfLocationDoesNotExist(self):
         with patch('services.job_seeker_services.find_location_by_city') as find_location_by_city:
@@ -512,7 +509,6 @@ class CompanyServices_Should(unittest.TestCase):
             get_location_name.return_value = 'placeholder_loc_name'
             get_location_id.return_value = 'placeholder_loc_id'
 
-
             read_query.return_value = [
                 (1, 100, 200, 'description1', 'status', 'date', 1, 1),
                 (2, 200, 300, 'description2', 'status', 'date', 1, 1),
@@ -527,11 +523,9 @@ class CompanyServices_Should(unittest.TestCase):
         self.assertEqual('description3', cvs[2]['Cv Description'])
         self.assertEqual(300, cvs[2]['Minimum Salary'])
         self.assertEqual(400, cvs[2]['Maximum Salary'])
-        self.assertEqual(400, cvs[2]['Maximum Salary'])
         self.assertEqual('placeholder_loc_name', cvs[2]['Location'])
         self.assertEqual('status', cvs[2]['Status'])
         self.assertEqual('date', cvs[2]['Date Posted'])
-
 
     def test_viewAllCvsReturnsNotFound_IfNoCvs(self):
         with patch('services.company_services.read_query') as read_query:
