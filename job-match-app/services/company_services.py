@@ -138,7 +138,7 @@ def edit_company_information(username: str, description: str, city: str, address
         location_id = job_seeker_services.find_location_id_by_city(city)
         update_query('UPDATE company_contacts SET locations_id = ? WHERE company_id = ?', (location_id, company_id,))
 
-    raise HTTPException(status_code=200, detailt="You successfully edited your personal company information")
+    raise HTTPException(status_code=200, detail="You successfully edited your personal company information")
 
 
 def find_company_id_byusername_for_job_seeker(id: int):

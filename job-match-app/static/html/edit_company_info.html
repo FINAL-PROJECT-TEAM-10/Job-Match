@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/css/edit_personal_seeker.css">
+    <link rel="stylesheet" href="/static/css/edit_company_info.css">
     <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
     <script src="/static/js/loading_overlay_home.js"></script>
     <script src="/static/js/button_click_loader.js"></script>
@@ -12,10 +12,11 @@
 <body>
     <header>
         <div class="header-content">
-            <h1>Personal Info Edit</h1>
+            <h1>Company Info Edit</h1>
             <nav class="navbar">
-                <h3>Edit your personal info</h3>
+                <h3>Edit your company info</h3>
                 <ul class="nav-list">
+                    <li><a href="/company_section/personal_info">Back To Personal Info</a></li>
                 </ul>
             </nav>
         </div>
@@ -28,11 +29,17 @@
 
     <div class="form-container">
         <form id="dataForm">
-            <label for="seeker_summary">Summary:</label>
-            <input type="text" id="seeker_summary" name="summary" placeholder="new_summary">
+            <label for="company_description">Description:</label>
+            <input type="text" id="company_description" name="description" placeholder="description">
         
-            <label for="seeker_password">City:</label>
-            <input type="text" id="seeker_city" name="city" placeholder="city">
+            <label for="company_city">City:</label>
+            <input type="text" id="company_city" name="city" placeholder="city">
+
+            <label for="company_address">Address:</label>
+            <input type="text" id="company_address" name="address" placeholder="address">
+
+            <label for="company_telephone">Telephone:</label>
+            <input type="text" id="company_telephone" name="telephone" placeholder="telephone">
 
         
             <div class="button-container">
@@ -60,7 +67,7 @@
     const access_token = localStorage.getItem("access_token");
     console.log(formData)
 
-    fetch('http://127.0.0.1:8000/seekers/information/edit', {
+    fetch('http://127.0.0.1:8000/companies/information/edit', {
             method: 'PUT',
             body: formData,
             headers: {
@@ -111,7 +118,7 @@
 
 
     function reload_stats(){
-        fetch('http://127.0.0.1:8000/seekers/information', {
+        fetch('http://127.0.0.1:8000/companies/information', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${access_token}`,
@@ -121,10 +128,13 @@
             return response.json();
         }).then(data => {
             const personalInfoContainer = document.getElementById('personalInfoContainer');
-            personalInfoContainer.innerHTML = '<h3>Your Personal Info</h3>';
-            personalInfoContainer.innerHTML += `<p>Current Summary: ${data.summary}</p>`;
-            personalInfoContainer.innerHTML += `<p>Current Location: ${data.location}</p>`;
-            personalInfoContainer.innerHTML += `<p>Current Status: ${data.status}</p>`;
+            const result_data = data[0]
+            personalInfoContainer.innerHTML = '<h3>Your Company Info</h3>';
+
+            personalInfoContainer.innerHTML += `<p>Current Description: ${result_data["Company Description"]}</p>`;
+            personalInfoContainer.innerHTML += `<p>Current City: ${result_data["Company City"]}</p>`;
+            personalInfoContainer.innerHTML += `<p>Current Address: ${result_data["Company Address"]}</p>`;
+            personalInfoContainer.innerHTML += `<p>Current Telephone: ${result_data["Company Telephone"]}</p>`;
         });
     }
 }
@@ -136,7 +146,7 @@
         try {
             const access_token = localStorage.getItem("access_token");
 
-            const response = await fetch('http://127.0.0.1:8000/seekers/information', {
+            const response = await fetch('http://127.0.0.1:8000/companies/information', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${access_token}`,
@@ -145,13 +155,15 @@
             });
 
             const data = await response.json();
+            const result_data = data[0]
 
             const personalInfoContainer = document.getElementById('personalInfoContainer');
-            personalInfoContainer.innerHTML = '<h3>Your Personal Info</h3>';
+            personalInfoContainer.innerHTML = '<h3>Your Company Info</h3>';
 
-            personalInfoContainer.innerHTML += `<p>Current Summary: ${data.summary}</p>`;
-            personalInfoContainer.innerHTML += `<p>Current Location: ${data.location}</p>`;
-            personalInfoContainer.innerHTML += `<p>Current Status: ${data.status}</p>`;
+            personalInfoContainer.innerHTML += `<p>Current Description: ${result_data["Company Description"]}</p>`;
+            personalInfoContainer.innerHTML += `<p>Current City: ${result_data["Company City"]}</p>`;
+            personalInfoContainer.innerHTML += `<p>Current Address: ${result_data["Company Address"]}</p>`;
+            personalInfoContainer.innerHTML += `<p>Current Telephone: ${result_data["Company Telephone"]}</p>`;
         } catch (error) {
             console.error('Error fetching personal info:', error);
         }
@@ -180,7 +192,7 @@ function setStatus(status) {
 <script>
     function redirectToAnotherPage(event) {
         event.preventDefault()
-        window.location.href = '/seeker_section/personal_info';
+        window.location.href = '/company_section/personal_info';
     }
 </script>
 

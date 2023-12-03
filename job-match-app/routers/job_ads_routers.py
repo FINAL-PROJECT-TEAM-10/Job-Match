@@ -87,9 +87,9 @@ def view_active_or_archived_job_ads(status: str = Query(enum= ['active', 'archiv
     return get_company_ads
 
 @job_ads_router.put('/edit/information', description= 'You can edit your job ad from this section.', tags={'Job Ads Section'})
-def edit_your_job_ad(job_ad_id: int = Query(), description: str = Query(None), min_salary: int = Query(None), 
-                     max_salary: int = Query(None), 
-                     requirements: str = Query(None, description= 'Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'), 
+def edit_your_job_ad(job_ad_id: int = Form(), description: str = Form(None), min_salary: int = Form(None), 
+                     max_salary: int = Form(None), 
+                     requirements: str = Form(None, description= 'Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'), 
                      current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'companies':

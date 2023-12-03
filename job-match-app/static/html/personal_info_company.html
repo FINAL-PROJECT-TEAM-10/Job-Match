@@ -43,7 +43,7 @@
         <div class="sections-container">
         <section class="position-selection">
             <h2>Edit Personal Info</h2>
-            <a href="/seeker_section/personal_info/edit" class="button">Edit</a>
+            <a href="/company_section/personal_info/edit" class="button">Edit</a>
         </section>
     </div>
 
@@ -70,8 +70,7 @@
                     const personalInfoContainer = document.getElementById('personalInfoContainer');
                     personalInfoContainer.innerHTML = '<h3>Your Company Info</h3>';
 
-                    const data_info = data[0]; // Assuming there's only one company in the array
-                    console.log(data_info)
+                    const data_info = data[0];
 
                     personalInfoContainer.innerHTML += `<p>Company Name: ${data_info["Company Name"]}</p>`;
                     personalInfoContainer.innerHTML += `<p>Company Description: ${data_info["Company Description"]}</p>`;

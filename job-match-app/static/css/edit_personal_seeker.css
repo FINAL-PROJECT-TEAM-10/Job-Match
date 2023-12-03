@@ -7,6 +7,7 @@ body {
     color: #fff;
 }
 
+
 header {
     background: linear-gradient(to right, #242424, #2e2e2e);
     color: #fff;
@@ -19,6 +20,13 @@ header {
 
 header h1 {
     color: #2ecc71;
+}
+
+.header-content {
+    position: absolute;
+    top: 9%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .header-logo {
@@ -223,3 +231,4 @@ input:focus:required:invalid {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+

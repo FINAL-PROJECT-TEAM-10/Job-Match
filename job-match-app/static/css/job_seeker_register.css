@@ -188,3 +188,10 @@ input:focus:required:invalid {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+.header-content {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}

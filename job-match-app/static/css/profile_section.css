@@ -36,6 +36,13 @@ header h1 {
     text-align: center;
 }
 
+.header-content {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
 .sections-container {
     display: flex;
     justify-content: center;
@@ -83,12 +90,18 @@ header h1 {
 .nav-list {
     list-style: none;
     display: flex;
-    margin: 0;
-    padding: 0;
+    margin: 10px 10px;
+    padding: 20px 30px;
+    position: relative;
 }
 
 .nav-list li {
-    margin-right: 20px;
+    margin-right: 10px;
+    margin-left: 30px;
+}
+
+#personalInfo{
+    margin-left: auto;
 }
 
 .nav-list a {
@@ -102,6 +115,7 @@ header h1 {
 .nav-list a:hover {
     color: #2ecc71;
 }
+
 
 .nav-list a::after {
     content: '';

@@ -94,10 +94,10 @@ def your_company_information(current_user_payload=Depends(get_current_user)):
     return all_information
 
 @companies_router.put('/information/edit', description= 'You can edit your private company information from this section.', tags= ['Company Section'])
-def edit_your_company_information(description: str = Query(None),
-                             city: str = Query(None),
-                             address: str = Query(None),
-                             telephone: int = Query(None),
+def edit_your_company_information(description: str = Form(None),
+                             city: str = Form(None),
+                             address: str = Form(None),
+                             telephone: int = Form(None),
                              current_user_payload=Depends(get_current_user)
                              ):
      

@@ -88,6 +88,34 @@ async def read_company_section(request: Request):
 async def read_company_personal_info(request: Request):
     return templates.TemplateResponse("personal_info_company.html", {"request": request})
 
+@app.get('/company_section/personal_info/edit', response_class=HTMLResponse, include_in_schema=False)
+async def read_edit_company_info(request: Request):
+    return templates.TemplateResponse("edit_company_info.html", {"request": request})
+
+@app.get('/company_section/searching', response_class=HTMLResponse, include_in_schema=False)
+async def read_searching_company(request: Request):
+    return templates.TemplateResponse("searching_company.html", {"request": request})
+
+@app.get('/company_section/searching/percentage', response_class=HTMLResponse, include_in_schema=False)
+async def read_searching_percent(request: Request):
+    return templates.TemplateResponse("percentage_search_company.html", {"request": request})
+
+@app.get('/company_section/searching/pending_requests', response_class=HTMLResponse, include_in_schema=False)
+async def read_pending_requests(request: Request):
+    return templates.TemplateResponse("pending_matches_company.html", {"request": request})
+
+@app.get('/company_section/job_ad', response_class=HTMLResponse, include_in_schema=False)
+async def read_job_ad_section(request: Request):
+    return templates.TemplateResponse("job_ad_section.html", {"request": request})
+
+@app.get('/company_section/job_ad/edit', response_class=HTMLResponse, include_in_schema=False)
+async def read_job_ad_section(request: Request):
+    return templates.TemplateResponse("edit_job_ad.html", {"request": request})
+
+@app.get('/company_section/job_ad/create', response_class=HTMLResponse, include_in_schema=False)
+async def read_job_ad_section(request: Request):
+    return templates.TemplateResponse("job_ad_create.html", {"request": request})
+
 
 #PROFILE SECTION
 @app.get('/profile', response_class=HTMLResponse, include_in_schema=False)

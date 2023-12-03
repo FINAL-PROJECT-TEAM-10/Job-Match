@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/pending_matches_company.css">
+    <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
+    <script src="/static/js/loading_overlay_home.js"></script>
+    <script src="/static/js/get_username.js"></script>
+    <script src="/static/js/button_click_loader.js"></script>
+    <title>Skill Sync</title>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <h1 id="usernameHeader"></h1>
+            <h3>View all pending requests for match you have</h3>
+            <nav class="navbar">
+                <ul class="nav-list">
+                    <li><a href="/seeker_section/searching">Back To Searching</li></a>
+                    <li><a href="/seeker_section">Back to your dashboard</li></a>
+                </ul>
+            </nav>
+        </div>
+        <div class="header-logo">
+            <a class="site-logo" href="/">
+                <img src="/static/images/logo.png" alt="Homepage">
+            </a>
+        </div>
+    </header>
+    <div class="form-container">
+        <form id="dataForm">
+            <p>View all pending requests</p>
+            <label for="jobAdId">Job Ad ID:</label>
+            <input type="number" id="jobAdId" name="job_ad_id" placeholder="Enter Job Ad ID" required>
+            <div id="statusButtons">
+
+            </div>
+
+            <div class="button-container">
+                <button type="submit" onclick="submitData(event)">View</button>
+            </div>
+
+        </form>
+
+        <div class="sections-container">
+            <div id="show"></div>
+        </div>
+
+        <div id="pagination"></div>
+        <div id="errorContainer"></div>
+        
+            <script>
+                const access_token = localStorage.getItem("access_token");
+                async function submitData(event) {
+                    event.preventDefault();
+                    try {
+                        const form = document.getElementById('dataForm');
+                        const formData = new FormData(form);
+                        const jobAdId = formData.get('job_ad_id');
+                        const url = `http://127.0.0.1:8000/companies/match/requests?job_ad_id=${jobAdId}`;
+            
+                        const response = await fetch(url, {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${access_token}`,
+                                'Content-Type': 'application/json'
+                            },
+                        });
+            
+                        const data = await response.json();
+            
+                        displayJobAds(data);
+                    } catch (error) {
+                        console.error('Error fetching personal info:', error);
+                    }
+                }
+            
+                function displayJobAds(data) {
+                const showContainer = document.getElementById('show');
+                const paginationContainer = document.getElementById('pagination');
+
+                showContainer.innerHTML = '';
+                paginationContainer.innerHTML = '';
+
+                const itemsPerPage = 3;
+                const totalPages = Math.ceil(data.length / itemsPerPage);
+
+                const currentPage = parseInt(localStorage.getItem('currentPage')) || 1;
+
+                if (!Array.isArray(data)) {
+                    const noAdsMessage = document.createElement('div');
+                    noAdsMessage.className = 'job-ad-card'
+                    noAdsMessage.textContent = 'No pending ads';
+                    showContainer.appendChild(noAdsMessage);
+                    return;
+                }
+                data.forEach((jobAd, index) => {
+                    const page = Math.ceil((index + 1) / itemsPerPage);
+                    const listItem = document.createElement('div');
+                    listItem.className = `job-ad-card page-${page}`;
+
+
+                    const matchButton = document.createElement('button');
+                    matchButton.textContent = 'Match';
+                    matchButton.addEventListener('click', () => handleMatch('match', jobAd["Mini CV ID"]));
+                    listItem.appendChild(matchButton);
+
+                    const cancelButton = document.createElement('button');
+                    cancelButton.textContent = 'Cancel';
+                    cancelButton.addEventListener('click', () => cancelMatch('cancel', jobAd["Mini CV ID"]));
+                    listItem.appendChild(cancelButton);
+
+                    for (const key in jobAd) {
+                        const value = jobAd[key];
+
+                        const pairContainer = document.createElement('div');
+                        pairContainer.className = 'key-value-pair';
+
+                        const keyElement = document.createElement('span');
+                        const valueElement = document.createElement('span');
+
+                        keyElement.textContent = `${key}: `;
+                        valueElement.textContent = value;
+
+                        if (key.toLowerCase().includes('status')) {
+                            const isMatched = key.toLowerCase().includes('status');
+                            valueElement.style.color = isMatched ? '#F4E406' : '#e74c3c';
+                        }
+
+                        pairContainer.appendChild(keyElement);
+                        pairContainer.appendChild(valueElement);
+
+                        listItem.appendChild(pairContainer);
+                    }
+
+                    showContainer.appendChild(listItem);
+                });
+
+                        for (let page = 1; page <= totalPages; page++) {
+                            const pageButton = document.createElement('button');
+                            pageButton.textContent = page;
+                            pageButton.addEventListener('click', () => showPage(page));
+                            paginationContainer.appendChild(pageButton);
+
+                            if (page === currentPage) {
+                                pageButton.classList.add('active');
+                            }
+                        }
+                    }
+
+                    async function handleMatch(action,cv_id) {
+                        try {
+                            const form = document.getElementById('dataForm');
+                            const formData = new FormData(form);
+                            const jobAdId = formData.get('job_ad_id');
+                            const miniCvId = cv_id;
+
+                            const url = `http://127.0.0.1:8000/companies/match/cv?job_ad_id=${jobAdId}&mini_cv_id=${miniCvId}`;
+
+                            const response = await fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${access_token}`,
+                                    'Content-Type': 'application/json',
+                                },
+                            });
+
+                            const data = await response.json();
+                            console.log(data);
+
+
+                            if (response.status !== 200) {
+                            const errorContainer = document.getElementById('errorContainer');
+                            errorContainer.innerHTML = `<p>Error ${action}ing job ad: ${data.detail}</p>`;
+                            return;
+                            }else{
+                                errorContainer.innerHTML = `<p>${data.detail}</p>`; 
+                            }
+                        } catch (error) {
+                            console.error(`Error ${action}ing job ad:`, error);
+                        }
+                    }
+
+                    async function cancelMatch(action,cv_id) {
+                        try {
+                            const form = document.getElementById('dataForm');
+                            const formData = new FormData(form);
+                            const jobAdId = formData.get('job_ad_id');
+                            const miniCvId = cv_id;
+
+                            const url = `http://127.0.0.1:8000/companies/match/cancel?job_ad_id=${jobAdId}&mini_cv_id=${miniCvId}`;
+
+                            const response = await fetch(url, {
+                                method: 'PUT',
+                                headers: {
+                                    'Authorization': `Bearer ${access_token}`,
+                                    'Content-Type': 'application/json',
+                                },
+                            });
+
+                            const data = await response.json();
+                            console.log(data);
+
+
+                            if (response.status !== 200) {
+                            const errorContainer = document.getElementById('errorContainer');
+                            errorContainer.innerHTML = `<p>Error ${action}ing job ad: ${data.detail}</p>`;
+                            return;
+                            }else{
+                                errorContainer.innerHTML = `<p>${data.detail}</p>`; 
+                            }
+                        } catch (error) {
+                            console.error(`Error ${action}ing job ad:`, error);
+                        }
+                    }
+
+                    async function reloadCards() {
+                        try {
+                            const form = document.getElementById('dataForm');
+                            const formData = new FormData(form);
+                            const jobAdId = formData.get('job_ad_id');
+                            const url = `http://127.0.0.1:8000/companies/match/requests?job_ad_id=${jobAdId}`;
+
+                            const response = await fetch(url, {
+                                method: 'GET',
+                                headers: {
+                                    'Authorization': `Bearer ${access_token}`,
+                                    'Content-Type': 'application/json'
+                                },
+                            });
+
+                            const data = await response.json();
+
+                            displayJobAds(data);
+                        } catch (error) {
+                            console.error('Error reloading cards:', error);
+                        }
+                    }
+            </script>
+</body>
+
+</html>

@@ -7,6 +7,7 @@ body {
     color: #fff;
 }
 
+
 header {
     background: linear-gradient(to right, #242424, #2e2e2e);
     color: #fff;
@@ -15,23 +16,17 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: relative;
-}
-
-.header-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
 }
 
 header h1 {
     color: #2ecc71;
-    text-align: center;
 }
 
-.header-content h1{
-    text-align: center;
+.header-content {
+    position: absolute;
+    top: 9%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .header-logo {
@@ -48,13 +43,18 @@ header h1 {
 .nav-list {
     list-style: none;
     display: flex;
-    margin: 0;
-    padding: 0;
+    margin: 10px 10px;
+    padding: 20px 30px;
     position: relative;
 }
 
 .nav-list li {
-    margin-right: 20px;
+    margin-right: 30px;
+    margin-left: 30px;
+}
+
+#personalInfo{
+    margin-left: auto;
 }
 
 .nav-list a {
@@ -68,6 +68,7 @@ header h1 {
 .nav-list a:hover {
     color: #2ecc71;
 }
+
 
 .nav-list a::after {
     content: '';
@@ -196,34 +197,84 @@ input:focus:required:invalid {
     height: 50px;
     animation: spin 1s linear infinite;
 }
+#personalInfoContainer {
+    background: linear-gradient(to right, #242424, #2e2e2e);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+#statusButtons {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+#statusButtons input[type="radio"] {
+    display: none;
+}
+
+#statusButtons label {
+    display: inline-block;
+    margin-right: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background: linear-gradient(to right, #242424, #2e2e2e);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+#statusButtons label:hover {
+    background: rgba(13, 228, 103, 0.712)
+}
+
+#statusButtons input[type="radio"]:checked + label {
+    background: #05e061;
+}
 
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
 
-.button-container a {
-    text-decoration: none;
+select {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 5px;
     color: #fff;
-    position: relative;
+    transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
 }
 
-.button-container a:hover {
-    color: #12e269;
+select:focus {
+    background: #555;
+    border-color: #777;
+    transform: scale(1.05);
 }
 
-.button-container a::after {
-    content: '';
-    display: block;
-    width: 0;
-    height: 2px;
-    background-color: #27ae60;
-    position: absolute;
-    bottom: -3px;
-    left: 0;
-    transition: width 0.3s ease;
+select::-ms-expand {
+    display: none;
 }
 
-.button-container a:hover::after {
-    width: 100%;
+select::-webkit-select {
+    appearance: none;
+    padding-right: 20px;
+    background: url('path/to/arrow.png') no-repeat right center;
+}
+
+select:required:valid, select:required:invalid {
+    border: 1px solid #2ecc71;
+}
+
+select:focus:required, select:focus:required:invalid {
+    outline: none;
+    box-shadow: 0 0 5px rgba(46, 204, 113, 0.8);
+}
+
+select:focus:required:invalid {
+    box-shadow: 0 0 5px rgba(231, 76, 60, 0.8);
 }

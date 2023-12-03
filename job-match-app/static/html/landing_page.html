@@ -30,10 +30,10 @@
     
     <div class="square-container">
         <section class="position-selection">
-            <h2>REGISTER AS:</h2>
-            <a href="job_seeker_register" class="button job-seeker">JOB SEEKER</a>
-            <a href="/company_register" class="button company">COMPANY</a>
-            <h2>OR</h2>
+            <h2 id="register-text">REGISTER</h2>
+            <a href="job_seeker_register" class="button job-seeker" id="job-seeker-button">JOB SEEKER</a>
+            <a href="/company_register" class="button company" id="company-button">COMPANY</a>
+            <h2 id="sign-button">SIGN IN</h2>
             <a href="/login" class="button company" id="loginButton">LOGIN</a>
             <a href="#" class="button company" id="logoutButton">LOGOUT</a>
         </section>
@@ -46,6 +46,10 @@
             const personalInfo = document.getElementById("personalInfo");
             const companyDashboard = document.getElementById("companyDashboard");
             const companyInfo = document.getElementById("companyInfo");
+            const register_text = document.getElementById('register-text')
+            const registerJobSeekerButton = document.getElementById('job-seeker-button')
+            const registerCompanyButton = document.getElementById('company-button')
+            const signButton = document.getElementById('sign-button')
 
             const token = localStorage.getItem("access_token");
             console.log(token)
@@ -60,6 +64,18 @@
                 personalInfo.style.display = "none";
                 companyDashboard.style.display = "none";
                 companyInfo.style.display = "none";
+                register_text.textContent = 'Your personal dashboard:'
+                if (userRole == 'seekers'){
+                registerJobSeekerButton.textContent = 'Personal Dashboard'
+                signButton.textContent = 'SIGN OUT'
+                registerJobSeekerButton.href = '/seeker_tab'
+                registerCompanyButton.style.display = 'none'
+                } else if (userRole === "companies") {
+                registerCompanyButton.textContent = 'Company Dashboard'
+                signButton.textContent = 'SIGN OUT'
+                registerCompanyButton.href = '/company_tab'
+                registerJobSeekerButton.style.display = 'none'
+                }
     
                 if (userRole === "seekers") {
                     personalDashboard.style.display = "block";
