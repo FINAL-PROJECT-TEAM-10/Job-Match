@@ -1,7 +1,7 @@
 import io
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends, Body, HTTPException
 
 from fastapi.responses import JSONResponse, StreamingResponse
 
@@ -39,18 +39,18 @@ admin_router = APIRouter(prefix='/admin',tags={'Only for Admins'})
 })
 def add_admin(registration_details: Admin, password: Annotated[str, Body()], current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'admins':
-        return JSONResponse(status_code=403,
-                            content='Only admins can register other admins.')
+        raise HTTPException(status_code=403,
+                            detail='Only admins can register other admins.')
 
     if admin_services.admin_exists(registration_details):
-        return JSONResponse(status_code=409,
-                            content=f'Admin with username {registration_details.username} already exists.')
+        raise HTTPException(status_code=409,
+                            detail=f'Admin with username {registration_details.username} already exists.')
 
     validate_location(registration_details.city, registration_details.country)
 
     if registration_details.group != 'admins':
-        return JSONResponse(status_code=400,
-                            content='This is an endpoint for creating admins only.')
+        raise HTTPException(status_code=400,
+                            detail='This is an endpoint for creating admins only.')
     new_admin = admin_services.create_admin(registration_details, password)
     return JSONResponse(status_code=201,
                         content=new_admin.json())
@@ -59,8 +59,8 @@ def add_admin(registration_details: Admin, password: Annotated[str, Body()], cur
 @admin_router.delete('/temporary_tokens', description='Admin can delete all temporary tokens. Use with caution.')
 def delete_all_temp_tokens(current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'admins':
-        return JSONResponse(status_code=403,
-                            content='Only admins can register other admins.')
+        raise HTTPException(status_code=403,
+                            detail='Only admins can register other admins.')
 
     admin_services.delete_temp_tokens()
 
@@ -75,11 +75,11 @@ def get_admin_avatar(id: int, current_user_payload=Depends(get_current_user)):
     image_data = upload_services.get_picture(id, 'admins')
 
     if not admin_services.admin_exists_by_id(id):
-        return JSONResponse(status_code=404,
-                            content='No such admin.')
+        raise HTTPException(status_code=404,
+                            detail='No such admin.')
     if image_data is None:
-        return JSONResponse(status_code=404,
-                            content='No associated picture with the admin.')
+        raise HTTPException(status_code=404,
+                            detail='No associated picture with the admin.')
 
     return StreamingResponse(io.BytesIO(image_data), media_type="image/jpeg")
 

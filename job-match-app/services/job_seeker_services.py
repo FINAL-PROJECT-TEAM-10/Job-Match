@@ -310,6 +310,7 @@ def get_cv_location_name(location_id):
     return location_name
 
 
+
 def check_owner_cv(cv_id, seeker_id):
     data = read_query('SELECT * FROM mini_cvs WHERE id = ? AND job_seekers_id = ?', (cv_id, seeker_id))
 

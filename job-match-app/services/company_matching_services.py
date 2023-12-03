@@ -35,6 +35,8 @@ def match_cv(job_ad_id: int, mini_cv_id: int):
                         (job_ad_id, mini_cv_id))
         raise HTTPException(status_code= 200, detail = 'You have already send out a request to the job seeker')
 
+
+# TODO: Should be renamed to "is_main_cv"
 def get_main_cv(seeker_id):
 
     cv_id = read_query('SELECT id FROM mini_cvs WHERE id = ? AND main_cv = 1', (seeker_id,))
@@ -64,6 +66,7 @@ def pending_cvs(job_ad_id):
         raise HTTPException(status_code=404, detail='There are no pending matches.')
     
 
+# TODO: These should be mini_cv_id, not job_ad_id
 def mini_cv_description(job_ad_id):
 
      desc = read_query('SELECT description FROM mini_cvs WHERE id = ?', (job_ad_id,))
@@ -95,6 +98,7 @@ def cancel_request(job_ad_id, mini_cv_id):
        update_query('UPDATE job_ads_has_mini_cvs SET match_status = "Canceled" WHERE job_ad_id = ? AND mini_cv_id = ? AND sender = "Seeker"',
                     (job_ad_id, mini_cv_id))
 
+    # TODO: Consider having this in the if block
     raise HTTPException(status_code=200, detail=f'You canceled the match request for cv with id: {job_ad_id}')
      
 def check_if_canceled(job_ad_id, mini_cv_id):
