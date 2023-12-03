@@ -66,6 +66,7 @@ def pending_cvs(job_ad_id):
         raise HTTPException(status_code=404, detail='There are no pending matches.')
     
 
+# TODO: These should be mini_cv_id, not job_ad_id
 def mini_cv_description(job_ad_id):
 
      desc = read_query('SELECT description FROM mini_cvs WHERE id = ?', (job_ad_id,))

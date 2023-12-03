@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime
 
 from unittest.mock import Mock, patch
 
@@ -97,10 +98,24 @@ class CompanyMatching_Should(unittest.TestCase):
                 self.assertEqual(200, conflict.exception.status_code)
 
     def test_isMainCvReturnsTrue_IfMainCv(self):
-        pass
+        seeker_id = 1
+        with patch('services.company_matching_services.read_query') as read_query:
+            read_query.return_value = [
+                (1,)
+            ]
+
+            result = company_matching_services.get_main_cv(seeker_id)
+
+        self.assertTrue(result)
 
     def test_isMainCvReturnsFalse_IfNotMainCv(self):
-        pass
+        seeker_id = 1
+        with patch('services.company_matching_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = company_matching_services.get_main_cv(seeker_id)
+
+        self.assertFalse(result)
 
     def test_matchingExistsReturnsTrue_IfMatch(self):
         job_ad = fake_job_ad()
@@ -124,34 +139,147 @@ class CompanyMatching_Should(unittest.TestCase):
 
         self.assertFalse(exists)
 
+    # Below needs to be refactored to Return a List of CVs once we
+    # move to objects fully at a future point. Since this is an important method
+    # for the current state of the app, it was still tested.
+    # SELECTING CV creator and location info with one QUERY should be the goal.
+    # Currently, copy-pasted from test_successfulMatchesReturnsDictInList_IfMatches
+    # Could be done with a setup/teardown because of similar test.
     def test_pendingCvsReturnsDictInList_IfMiniCv(self):
-        pass
+        job_ad = fake_job_ad()
+        with patch('services.company_matching_services.read_query') as read_query, \
+                patch('services.company_matching_services.mini_cv_description') as get_description, \
+                patch('services.company_matching_services.mini_cv_mini_salary') as get_min_salary, \
+                patch('services.company_matching_services.mini_cv_max_salary') as get_max_salary, \
+                patch('services.company_matching_services.mini_cv_date_creation') as get_date_created, \
+                patch('services.job_seeker_services.get_cv_location_name') as get_location_name, \
+                patch('services.job_seeker_services.get_cv_location_id') as get_location_id:
+            get_description.return_value = 'description'
+            get_min_salary.return_value = 100
+            get_max_salary.return_value = 200
+            get_date_created.return_value = 'created_date'
+            get_location_name.return_value = 'placeholder_loc_name'
+            get_location_id.return_value = 'placeholder_loc_id'
+
+            read_query.return_value = [
+                (1, 2, 'matched_date', 'match_status', 'sender')
+            ]
+
+            cvs = company_matching_services.pending_cvs(job_ad.id)
+
+        self.assertIsInstance(cvs, list)
+        self.assertIsInstance(cvs[0], dict)
+        self.assertEqual(2, cvs[0]['Mini CV ID'])
+        self.assertEqual('description', cvs[0]['Mini CV Description'])
+        self.assertEqual(100, cvs[0]['Minimal Salary'])
+        self.assertEqual(200, cvs[0]['Maximum Salary'])
+        self.assertEqual('placeholder_loc_name', cvs[0]['Preferred Location'])
+        self.assertEqual('match_status', cvs[0]['Status'])
+        self.assertEqual('created_date', cvs[0]['CV created on'])
+        self.assertEqual('matched_date', cvs[0]['Date of match request'])
+
+    def test_successfulMatchesRaisesNotFound_IfNoMatches(self):
+        job_ad = fake_job_ad()
+        with patch('services.company_matching_services.read_query') as read_query:
+            read_query.return_value = []
+
+            with self.assertRaises(HTTPException) as conflict:
+                cvs = company_matching_services.pending_cvs(job_ad.id)
+
+        self.assertEqual(404, conflict.exception.status_code)
 
     def test_miniCvDescriptionReturnsString(self):
-        pass
+        cv = fake_mini_cv()
+        cv.description = 'description'
+        with patch('services.company_matching_services.read_query') as read_query:
+            read_query.return_value = [
+                ('description',)
+            ]
 
+            result = company_matching_services.mini_cv_description(cv.id)
+
+        self.assertIsInstance(result, str)
+        self.assertEqual(cv.description, result)
+
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_miniCvDescriptionReturnsNone_IfNoDescription(self):
-        pass
+        cv = fake_mini_cv()
+        with patch('services.company_matching_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = company_matching_services.mini_cv_description(cv.id)
+
+        self.assertIsNone(result)
 
     def test_miniCvMiniSalaryReturnsInt(self):
-        # TODO: Check if database returns int by default
-        pass
+        cv = fake_mini_cv()
+        cv.min_salary = 100
+        with patch('services.company_matching_services.read_query') as read_query:
+            read_query.return_value = [
+                (100,)
+            ]
 
+            result = company_matching_services.mini_cv_description(cv.id)
+
+        self.assertIsInstance(result, int)
+        self.assertEqual(cv.min_salary, result)
+
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_miniCvMiniSalaryReturnsNone_IfNoMinSalary(self):
-        pass
+        cv = fake_mini_cv()
+        with patch('services.company_matching_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = company_matching_services.mini_cv_mini_salary(cv.id)
+
+        self.assertIsNone(result)
 
     def test_miniCvMaxSalaryReturnsInt(self):
-        # TODO: Check if database returns int by default
-        pass
+        cv = fake_mini_cv()
+        cv.max_salary = 200
+        with patch('services.company_matching_services.read_query') as read_query:
+            read_query.return_value = [
+                (200,)
+            ]
 
+            result = company_matching_services.mini_cv_description(cv.id)
+
+        self.assertIsInstance(result, int)
+        self.assertEqual(cv.max_salary, result)
+
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_miniCvMaxSalaryReturnsNone_IfNoMaxSalary(self):
-        pass
+        cv = fake_mini_cv()
+        with patch('services.company_matching_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = company_matching_services.mini_cv_max_salary(cv.id)
+
+        self.assertIsNone(result)
 
     def test_miniCvDateCreationReturnsDate(self):
-        pass
+        cv = fake_mini_cv()
+        now = datetime.now()
+        cv.date = now
+        with patch('services.company_matching_services.read_query') as read_query:
+            read_query.return_value = [
+                (now,)
+            ]
 
+            result = company_matching_services.mini_cv_description(cv.id)
+
+        self.assertIsInstance(result, datetime)
+        self.assertEqual(cv.date, result)
+
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_miniCvDateCreationReturnsNone_IfNoDate(self):
-        pass
+        cv = fake_mini_cv()
+        with patch('services.company_matching_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = company_matching_services.mini_cv_description(cv.id)
+
+        self.assertIsNone(result)
 
     def test_cancelRequest_RaisesOkExceptionWhenSuccessful(self):
         pass
