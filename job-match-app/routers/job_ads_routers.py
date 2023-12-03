@@ -128,8 +128,6 @@ def edit_your_job_ad(job_ad_id: int = Query(), description: str = Query(None), m
             requirements_names = []
             requirements_list = []
 
-    #TODO Needs a fix for requirements levels from the database
-
     company_information = job_ads_services.check_company_information(job_ad_id, company_id)
 
     if min_salary:
