@@ -33,6 +33,8 @@ def convert_level_name(level):
     elif level == 'Advanced':
         result = 3
 
+    else:
+        raise HTTPException(status_code=404, detail="Invalid input, please look at the description")
     return int(result)
 
 

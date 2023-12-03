@@ -215,6 +215,8 @@ def convert_level_name(level):
     elif level == 'Advanced':
         result = 3
 
+    else:
+        raise HTTPException(status_code=404, detail="Invalid input, please look at the description")
     return int(result)
 
 
@@ -332,14 +334,14 @@ def filter_by_cv_salaries(job_ad_range, cvs_calculated_salaries):
             original_cv_salary_range = read_query('SELECT min_salary, max_salary FROM mini_cvs WHERE id = ?', (key,))
 
             if job_ad_min_salary >= min_salary_cv and job_ad_max_salary <= max_salary_cv:
-                seeker_username, description = find_seeker_name_cv_description_from_cv(key)[0]
-                location = get_cv_location_directly_by_id(key)
+                seeker_id = find_name_for_job_seeker(key)
+                description = read_query('SELECT description FROM mini_cvs WHERE id = ? AND job_seekers_id = ?', (key, seeker_id))
 
                 filtered_ads = {
                     'CV ID': key,
-                    'Job Seeker Name': seeker_username,
+                    'Job Seeker Name': find_username_job_seeker(seeker_id),
                     'Description': description[0][0],
-                    "Preferred Location": location,
+                    "Preferred Location": job_seeker_services.get_cv_location_name(job_seeker_services.get_cv_location_id(key)),
                     'Original Salary Range': f'{original_cv_salary_range[0][0]} - {original_cv_salary_range[0][1]}',
                     'Threshold Salary Range': f'{int(min_salary_cv)} - {int(max_salary_cv)}',
                 }

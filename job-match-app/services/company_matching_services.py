@@ -127,3 +127,9 @@ def successfull_matches():
                      } for row in data]
         
         return mini_cv
+    
+def check_active_cvs(seeker_id):
+
+    cv_id = read_query('SELECT id FROM mini_cvs WHERE id = ?', (seeker_id,))
+
+    return bool(cv_id)

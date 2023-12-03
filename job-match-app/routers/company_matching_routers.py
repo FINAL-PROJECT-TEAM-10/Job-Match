@@ -45,7 +45,7 @@ def cancel_a_request(job_ad_id: int, mini_cv_id: int, current_user_payload = Dep
     if not company_matching_services.check_job_ad_exist(job_ad_id):
         raise HTTPException(status_code = 404, detail= 'That is not a valid id for your job ads')
     
-    if not company_matching_services.get_main_cv(mini_cv_id):
+    if not company_matching_services.check_active_cvs(mini_cv_id):
         raise HTTPException(status_code = 404, detail= 'That is not a valid id for job seeker cv')
     
     if not company_matching_services.check_request_exist(job_ad_id,mini_cv_id):
