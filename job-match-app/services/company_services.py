@@ -7,6 +7,8 @@ from services import admin_services
 from common.country_validators_helpers import *
 from services import job_seeker_services
 
+from data.database import update_queries_transaction
+
 
 # TODO: Consider using models to process data selects:
 
@@ -125,6 +127,7 @@ def everything_from_companies_by_username(username: str):
 def edit_company_information(username: str, description: str, city: str, address: str, telephone: int):
     company_id = find_company_id_byusername(username)
 
+    # This could also be a transaction
     update_query('UPDATE companies SET description = ? WHERE username = ?', (description, username,))
     update_query('UPDATE company_contacts SET address = ?, telephone = ? WHERE company_id = ?',
                  (address, telephone, company_id,))
@@ -137,7 +140,8 @@ def edit_company_information(username: str, description: str, city: str, address
         update_query('UPDATE company_contacts SET locations_id = ? WHERE company_id = ?',(location_id,company_id,))
 
     else:
-        
+        # TODO: Consider removing the UPDATE query
+        #   If you already have a location, you don't need to, you don't need to update
         location_id = job_seeker_services.find_location_id_by_city(city)
         update_query('UPDATE company_contacts SET locations_id = ? WHERE company_id = ?', (location_id, company_id,))
 
@@ -160,7 +164,7 @@ def view_all_cvs():
         return ads
     
     else:
-        return JSONResponse(status_code=404, content='No cvs found!')
+        raise HTTPException(status_code=404, detail='No cvs found!')
 
 def find_matched_job_ads(company_id: int):
 
