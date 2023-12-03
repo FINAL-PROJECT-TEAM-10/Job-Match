@@ -307,10 +307,25 @@ class CompanyServices_Should(unittest.TestCase):
         self.assertIsNone(company_id)
 
     def test_findLocationReturnsList_IfFound(self):
-        pass
+        location_id = 1
+        with patch('services.company_services.read_query') as read_query:
+            read_query.return_value = [
+                ('City', 'Country'),
+            ]
+
+            location_data = company_services.find_location(location_id)
+
+            self.assertIsInstance(location_data, list)
+            self.assertEqual(1, len(location_data))
 
     def test_findLocationReturnsNone_IfNotFound(self):
-        pass
+        location_id = 1
+        with patch('services.company_services.read_query') as read_query:
+            read_query.return_value = []
+
+            location_data = company_services.find_location(location_id)
+
+            self.assertIsNone(location_data)
 
     @unittest.skip("Testing for this was skipped.\n"
                    "Reason: The logic for this test is identical to the logic\n"

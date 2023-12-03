@@ -2,15 +2,46 @@ import unittest
 
 from unittest.mock import Mock, patch
 
+import services.company_matching_services
 from services import company_matching_services
+
+
+def fake_job_ad():
+    job_ad = Mock()
+    job_ad.id = 1
+    job_ad.description = 'description'
+
+    return job_ad
+
+
+def fake_mini_cv():
+    cv = Mock()
+    cv.id = 1
+
+    return cv
+
 
 class CompanyMatching_Should(unittest.TestCase):
 
     def test_checkJobAdExistReturnsTrue_IfJobAdId(self):
-        pass
+        job_ad = fake_job_ad()
+        with patch('services.company_matching_services.read_query') as read_query:
+            read_query.return_value = [
+                ('description',)
+            ]
+
+            exists = company_matching_services.check_job_ad_exist(job_ad.id)
+
+        self.assertTrue(exists)
 
     def test_checkJobAdExistReturnsFalse_IfJobAdNotFound(self):
-        pass
+        job_ad = fake_job_ad()
+        with patch('services.company_matching_services.read_query') as read_query:
+            read_query.return_value = []
+
+            exists = company_matching_services.check_job_ad_exist(job_ad.id)
+
+        self.assertFalse(exists)
 
     def test_matchCvUsesUpdateQuery_WhenMatchFinalized(self):
         pass
@@ -28,11 +59,26 @@ class CompanyMatching_Should(unittest.TestCase):
         pass
 
     def test_matchingExistsReturnsTrue_IfMatch(self):
-        pass
+        job_ad = fake_job_ad()
+        cv = fake_mini_cv()
+        with patch('services.company_matching_services.read_query') as read_query:
+            read_query.return_value = [
+                (1, 1, 'date', 'match_status', 'sender')
+            ]
+
+            exists = company_matching_services.matching_exist(job_ad.id, cv.id)
+
+        self.assertTrue(exists)
 
     def test_matchingExistsReturnsFalse_IfNoMatch(self):
-        pass
+        job_ad = fake_job_ad()
+        cv = fake_mini_cv()
+        with patch('services.company_matching_services.read_query') as read_query:
+            read_query.return_value = []
 
+            exists = company_matching_services.matching_exist(job_ad.id, cv.id)
+
+        self.assertFalse(exists)
 
     def test_pendingCvsReturnsDictInList_IfMiniCv(self):
         pass
