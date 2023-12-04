@@ -55,6 +55,10 @@ async def read_cv_maker(request: Request):
 async def read_seeker_section(request: Request):
     return templates.TemplateResponse("seeker_section.html", {"request": request})
 
+@app.get('/seeker_section/cv', response_class=HTMLResponse, include_in_schema=False)
+async def read_seeker_section(request: Request):
+    return templates.TemplateResponse("cv_section.html", {"request": request})
+
 @app.get('/seeker_section/personal_info', response_class=HTMLResponse, include_in_schema=False)
 async def read_seeker_personal_info(request: Request):
     return templates.TemplateResponse("personal_info_seeker.html", {"request": request})

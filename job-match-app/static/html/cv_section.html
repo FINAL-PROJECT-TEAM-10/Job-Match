@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/css/pending_matches_company.css">
+    <link rel="stylesheet" href="/static/css/cv_section.css">
     <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
     <script src="/static/js/loading_overlay_home.js"></script>
     <script src="/static/js/get_username.js"></script>
@@ -16,10 +16,9 @@
     <header>
         <div class="header-content">
             <h1 id="usernameHeader"></h1>
-            <h3>View all pending requests for match you have</h3>
+            <h3>My CVS</h3>
             <nav class="navbar">
                 <ul class="nav-list">
-                    <li><a href="/seeker_section/searching">Back To Searching</li></a>
                     <li><a href="/seeker_section">Back to your dashboard</li></a>
                 </ul>
             </nav>
@@ -32,9 +31,7 @@
     </header>
     <div class="form-container">
         <form id="dataForm">
-            <p>View all pending requests</p>
-            <label for="jobAdId">Job Ad ID:</label>
-            <input type="number" id="jobAdId" name="job_ad_id" placeholder="Enter Job Ad ID" required>
+            <p>View all of your CVS</p>
             <div id="statusButtons">
 
             </div>
@@ -57,10 +54,7 @@
                 async function submitData(event) {
                     event.preventDefault();
                     try {
-                        const form = document.getElementById('dataForm');
-                        const formData = new FormData(form);
-                        const jobAdId = formData.get('job_ad_id');
-                        const url = `http://127.0.0.1:8000/companies/match/requests?job_ad_id=${jobAdId}`;
+                        const url = `http://127.0.0.1:8000/seekers/personal/cv`;
             
                         const response = await fetch(url, {
                             method: 'GET',
@@ -69,7 +63,7 @@
                                 'Content-Type': 'application/json'
                             },
                         });
-            
+                        
                         const data = await response.json();
                         localStorage.setItem('currentPage', '1');
                         displayJobAds(data);
@@ -103,15 +97,14 @@
                     const listItem = document.createElement('div');
                     listItem.className = `job-ad-card page-${page}`;
 
-
                     const matchButton = document.createElement('button');
-                    matchButton.textContent = 'Match';
-                    matchButton.addEventListener('click', () => handleMatch('match', jobAd["Mini CV ID"]));
+                    matchButton.textContent = 'Edit CV';
+                    matchButton.addEventListener('click', () => editCV(jobAd["Cv ID"]));
                     listItem.appendChild(matchButton);
 
                     const cancelButton = document.createElement('button');
-                    cancelButton.textContent = 'Cancel';
-                    cancelButton.addEventListener('click', () => cancelMatch('cancel', jobAd["Mini CV ID"]));
+                    cancelButton.textContent = 'Set Main CV';
+                    cancelButton.addEventListener('click', () => setMainCV(jobAd["Cv ID"]));
                     listItem.appendChild(cancelButton);
 
                     for (const key in jobAd) {
@@ -127,8 +120,16 @@
                         valueElement.textContent = value;
 
                         if (key.toLowerCase().includes('status')) {
-                            const isMatched = key.toLowerCase().includes('status');
-                            valueElement.style.color = isMatched ? '#F4E406' : '#e74c3c';
+                            const isActive = value.includes('Active')
+                            const isPrivate = value.includes('Private')
+                            const isHidden = value.includes('Hidden')
+                            if (isActive) {
+                                valueElement.style.color = '#00FF00';
+                            } else if (isPrivate) {
+                                valueElement.style.color = '#FF0000';
+                            } else if (isHidden) {
+                                valueElement.style.color = '#808080';
+                            }
                         }
 
                         pairContainer.appendChild(keyElement);
@@ -152,14 +153,62 @@
                         }
                     }
 
-                    async function handleMatch(action,cv_id) {
-                        try {
-                            const form = document.getElementById('dataForm');
-                            const formData = new FormData(form);
-                            const jobAdId = formData.get('job_ad_id');
-                            const miniCvId = cv_id;
 
-                            const url = `http://127.0.0.1:8000/companies/match/cv?job_ad_id=${jobAdId}&mini_cv_id=${miniCvId}`;
+                    function showPage(page) {
+                    const itemsPerPage = 3;
+
+                    const allAds = document.querySelectorAll('.job-ad-card');
+                    allAds.forEach((ad) => {
+                        ad.style.display = 'none';
+                    });
+
+                    const start = (page - 1) * itemsPerPage;
+                    const end = start + itemsPerPage;
+
+                    const newAds = document.querySelectorAll(`.job-ad-card`);
+                    newAds.forEach((ad, index) => {
+                        if (index >= start && index < end) {
+                            ad.style.display = 'block';
+                        }
+                    });
+
+                    const paginationButtons = document.querySelectorAll('#pagination button');
+                    paginationButtons.forEach((button, index) => {
+                        button.classList.toggle('active', index + 1 === page);
+                    });
+
+                    localStorage.setItem('currentPage', page);
+                }
+
+                    async function editCV(cv_id) {
+                        try {
+                            const url = `http://127.0.0.1:8000/seekers/match/company?job_ad_id=${jobId}`;
+
+                            const response = await fetch(url, {
+                                method: 'PUT',
+                                headers: {
+                                    'Authorization': `Bearer ${access_token}`,
+                                    'Content-Type': 'application/json',
+                                },
+                            });
+
+                            const data = await response.json();
+
+                            await reloadCards();
+
+                            if (action === 'match') {
+                                alert('Matched successfully!');
+                            } else if (action === 'cancel') {
+                                alert('Cancelled successfully!');
+                            }
+                        } catch (error) {
+                            console.error(`Error ${action}ing job ad:`, error);
+                        }
+                    }
+
+                    async function setMainCV(cv_id) {
+                        try {
+                            const url = `http://127.0.0.1:8000/seekers/main/cv?cv_id=${cv_id}`;
 
                             const response = await fetch(url, {
                                 method: 'POST',
@@ -171,48 +220,16 @@
 
                             const data = await response.json();
                             console.log(data);
-
-
                             if (response.status !== 200) {
                             const errorContainer = document.getElementById('errorContainer');
-                            errorContainer.innerHTML = `<p>Error ${action}ing job ad: ${data.detail}</p>`;
+                            errorContainer.innerHTML = `<p>${data.detail}</p>`;
                             return;
                             }else{
                                 errorContainer.innerHTML = `<p>${data.detail}</p>`; 
                             }
-                        } catch (error) {
-                            console.error(`Error ${action}ing job ad:`, error);
-                        }
-                    }
 
-                    async function cancelMatch(action,cv_id) {
-                        try {
-                            const form = document.getElementById('dataForm');
-                            const formData = new FormData(form);
-                            const jobAdId = formData.get('job_ad_id');
-                            const miniCvId = cv_id;
+                            await reloadCards();
 
-                            const url = `http://127.0.0.1:8000/companies/match/cancel?job_ad_id=${jobAdId}&mini_cv_id=${miniCvId}`;
-
-                            const response = await fetch(url, {
-                                method: 'PUT',
-                                headers: {
-                                    'Authorization': `Bearer ${access_token}`,
-                                    'Content-Type': 'application/json',
-                                },
-                            });
-
-                            const data = await response.json();
-                            console.log(data);
-
-
-                            if (response.status !== 200) {
-                            const errorContainer = document.getElementById('errorContainer');
-                            errorContainer.innerHTML = `<p>Error ${action}ing job ad: ${data.detail}</p>`;
-                            return;
-                            }else{
-                                errorContainer.innerHTML = `<p>${data.detail}</p>`; 
-                            }
                         } catch (error) {
                             console.error(`Error ${action}ing job ad:`, error);
                         }
@@ -220,10 +237,7 @@
 
                     async function reloadCards() {
                         try {
-                            const form = document.getElementById('dataForm');
-                            const formData = new FormData(form);
-                            const jobAdId = formData.get('job_ad_id');
-                            const url = `http://127.0.0.1:8000/companies/match/requests?job_ad_id=${jobAdId}`;
+                            const url = `http://127.0.0.1:8000/seekers/match/pending`;
 
                             const response = await fetch(url, {
                                 method: 'GET',
@@ -234,6 +248,7 @@
                             });
 
                             const data = await response.json();
+                            console.log(data);
 
                             displayJobAds(data);
                         } catch (error) {

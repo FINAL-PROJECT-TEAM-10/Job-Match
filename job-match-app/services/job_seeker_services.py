@@ -50,9 +50,9 @@ def contacts_info_for_seeker(contact_id: int):
 
 
 def location_id_from_contacts(contact_id: int):
-    data = read_query('SELECT locations_id FROM employee_contacts WHERE id = ?', (contact_id,))
+    data = read_query('SELECT locations_id,address,telephone FROM employee_contacts WHERE id = ?', (contact_id,))
 
-    return data[0][0]
+    return data
 
 
 def location_finder(location_id: int):
@@ -69,16 +69,22 @@ def job_seeker_info_username(username: str):
                             (username,))
     data = read_query('SELECT id FROM job_seekers WHERE username = ?', (username,))
 
+    contacts = read_query('SELECT email, address, telephone FROM employee_contacts WHERE id = ?', (job_seeker[0][1],))
+
     status = recognize_status(job_seeker[0][2])
     location_id_contacts = location_id_from_contacts(job_seeker[0][1])
-    location_seeker = location_finder(location_id_contacts)
+    location_seeker = location_finder(location_id_contacts[0][0])
     summary = job_seeker[0][0]
     location = location_seeker[0][0]
+    email = contacts[0][0]
+    address = contacts[0][1]
+    telephone = contacts[0][2]
 
     if not summary:
         summary = 'No summary'
 
-    return JobSeekerInfo(summary=summary, location=location, status=status, number_of_matches_from_diffrent_cvs=job_seeker_matching_services.find_matched_cvs(data[0][0]))
+    return JobSeekerInfo(summary=summary, email=email, address=address, telephone=telephone, location=location, status=status, 
+                         number_of_matches_from_diffrent_cvs=job_seeker_matching_services.find_matched_cvs(data[0][0]))
 
 
 def check_seeker_exists(username: str):
@@ -119,18 +125,20 @@ def find_location_id_by_city(city):
     return location_id[0][0]
 
 
-def edit_info(username: str, summary: str, city: str):
+def edit_info(username: str, summary: str, city: str, telephone: str, address: str):
     update_query('UPDATE job_seekers SET summary = ? WHERE username = ?',
                  (summary,username))
+    
+    contact_id = find_employee_contacts_id(username)
+    
+    update_query('UPDATE employee_contacts SET telephone = ?, address = ? WHERE id = ?', (telephone, address, contact_id))
 
     if not find_location_by_city(city):
         country = find_country_by_city(city)
         insert_query('INSERT INTO locations (city, country) VALUES (?,?)', (city, country))
-        contact_id = find_employee_contacts_id(username)
         location_id = find_location_id_by_city_country(city, country)
         update_query('UPDATE employee_contacts SET locations_id = ? WHERE id = ?', (location_id, contact_id))
     else:
-        contact_id = find_employee_contacts_id(username)
         location_id = find_location_id_by_city(city)
         update_query('UPDATE employee_contacts SET locations_id = ? WHERE id = ?', (location_id, contact_id))
 
@@ -170,7 +178,7 @@ def get_seeker_by_email(email):
     return next((JobSeeker.from_query_results(*row) for row in seeker_data), None)
 
 
-def create_seeker(username, password, first_name, last_name, email, city, country):
+def create_seeker(username, password, first_name, last_name, email, city, country, telephone, address):
     from services.authorization_services import get_password_hash
 
     location_id = admin_services.find_location_id(city, country)
@@ -179,8 +187,6 @@ def create_seeker(username, password, first_name, last_name, email, city, countr
         location_id = admin_services.create_location(city, country)
 
     password = get_password_hash(password)
-    adress = ' '
-    telephone = ' '
     busy = False
     blocked = False
     approved = 0
@@ -189,7 +195,7 @@ def create_seeker(username, password, first_name, last_name, email, city, countr
     INSERT INTO employee_contacts
     (email, address, telephone,locations_id)
     VALUES (?,?,?,?)
-''', (email, adress, telephone, location_id)
+''', (email, address, telephone, location_id)
                                )
 
     new_seeker = insert_query('''

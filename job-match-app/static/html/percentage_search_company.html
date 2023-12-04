@@ -104,8 +104,9 @@
                         });
             
                         const data = await response.json();
-
+                        localStorage.setItem('currentPage', '1');
                         displayJobAds(data)
+                        showPage(1)
                     } catch (error) {
                         console.error('Error fetching personal info:', error);
                     }

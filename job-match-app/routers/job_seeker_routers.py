@@ -64,6 +64,8 @@ def your_information(current_user_payload=Depends(get_current_user)):
 
 @job_seekers_router.put('/information/edit', description= 'You can edit your personal information in this section.', tags=['Seeker Section'])
 def edit_proffesional_info(summary: str = Form(None),
+                           telephone: str = Form(None),
+                           address: str = Form(None),
                            city: str = Form(None),
                            current_user_payload=Depends(get_current_user)):
     
@@ -76,17 +78,19 @@ def edit_proffesional_info(summary: str = Form(None),
     db_seeker = job_seeker_services.get_job_seeker_info(username)
     job_seeker = JobSeekerOptionalInfo()
     contacts = job_seeker_services.location_id_from_contacts(db_seeker[0][10])
-    db_location = job_seeker_services.location_finder(contacts)
+    db_location = job_seeker_services.location_finder(contacts[0][0])
     job_seeker.username = username
     job_seeker.summary = summary or db_seeker[0][5]
+    job_seeker.telephone = telephone or contacts[0][2]
+    job_seeker.address = address or contacts[0][1]
     job_seeker.city = city or db_location[0][0]
 
-    if not summary and not city:
+    if not summary and not city and not address and not telephone:
         raise HTTPException(status_code=203,detail= "You haven't done any changes to your personal information")
 
     validate_city(job_seeker.city)
     
-    return job_seeker_services.edit_info(job_seeker.username, job_seeker.summary,job_seeker.city)
+    return job_seeker_services.edit_info(job_seeker.username, job_seeker.summary,job_seeker.city, job_seeker.telephone, job_seeker.address)
 
 @job_seekers_router.post('/cv', description= 'You can create your cvs from this section.', tags =['CV Section'])
 def create_cv(description: str = Form(),
@@ -198,6 +202,8 @@ def add_seeker(seeker_username: str = Form(),
               seeker_first_name: str = Form(), 
               seeker_last_name: str = Form(),
               seeker_email_adress: str = Form(),
+              seeker_telephone : str = Form(),
+              seeker_address: str = Form(),
               seeker_city: str = Form(),
               seeker_country: str = Form()):
     
@@ -212,6 +218,9 @@ def add_seeker(seeker_username: str = Form(),
     current_seeker.email = seeker_email_adress
     current_seeker.city = seeker_city
     current_seeker.country = seeker_country
+    current_seeker.telephone = seeker_telephone
+    current_seeker.address = seeker_address
+
     
 
     if job_seeker_services.check_seeker_exists(current_seeker.username):
@@ -219,7 +228,7 @@ def add_seeker(seeker_username: str = Form(),
                             detail=f'Seeker with username {current_seeker.username} already exists.')
 
     new_seeker = job_seeker_services.create_seeker(current_seeker.username, current_seeker.password, current_seeker.first_name, current_seeker.last_name,
-                                                   current_seeker.email, current_seeker.city, current_seeker.country)
+                                                   current_seeker.email, current_seeker.city, current_seeker.country, current_seeker.telephone, current_seeker.address)
     return new_seeker
 
 
