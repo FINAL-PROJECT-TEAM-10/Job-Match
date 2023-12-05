@@ -1,7 +1,9 @@
 from mailjet_rest import Client
+
+from app_models.job_ads_models import Job_ad
 from private_details import mailjet_public_api_key as api_key, mailjet_secret_api_key as api_secret, skill_sync_address
 from private_details import mailjet_sender_email as sender
-from services import job_seeker_services
+from services import job_seeker_services, company_services
 
 mailjet = Client(auth=(api_key, api_secret), version='v3.1')
 
@@ -73,27 +75,39 @@ def password_reset_email(payload, generated_password):
 def company_match_request_notification():
     pass
 
-def seeker_match_request_notification(payload, mini_cv_id):
-    receiver, receiver_username = job_seeker_services.get_email_username_by_cv(mini_cv_id)
+# This is also one of the points that needs to be refactored heavily, but needs
+# refactoring at models, services, and routers, so it's left for a future point.
+def job_seeker_match_request_notification(job_ad: Job_ad, job_ad_id, mini_cv_id):
+    sender_email, sender_username = company_services.find_company_email_username_by_job_ad(job_ad_id)
+    receiver_email, receiver_username = job_seeker_services.get_email_username_by_cv(mini_cv_id)
     pending_matches: str = skill_sync_address + f'job_seekers_match/pending_list'
     match_request = {
         'Messages': [
             {
                 "From": {
-                    "Email": f"{payload['email']}",
-                    "Name": "Skill Sync"
+                    "Email": f"{sender}",
+                    "Name": "Skill-Sync"
                 },
                 "To": [
                     {
-                        "Email": f"{receiver}",
+                        "Email": f"{receiver_email}",
                         "Name": f"{receiver_username}"
                     }
                 ],
-                "Subject": "Password Reset Confirmation at Skill-Sync",
-                "TextPart": "You requested a password reset for your Skill-Sync account.",
-                "HTMLPart": f"<h3>Hello, {receiver_username}!</h3><br/>" +
-                            f'<p>You received a new match request for your main CV. ' +
-                            f"<p>You can view your pending matches <a href='{pending_matches}'>HERE!</a></p>" +
+                "Subject": "Match Request at Skill-Sync",
+                "TextPart": "You were matched in our platform.",
+                "HTMLPart": f"<h3>Hello, {receiver_username}!</h3><br/>"
+                            f'<p>You received a new match request from {sender_username} for your main CV. '
+                            f'<p></p>'
+                            f'<p><strong> Description:</strong> {job_ad.description}</p>'
+                            f'<p><strong> Date Posted:</strong> {job_ad.date_posted}</p>'
+                            f'<p><strong> City:</strong> {job_ad.location_name}</p>'
+                            f'<p><strong> Remote:</strong> {job_ad.remote_status}</p>'
+                            f'<p><strong> Min Salary:</strong> {job_ad.min_salary}</p>'
+                            f'<p><strong> Max Salary:</strong> {job_ad.max_salary}</p>'
+                            f'<p></p>'
+                            f"<p>You can view your pending matches <a href='{pending_matches}'>HERE!</a></p>"
+                            f'Contact the company at: {sender_email}'
                             '<p>Congratulations!</p>' +
                             '<p></p>' +
                             '<p><em>Skill, Sync, Match!</em></p>'

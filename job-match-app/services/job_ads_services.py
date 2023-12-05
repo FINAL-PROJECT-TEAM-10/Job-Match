@@ -228,16 +228,16 @@ def get_level_job_ad(job_ad_id: int, requirement_id: int):
     return data[0][0]
 
 
-# The variables below need to be renamed
+# TODO: The function and variables below need to be renamed
 def get_current_job_ad(job_ads_id: int):
     data = read_query('''
     SELECT sr.id, sr.name, jar.level
     FROM job_ads_has_requirements as jar
     JOIN skills_or_requirements as sr ON sr.id = jar.skills_or_requirements_id
     WHERE job_ads_id = ?''',
-                        (job_ads_id,))
+                      (job_ads_id,))
 
-    result_pairs = [f'{row[1]};{row[2]}'for row in data]
+    result_pairs = [f'{row[1]};{row[2]}' for row in data]
 
     # # This step adds 10 seconds even though it appears innocuous
     # names = read_query('SELECT name FROM ')
@@ -335,13 +335,15 @@ def filter_by_cv_salaries(job_ad_range, cvs_calculated_salaries):
 
             if job_ad_min_salary >= min_salary_cv and job_ad_max_salary <= max_salary_cv:
                 seeker_id = find_name_for_job_seeker(key)
-                description = read_query('SELECT description FROM mini_cvs WHERE id = ? AND job_seekers_id = ?', (key, seeker_id))
+                description = read_query('SELECT description FROM mini_cvs WHERE id = ? AND job_seekers_id = ?',
+                                         (key, seeker_id))
 
                 filtered_ads = {
                     'CV ID': key,
                     'Job Seeker Name': find_username_job_seeker(seeker_id),
                     'Description': description[0][0],
-                    "Preferred Location": job_seeker_services.get_cv_location_name(job_seeker_services.get_cv_location_id(key)),
+                    "Preferred Location": job_seeker_services.get_cv_location_name(
+                        job_seeker_services.get_cv_location_id(key)),
                     'Original Salary Range': f'{original_cv_salary_range[0][0]} - {original_cv_salary_range[0][1]}',
                     'Threshold Salary Range': f'{int(min_salary_cv)} - {int(max_salary_cv)}',
                 }
@@ -390,3 +392,14 @@ def get_cv_location_directly_by_id(cv_id):
     JOIN mini_cv_has_locations as mcl ON l.id = mcl.locations_id''', (cv_id))
 
     return data
+
+
+def get_job_ad_as_object(job_ad_id):
+    job_data = read_query('''
+        SELECT j.description, l.city, jal.remote_status, j.min_salary, j.max_salary, j.status, j.date_posted
+        FROM job_ads as j, job_ads_has_locations as jal, locations as l 
+        WHERE j.id = jal.job_ads_id AND jal.locations_id = l.id
+        AND j.id = ?
+        ''', (job_ad_id,))
+
+    return next((Job_ad.from_query_results(*row) for row in job_data), None)

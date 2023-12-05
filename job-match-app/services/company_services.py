@@ -171,3 +171,16 @@ def find_matched_job_ads(company_id: int):
     data = read_query('SELECT * FROM job_ads WHERE companies_id = ? AND status = "archived"',(company_id,))
 
     return len(data)
+
+
+def find_company_email_username_by_job_ad(job_ad_id):
+    data = read_query('''
+        SELECT email, username
+        FROM companies as c
+        JOIN company_contacts as cc ON c.id = cc.company_id
+        JOIN job_ads as ja ON ja.companies_id = c.id
+        WHERE ja.id = ?
+        ''', (job_ad_id,)
+    )
+
+    return next((row for row in data), None)
