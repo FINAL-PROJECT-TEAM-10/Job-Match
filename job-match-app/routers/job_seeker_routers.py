@@ -130,9 +130,9 @@ def create_cv(description: str = Form(),
     return job_seeker_services.create_cv(description, location, is_remote, min_salary,max_salary,status,seeker_id[0][0], skill_names, skill_levels, is_main_cv)
 
 @job_seekers_router.put('/cv/edit', description= 'You can edit your cvs from this section.', tags =['CV Section'])
-def edit_cv(cv_id: int = Query(),description: str = Query(None), min_salary: int = Query(None),
-            max_salary: int = Query(None), status: str =  Query(enum=['Active', 'Hidden', 'Private']),
-            skills: str = Query(None, description = 'Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'),
+def edit_cv(cv_id: int = Form(),description: str = Form(None), min_salary: int = Form(None),
+            max_salary: int = Form(None), status: str =  Form(enum=['Active', 'Hidden', 'Private']),
+            skills: str = Form(None, description = 'Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'),
             current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'seekers':
