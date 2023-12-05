@@ -1,4 +1,4 @@
-#COMPANY ADS - CVS
+# COMPANY ADS - CVS
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
@@ -13,11 +13,14 @@ class CvCreation(BaseModel):
     status: str
     date_posted: datetime
 
-
-    def from_query_result(cls, description, min_salary,max_salary, status,date_posted):
-        return cls(description = description,
-                   min_salary = min_salary,
-                   max_salary = max_salary,
-                   status = status,
-                   date_posted = date_posted
-            )
+    @classmethod
+    def from_query_results(cls, description, city, remote_status, min_salary, max_salary, status, date_posted):
+        return cls(
+            description=description,
+            location_name=city,
+            remote_status=remote_status,
+            min_salary=min_salary,
+            max_salary=max_salary,
+            status=status,
+            date_posted=date_posted
+        )

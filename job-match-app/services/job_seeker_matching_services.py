@@ -1,9 +1,10 @@
+from common import mailing
 from data.database import read_query, insert_query, update_query
 from datetime import datetime
 from fastapi import HTTPException
 from mariadb import IntegrityError
 from services import job_ads_services, job_seeker_services
-
+from services.company_matching_services import get_job_ad_as_object
 
 def match_ad(job_ad_id: int, mini_cv_id: int, seeker_id: int):
     try:
@@ -22,6 +23,11 @@ def match_ad(job_ad_id: int, mini_cv_id: int, seeker_id: int):
             insert_query(
                 'INSERT INTO job_ads_has_mini_cvs (job_ad_id, mini_cv_id, date_matched, match_status, sender) VALUES (?,?,?,?,?)',
                 (job_ad_id, mini_cv_id, date_matched, match_status, sender))
+
+            cv = job_seeker_services.get_cv_as_object(mini_cv_id)
+            job_ad = get_job_ad_as_object(job_ad_id)
+            mailing.company_match_request_notification(cv, job_ad, job_ad_id, mini_cv_id)
+
             raise HTTPException(status_code=200, detail=f'Match request sended to job id : {job_ad_id}')
     except IntegrityError:
         data = update_query(
