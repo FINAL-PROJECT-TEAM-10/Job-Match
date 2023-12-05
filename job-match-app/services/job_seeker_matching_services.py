@@ -146,6 +146,6 @@ def job_date_creation(job_ad_id):
 
 
 def find_matched_cvs(cv_id: int):
-    data = read_query('SELECT * FROM mini_cvs WHERE job_seekers_id = ? AND status = "Private"', (cv_id,))
+    data = read_query('SELECT * FROM mini_cvs WHERE job_seekers_id = ? AND status = "Matched"', (cv_id,))
 
     return len(data)
