@@ -107,7 +107,7 @@ def create_cv(description: str = Form(),
     seeker_username = current_user_payload.get('username')
     seeker_id = current_user_payload.get('id')
     seeker_id = job_seeker_services.get_job_seeker_info(seeker_username)
-    skill_list = parse_skills(skills)#['python;2', 'javascript;3']
+    skill_list = parse_skills(skills)
 
     if min_salary and max_salary:
         if min_salary > max_salary:
@@ -115,7 +115,7 @@ def create_cv(description: str = Form(),
 
     try:
         skill_names = [skill.split(';')[0] for skill in skill_list]
-        skill_levels = [skill.split(';')[1] for skill in skill_list] #[2,3]
+        skill_levels = [skill.split(';')[1] for skill in skill_list]
     except IndexError:
         return JSONResponse(status_code=400, content='Invalid input look at the description')
     
@@ -145,11 +145,11 @@ def edit_cv(cv_id: int = Query(),description: str = Query(None), min_salary: int
     try:
         skill_list = parse_skills(skills)
         skill_names = [skill.split(';')[0] for skill in skill_list]
-        skill_levels = [skill.split(';')[1] for skill in skill_list] #[2,3]
+        skill_levels = [skill.split(';')[1] for skill in skill_list]
     except IndexError:
         return JSONResponse(status_code=400, content='Invalid input look at the description')
     except TypeError:
-        cv_skills_info_ids = job_seeker_services.get_existing_skills(cv_id) #2,10
+        cv_skills_info_ids = job_seeker_services.get_existing_skills(cv_id)
         skill_names = []
         skill_levels = []
 
@@ -266,8 +266,6 @@ def get_job_ads_from_companies(current_user_payload=Depends(get_current_user)):
     
     return job_seeker_services.get_all_job_ads()
 
-
-# TODO: Test below (low priority)
 @job_seekers_router.get('{id}/avatar', description= 'You can view a specific job seeker avatar from this section.', tags=['Seeker Section'])
 def get_seeker_avatar(id: int, current_user_payload=Depends(get_current_user)):
     image_data = upload_services.get_picture(id, 'admins')

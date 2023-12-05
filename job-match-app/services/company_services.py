@@ -10,8 +10,6 @@ from services import job_seeker_services
 from data.database import update_queries_transaction
 
 
-# TODO: Consider using models to process data selects:
-
 def read_companies():
     data = read_query('SELECT * FROM companies')
     return data
@@ -127,7 +125,6 @@ def everything_from_companies_by_username(username: str):
 def edit_company_information(username: str, description: str, city: str, address: str, telephone: int):
     company_id = find_company_id_byusername(username)
 
-    # This could also be a transaction
     update_query('UPDATE companies SET description = ? WHERE username = ?', (description, username,))
     update_query('UPDATE company_contacts SET address = ?, telephone = ? WHERE company_id = ?',
                  (address, telephone, company_id,))
@@ -140,8 +137,7 @@ def edit_company_information(username: str, description: str, city: str, address
         update_query('UPDATE company_contacts SET locations_id = ? WHERE company_id = ?',(location_id,company_id,))
 
     else:
-        # TODO: Consider removing the UPDATE query
-        #   If you already have a location, you don't need to, you don't need to update
+        
         location_id = job_seeker_services.find_location_id_by_city(city)
         update_query('UPDATE company_contacts SET locations_id = ? WHERE company_id = ?', (location_id, company_id,))
 

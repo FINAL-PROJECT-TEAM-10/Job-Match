@@ -104,7 +104,6 @@ def cancel_request(job_ad_id, mini_cv_id):
        update_query('UPDATE job_ads_has_mini_cvs SET match_status = "Canceled" WHERE job_ad_id = ? AND mini_cv_id = ? AND sender = "Seeker"',
                     (job_ad_id, mini_cv_id))
 
-    # TODO: Consider having this in the if block
     raise HTTPException(status_code=200, detail=f'You canceled the match request for cv with id: {job_ad_id}')
      
 def check_if_canceled(job_ad_id, mini_cv_id):

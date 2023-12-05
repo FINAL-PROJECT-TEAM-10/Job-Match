@@ -239,24 +239,13 @@ def get_current_job_ad(job_ads_id: int):
 
     result_pairs = [f'{row[1]};{row[2]}' for row in data]
 
-    # # This step adds 10 seconds even though it appears innocuous
-    # names = read_query('SELECT name FROM ')
-    # result_pairs = [
-    #     f"{get_skill_name(id)};{get_level_job_ad(job_ads_id, id)}"
-    #     for ad in job_ad
-    #     for id in ad
-    # ]
-
     return result_pairs
 
 
 def calculate_percantage_cv(job_ad_id, sorting, perms, threshold_percent, salary=None):
-    # Not used anywhere
-    # ads = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_ad_id,))
 
     get_main_cvs = read_query('SELECT * FROM mini_cvs WHERE main_cv = 1')
 
-    # This step is a bottleneck for some reason
     current_job_ad = get_current_job_ad(job_ad_id)
 
     result = []
@@ -363,8 +352,6 @@ def find_username_job_seeker(id: int):
     data = read_query('SELECT username FROM job_seekers WHERE id = ?', (id,))
     return data[0][0]
 
-
-# New: to combine in the above in one select
 def find_seeker_name_cv_description_from_cv(id_of_cv):
     data = read_query('''
     SELECT js.username, mc.description

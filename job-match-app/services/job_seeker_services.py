@@ -146,7 +146,6 @@ def get_job_seeker_info(username: str):
     return data
 
 
-# TODO: Consider having a more encompassing get function (medium priority)
 def get_seeker(username) -> None | JobSeeker:
     seeker_data = read_query('''
         SELECT js.id, js.username, ec.email, js.first_name, js.last_name, js.summary, js.blocked
@@ -468,7 +467,6 @@ def calculate_percents_job_ad(seeker_id, current_sort, perms, threshold_percent,
     for job_ad_id, requirements in filtered_data.items():
         unmatched[job_ad_id] = find_unmatched(requirements, cv_skills)
 
-    # TODO make it
     matching_side = False
     if current_sort == 'Matches':
         matching_side = True

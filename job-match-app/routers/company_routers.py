@@ -135,8 +135,6 @@ def get_main_cv_from_job_seeker(current_user_payload=Depends(get_current_user)):
 
     return company_services.view_all_cvs()
 
-
-# TODO: test below for companies (low priority)
 @companies_router.get('{id}/avatar', description= 'You can view your company profile avatar from here.', tags=['Company Section'])
 def get_company_avatar(id: int, current_user_payload=Depends(get_current_user)):
     image_data = upload_services.get_picture(id, 'companies')

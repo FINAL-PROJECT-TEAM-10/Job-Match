@@ -14,7 +14,7 @@ def match_ad(job_ad_id: int, mini_cv_id: int, seeker_id: int):
                 (job_ad_id, mini_cv_id))
 
             update_query('UPDATE job_seekers SET busy = 1 WHERE id = ?', (seeker_id,))
-            # 0 - Active 1- Busy
+            
             raise HTTPException(status_code=200, detail=f'You matched successfully with job ad id: {job_ad_id}')
         else:
             date_matched = datetime.now()
@@ -71,9 +71,6 @@ def is_matching_exist_pendings(job_ad_id, cv_id):
 
 
 def pending_list(cv_id):
-    # data = read_query(
-    #     'SELECT * FROM job_ads_has_mini_cvs WHERE mini_cv_id = ? AND match_status = "Pending" AND sender = "Company"',
-    #     (cv_id,))
 
     data = read_query('''
                     SELECT ja.id, ja.description, ja.min_salary, ja.max_salary,
