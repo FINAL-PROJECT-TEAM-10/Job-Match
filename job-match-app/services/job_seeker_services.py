@@ -575,3 +575,16 @@ def original_salary_info(job_ad_id: int):
     data = read_query('SELECT min_salary, max_salary FROM job_ads WHERE id = ?', (job_ad_id,))
 
     return data
+
+
+def get_email_username_by_cv(mini_cv_id):
+    data = read_query('''
+        SELECT email, username
+        FROM job_seekers as js
+        JOIN employee_contacts as ec ON js.employee_contacts_id = ec.id
+        JOIN mini_cvs as mc ON js.id = mc.job_seekers_id
+        WHERE mc.id = ?
+        ''', (mini_cv_id,)
+    )
+
+    return next((row for row in data), None)
