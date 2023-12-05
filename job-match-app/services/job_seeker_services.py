@@ -33,6 +33,8 @@ def convert_level_name(level):
     elif level == 'Advanced':
         result = 3
 
+    else:
+        raise HTTPException(status_code=404, detail="Invalid input, please look at the description")
     return int(result)
 
 
@@ -314,6 +316,7 @@ def get_cv_location_name(location_id):
         location_name = 'Remote'
 
     return location_name
+
 
 
 def check_owner_cv(cv_id, seeker_id):

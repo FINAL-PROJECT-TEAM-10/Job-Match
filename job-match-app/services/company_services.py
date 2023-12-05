@@ -3,10 +3,14 @@ from fastapi import Response
 from fastapi.responses import JSONResponse
 from app_models.company_models import Company
 from services import admin_services
-from services.authorization_services import get_password_hash
+
 from common.country_validators_helpers import *
 from services import job_seeker_services
 
+from data.database import update_queries_transaction
+
+
+# TODO: Consider using models to process data selects:
 
 def read_companies():
     data = read_query('SELECT * FROM companies')
@@ -68,6 +72,7 @@ def find_company_id_byusername(nickname: str):
 
 def create_company(Company_Name, Password, Company_City, Company_Country, Company_Adress, Telephone_Number,
                    Email_Adress):
+    from services.authorization_services import get_password_hash
     location_id = admin_services.find_location_id(Company_City, Company_Country)
 
     if not location_id:
@@ -122,6 +127,7 @@ def everything_from_companies_by_username(username: str):
 def edit_company_information(username: str, description: str, city: str, address: str, telephone: int):
     company_id = find_company_id_byusername(username)
 
+    # This could also be a transaction
     update_query('UPDATE companies SET description = ? WHERE username = ?', (description, username,))
     update_query('UPDATE company_contacts SET address = ?, telephone = ? WHERE company_id = ?',
                  (address, telephone, company_id,))
@@ -134,13 +140,15 @@ def edit_company_information(username: str, description: str, city: str, address
         update_query('UPDATE company_contacts SET locations_id = ? WHERE company_id = ?',(location_id,company_id,))
 
     else:
-        
+        # TODO: Consider removing the UPDATE query
+        #   If you already have a location, you don't need to, you don't need to update
         location_id = job_seeker_services.find_location_id_by_city(city)
         update_query('UPDATE company_contacts SET locations_id = ? WHERE company_id = ?', (location_id, company_id,))
 
     raise HTTPException(status_code=200, detail="You successfully edited your personal company information")
 
 
+# TODO: rename: this returns username by id, not the other way around
 def find_company_id_byusername_for_job_seeker(id: int):
     data = read_query('SELECT username FROM companies WHERE id = ?', (id,))
     return data[0][0]
@@ -156,7 +164,7 @@ def view_all_cvs():
         return ads
     
     else:
-        return JSONResponse(status_code=404, content='No cvs found!')
+        raise HTTPException(status_code=404, detail='No cvs found!')
 
 def find_matched_job_ads(company_id: int):
 
