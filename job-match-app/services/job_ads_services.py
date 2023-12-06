@@ -242,7 +242,9 @@ def get_current_job_ad(job_ads_id: int):
 
 def calculate_percantage_cv(job_ad_id, sorting, perms, threshold_percent, salary=None):
 
-    get_main_cvs = read_query('SELECT * FROM mini_cvs WHERE main_cv = 1')
+    ads = read_query('SELECT skills_or_requirements_id FROM job_ads_has_requirements WHERE job_ads_id = ?', (job_ad_id,))
+
+    get_main_cv = read_query('SELECT * FROM mini_cvs WHERE main_cv = 1 AND status != "Matched"')
 
     current_job_ad = get_current_job_ad(job_ad_id)
 
@@ -250,9 +252,9 @@ def calculate_percantage_cv(job_ad_id, sorting, perms, threshold_percent, salary
 
     if sorting == 'All':
         cv_range = salary
-        salary_based_on_cv = calculate_cv_salaries(get_main_cvs, threshold_percent)
+        salary_based_on_cv = calculate_cv_salaries(get_main_cv, threshold_percent)
 
-    for current_mini_cv in get_main_cvs:
+    for current_mini_cv in get_main_cv:
         current_cv_skills = get_main_cv_skills(current_mini_cv[0])
 
         data_dict = {

@@ -410,12 +410,13 @@ def check_skill_cv_exist(cv_id, skill_id):
 
 def update_main_cv(cv_id, seeker_id):
     other_cv_id = read_query('SELECT id FROM mini_cvs WHERE main_cv = 1 AND job_seekers_id = ?', (seeker_id,))
+    status = ''
 
     if other_cv_id:
-        update_query('UPDATE mini_cvs SET main_cv = 0 WHERE id = ? AND job_seekers_id = ?',
-                     (other_cv_id[0][0], seeker_id))
-
-    update_query('UPDATE mini_cvs SET main_cv = 1 WHERE id = ? AND job_seekers_id = ?', (cv_id, seeker_id))
+        status = 'Private'
+        update_query('UPDATE mini_cvs SET main_cv = 0, status = ?  WHERE id = ? AND job_seekers_id = ?', (status,other_cv_id[0][0], seeker_id))
+    status = 'Active'
+    update_query('UPDATE mini_cvs SET main_cv = 1, status = ? WHERE id = ? AND job_seekers_id = ?', (status,cv_id, seeker_id))
 
     raise HTTPException(status_code=200, detail=f'You successfully choose a main CV with id: {cv_id}')
 
@@ -465,16 +466,12 @@ def calculate_percents_job_ad(seeker_id, current_sort, perms, threshold_percent,
     unmatched = {}
     for job_ad_id, requirements in filtered_data.items():
         unmatched[job_ad_id] = find_unmatched(requirements, cv_skills)
-
-    matching_side = False
-    if current_sort == 'Matches':
-        matching_side = True
-        return matched, unmatched
+    
 
     if current_sort != 'All':
-        return percent_section_helper(current_sort, matches_per_job_ad, perms, matched, unmatched)
-    elif matching_side == False:
-        return filter_by_salaries(my_cv_ad_range, salaries_for_job_ad)
+        return percent_section_helper(current_sort,matches_per_job_ad, perms, matched, unmatched)
+    else:
+        return filter_by_salaries(my_cv_ad_range,salaries_for_job_ad)
 
 
 def get_current_job_ad_requirements(job_ad_id: int):
@@ -602,3 +599,16 @@ def get_cv_as_object(mini_cv_id):
         ''', (mini_cv_id,))
 
     return next((CvCreation.from_query_results(*row) for row in cv_data), None)
+def check_is_matched(cv_id):
+
+    check = read_query('SELECT min_salary FROM mini_cvs WHERE id = ? AND status = "Matched" AND main_cv = 1', 
+                       (cv_id,))
+
+    return bool(check)
+
+def get_existing_status(cv_id):
+
+    status = read_query('SELECT status FROM mini_cvs WHERE id = ? AND main_cv = 1', (cv_id,))
+
+
+    return status[0][0]
