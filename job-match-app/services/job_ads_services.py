@@ -51,7 +51,7 @@ def create_job_add(description: str, location: str, remote_location: str, min_sa
                 'INSERT INTO job_ads_has_locations(job_ads_id, remote_status) VALUES (?,?)',
                 (job_id, remote_status,))
         else:
-            raise HTTPException(status_code=404, detail="You have to choose a location. City / Remote or Both ")
+            raise HTTPException(status_code=400, detail="You have to choose a location. City / Remote or Both ")
 
     job_ad_id = find_job_ad_by_id(company_id, description)
 
@@ -68,7 +68,7 @@ def create_job_add(description: str, location: str, remote_location: str, min_sa
                     'INSERT INTO job_ads_has_requirements (job_ads_id,skills_or_requirements_id,level) VALUES (?,?,?)',
                     (job_ad_id, requirement_id, requirement_level_convertor))
     except IntegrityError:
-        return JSONResponse(status_code=404, content="Duplicating description or requirements")
+        return JSONResponse(status_code=409, content="Duplicating description or requirements")
 
     try:
 
@@ -216,7 +216,7 @@ def convert_level_name(level):
         result = 3
 
     else:
-        raise HTTPException(status_code=404, detail="Invalid input, please look at the description")
+        raise HTTPException(status_code=400, detail="Invalid input, please look at the description")
     return int(result)
 
 
