@@ -385,11 +385,24 @@ def get_cv_location_directly_by_id(cv_id):
 
 
 def get_job_ad_as_object(job_ad_id):
-    job_data = read_query('''
-        SELECT j.description, l.city, jal.remote_status, j.min_salary, j.max_salary, j.status, j.date_posted
-        FROM job_ads as j, job_ads_has_locations as jal, locations as l 
-        WHERE j.id = jal.job_ads_id AND jal.locations_id = l.id
-        AND j.id = ?
-        ''', (job_ad_id,))
+    is_location = read_query('''
+    SELECT jal.locations_id
+    FROM job_ads_has_locations as jal
+    WHERE jal.job_ads_id = ?
+    ''', (job_ad_id,))
+
+    if is_location:
+        job_data = read_query('''
+            SELECT j.description, l.city, jal.remote_status, j.min_salary, j.max_salary, j.status, j.date_posted
+            FROM job_ads as j, job_ads_has_locations as jal, locations as l 
+            WHERE j.id = jal.job_ads_id AND jal.locations_id = l.id
+            AND j.id = ?
+            ''', (job_ad_id,))
+    else:
+        job_data = read_query('''
+            SELECT j.description, "Fully Remote", 1, j.min_salary, j.max_salary, j.status, j.date_posted
+            FROM job_ads as j
+            WHERE j.id = ?
+            ''', (job_ad_id,))
 
     return next((Job_ad.from_query_results(*row) for row in job_data), None)
