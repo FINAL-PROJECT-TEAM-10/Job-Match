@@ -2,6 +2,8 @@ import unittest
 from datetime import datetime
 
 from unittest.mock import Mock, patch
+
+import mariadb
 from fastapi.exceptions import HTTPException
 
 import services.job_ads_services
@@ -62,7 +64,14 @@ class JobAdsServices_Should(unittest.TestCase):
         pass
 
     def test_findNameById_ReturnsNone_IfNotFound(self):
-        pass
+        company_id = 1
+        description = 'description'
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.find_job_ad_by_id(company_id, description)
+
+        self.assertIsNone(result)
 
     def test_createJobAd_ReturnsJobAd(self):
         job_ad = fake_job_ad()
@@ -102,6 +111,41 @@ class JobAdsServices_Should(unittest.TestCase):
             self.assertEqual('status', result.status)
 
 
+    @unittest.skip("Proud of test: will be used for future bug-testing")
+    def test_createJobAd_RaisesException_WhenIntegrityError(self):
+        job_ad = fake_job_ad()
+        company_id = 1
+        requirements = []
+        requirements_levels = []
+
+        with patch('services.job_ads_services.read_query') as read_query, \
+                patch('services.job_ads_services.insert_query') as insert_query, \
+                patch('services.job_ads_services.update_query') as update_query, \
+                patch('services.company_services.find_location') as fl, \
+                patch('services.job_seeker_services.check_skill_exist') as cse:
+            read_query.return_value = [(1,)]
+            update_query.return_value = None
+            fl.return_value = [(job_ad.location_name,)]
+            cse.return_value = True
+
+            insert_query.return_value = 1
+            insert_query.side_effect = mariadb.IntegrityError("MockedError")
+
+            with self.assertRaises(HTTPException) as conflict:
+                with self.assertRaises(mariadb.IntegrityError):
+                    job_ads_services.create_job_add(
+                        job_ad.description,
+                        job_ad.location_name,
+                        job_ad.remote_status,
+                        job_ad.min_salary,
+                        job_ad.max_salary,
+                        job_ad.status,
+                        company_id,
+                        requirements,
+                        requirements_levels
+                    )
+
+            self.assertEqual(409, conflict.exception.status_code)
 
     def test_createJobAd_UsesInsertQuery(self):
         job_ad = fake_job_ad()
@@ -118,7 +162,7 @@ class JobAdsServices_Should(unittest.TestCase):
             update_query.return_value = None
             fl.return_value = [(job_ad.location_name,)]
 
-            result = job_ads_services.create_job_add(
+            job_ads_services.create_job_add(
                 job_ad.description,
                 job_ad.location_name,
                 job_ad.remote_status,
