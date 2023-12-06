@@ -6,13 +6,14 @@ from app_models.skill_requirement_models import SkillRequirement
 from common.auth import get_current_user
 from services import skill_requirement_services
 
-skills_router = APIRouter(prefix='/skill-requirements',
-                          tags={'Skills and requirements'})
+skills_router = APIRouter(prefix='/skill-requirements')
 
 
 # TODO: Add filtration/pagination for skills (medium priority)
-@skills_router.get('/')
-def find_all_skills():
+@skills_router.get('/', tags={'View Skills and Requirements section'}, 
+                   description= "You can view all available skills/requirements in this section.")
+
+def find_all_skills(current_user_payload=Depends(get_current_user)):
     skill_list = skill_requirement_services.get_all_skills()
 
     if skill_list == 0:
@@ -22,7 +23,9 @@ def find_all_skills():
         return skill_list
 
 
-@skills_router.post('/', description='Admin endpoint')
+@skills_router.post('/', description='If you are on our moderation team, you can add a specific skill/requirement.', 
+                    tags={'Admins ADD/UPDATE/DELETE requirements/skills section'})
+
 def add_skill(name: str, description: str = None, career_type: str = None,
               current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'admins':
@@ -39,8 +42,10 @@ def add_skill(name: str, description: str = None, career_type: str = None,
     return skill
 
 
-@skills_router.get('/{id}')
-def find_skill_by_id(id: int):
+@skills_router.get('/{id}', tags={'View Skills and Requirements section'}, 
+                   description= "You can view a specific skill/requirement using an ID in this section.")
+
+def find_skill_by_id(id: int, current_user_payload=Depends(get_current_user)):
     skill = skill_requirement_services.get_skill_by_id(id)
     if skill:
         return skill
@@ -49,7 +54,9 @@ def find_skill_by_id(id: int):
                             content=f'Skill/Requirement with ID#{id} was not found.')
 
 
-@skills_router.put('/{id}', description='Admin endpoint')
+@skills_router.put('/{id}', description='You can edit a specific skill/requirement using an ID in this section.',
+                    tags={'Admins ADD/UPDATE/DELETE requirements/skills section'})
+
 def change_skill_name_description_and_career(id: int, name: str = None, description: str = None,
                                              career_type: str = None,
                                              current_user_payload=Depends(get_current_user)):
@@ -76,7 +83,9 @@ def change_skill_name_description_and_career(id: int, name: str = None, descript
                         content='Skill/Requirement successfully updated.')
 
 
-@skills_router.delete('/{id}', description='Admin endpoint')
+@skills_router.delete('/{id}', description='You can delete a specific skill/requirement using an ID in this section.', 
+                      tags={'Admins ADD/UPDATE/DELETE requirements/skills section'})
+
 def delete_skill_requirement(id: int, current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'admins':
         return JSONResponse(status_code=403,
@@ -104,7 +113,9 @@ def delete_skill_requirement(id: int, current_user_payload=Depends(get_current_u
 # TODO: Consider what happens with percent matches when force delete is called:
 #  Possible solution. Forcing an update of matches that have the skill/requirement.
 #  Implemented once matching functionality is complete. (medium priority, awaits functionality)
-@skills_router.delete('/{id}/force_delete', description='Admin endpoint')
+@skills_router.delete('/{id}/force_delete', description='You can force delete a specific skill/requirement using an ID in this section.', 
+                      tags={'Admins ADD/UPDATE/DELETE requirements/skills section'})
+
 def force_delete_skill_requirement(id: int, current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'admins':
         return JSONResponse(status_code=403,
