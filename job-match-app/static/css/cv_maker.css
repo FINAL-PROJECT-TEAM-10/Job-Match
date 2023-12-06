@@ -87,10 +87,15 @@ header h1 {
 }
 
 .nav-list {
+    /* Your existing nav-list styles */
     list-style: none;
     display: flex;
     margin: 0;
     padding: 0;
+}
+
+.nav-list h2 {
+    margin-right: 20px;
 }
 
 .nav-list li {
@@ -98,6 +103,7 @@ header h1 {
 }
 
 .nav-list a {
+    /* Your existing nav-list a styles */
     text-decoration: none;
     color: #fff;
     font-weight: bold;
@@ -110,6 +116,7 @@ header h1 {
 }
 
 .nav-list a::after {
+    /* Your existing nav-list a::after styles */
     content: '';
     display: block;
     width: 0;
@@ -123,6 +130,23 @@ header h1 {
 
 .nav-list a:hover::after {
     width: 100%;
+}
+
+.nav-list li:last-child {
+    margin-right: 0;
+}
+
+.nav-list a.skip-link {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+    position: relative;
+    margin-right: 20px;
+}
+
+.nav-list a.skip-link:hover {
+    color: #2ecc71;
 }
 
 .position-selection {

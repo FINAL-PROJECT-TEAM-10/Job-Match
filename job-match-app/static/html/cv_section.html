@@ -67,6 +67,14 @@
                         });
                         
                         const data = await response.json();
+
+                        if (response.status !== 200) {
+                            const errorContainer = document.getElementById('errorContainer');
+                                errorContainer.innerHTML = `<p>${data.detail}</p>`;
+                            return;
+                            }else{
+                                errorContainer.innerHTML = `<p>${data.detail}</p>`; 
+                            }
                         localStorage.setItem('currentPage', '1');
                         displayJobAds(data);
                         showPage(1)
@@ -280,7 +288,7 @@
             statusSelect.id = 'editStatus';
             statusSelect.name = 'status';
 
-            const statusOptions = ['Active', 'Hidden', 'Private'];
+            const statusOptions = ['Hidden', 'Private'];
             statusOptions.forEach(status => {
                 const option = document.createElement('option');
                 option.value = status;

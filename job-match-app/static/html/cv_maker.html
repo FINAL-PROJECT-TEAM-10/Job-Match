@@ -18,7 +18,7 @@
                 <h1 id="usernameHeader"></h1>
                 <nav class="navbar">
                     <ul class="nav-list">
-                        <h2>Lets make your CV</h2>
+                        <li><a href="/seeker_tab" class="skip-link">Skip for now</a></li>
                     </ul>
                 </nav>
             </div>
@@ -215,10 +215,25 @@
             function confirmSubmit() {
                 const isConfirmed = confirm('Are you sure you want to create your CV?');
                 if (isConfirmed) {
+                    let loadingOverlay = document.createElement('div');
+                    loadingOverlay.classList.add('loading-overlay');
+                    let loader = document.createElement('div');
+                    loader.classList.add('loader');
+                    loadingOverlay.appendChild(loader);
+                    document.body.appendChild(loadingOverlay);
                     storeAndSubmit();
+                    setTimeout(function () {
+                        loadingOverlay.remove();
+                        redirect()
+                    }, 1000);
                 }
             }
             displayQuestion();
+
+            function redirect(){
+                window.location.href = '/seeker_tab'
+            }
+            
         </script>
     </div>
 </body>

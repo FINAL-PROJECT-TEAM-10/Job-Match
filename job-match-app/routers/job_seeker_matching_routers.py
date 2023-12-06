@@ -37,7 +37,10 @@ def view_pending_list(current_user_payload=Depends(get_current_user)):
                             detail='Only seekers can view all pending matches')
 
     seeker_id = current_user_payload.get('id')
-    cv_id = job_seeker_matching_services.get_main_cv(seeker_id)
+    try:
+        cv_id = job_seeker_matching_services.get_main_cv(seeker_id)
+    except IndexError:
+        raise HTTPException(status_code=404, detail='No main cv selected for this operation')
     return job_seeker_matching_services.pending_list(cv_id)
 
 
