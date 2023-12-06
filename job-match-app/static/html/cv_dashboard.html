@@ -4,23 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/css/searching_seeker.css">
+    <link rel="stylesheet" href="/static/css/personal_info_seeker.css">
     <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
     <script src="/static/js/loading_overlay_home.js"></script>
     <script src="/static/js/get_username.js"></script>
     <script src="/static/js/button_click_loader.js"></script>
     <script src="/static/js/check_is_logged.js"></script>
-    <title>Searching | Skill Sync</title>
+    <title>CV Dashboard | Skill Sync</title>
 </head>
 
 <body>
     <header>
         <div class="header-content">
             <h1 id="usernameHeader"></h1>
-            <h3>Searching</h3>
+            <h3>CV Dashboard</h3>
             <nav class="navbar">
                 <ul class="nav-list">
-                    <li>Search whatever your preferences are</li>
+                    <li><a href="/seeker_section">Back to seeker section</a></li>
                 </ul>
             </nav>
         </div>
@@ -34,24 +34,18 @@
     <div class="sections-container">
         <!-- Seeker Section -->
         <section class="position-selection">
-            <h2>Search Job Ads by <br>Percents</br></h2>
-            <a href="/seeker_section/searching/percantage" class="button">Check your matches</a>
+            <h2>Create additional CVS</h2>
+            <a href="/seeker_section/cv/create" class="button" id="viewButtonInfo">Create</a>
+        </div>
         </section>
 
         <!-- CV Section -->
+        <div class="sections-container">
         <section class="position-selection">
-            <h2>Search Job Ads by Salary </h2>
-            <a href="/seeker_section/searching/salary" class="button">Based on your salary range</a>
-        </section>
-
-        <!-- Matching Section -->
-        <section class="position-selection">
-            <h2>View all pending Match requests</h2>
-            <a href="/seeker_section/searching/pending_requests" class="button">View requests</a>
+            <h2>Manage Your CVS</h2>
+            <a href="/seeker_section/cv/manage" class="button">Manage</a>
         </section>
     </div>
-
-</div>
 </body>
 
 </html>

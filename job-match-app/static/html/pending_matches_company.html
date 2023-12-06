@@ -9,18 +9,19 @@
     <script src="/static/js/loading_overlay_home.js"></script>
     <script src="/static/js/get_username.js"></script>
     <script src="/static/js/button_click_loader.js"></script>
-    <title>Skill Sync</title>
+    <script src="/static/js/check_is_logged.js"></script>
+    <title>Manage Job AD | Skill Sync</title>
 </head>
 
 <body>
     <header>
         <div class="header-content">
             <h1 id="usernameHeader"></h1>
-            <h3>View all pending requests for match you have</h3>
+            <h3>Manage my Job ADS</h3>
             <nav class="navbar">
                 <ul class="nav-list">
-                    <li><a href="/seeker_section/searching">Back To Searching</li></a>
-                    <li><a href="/seeker_section">Back to your dashboard</li></a>
+                    <li><a href="/company_section/searching">Search CVS</a></li>
+                    <li><a href="/company_section">Back to your dashboard</li></a>
                 </ul>
             </nav>
         </div>
@@ -32,9 +33,7 @@
     </header>
     <div class="form-container">
         <form id="dataForm">
-            <p>View all pending requests</p>
-            <label for="jobAdId">Job Ad ID:</label>
-            <input type="number" id="jobAdId" name="job_ad_id" placeholder="Enter Job Ad ID" required>
+            <p>View all of your Pending Requests for your ADS</p>
             <div id="statusButtons">
 
             </div>
@@ -55,12 +54,12 @@
             <script>
                 const access_token = localStorage.getItem("access_token");
                 async function submitData(event) {
+
+                const decodedToken = parseJwt(access_token);
+                    
                     event.preventDefault();
                     try {
-                        const form = document.getElementById('dataForm');
-                        const formData = new FormData(form);
-                        const jobAdId = formData.get('job_ad_id');
-                        const url = `http://127.0.0.1:8000/companies/match/requests?job_ad_id=${jobAdId}`;
+                        const url = `http://127.0.0.1:8000/job_ads/companies?name_of_company=${decodedToken.username}`;
             
                         const response = await fetch(url, {
                             method: 'GET',
@@ -69,7 +68,7 @@
                                 'Content-Type': 'application/json'
                             },
                         });
-            
+                        
                         const data = await response.json();
                         localStorage.setItem('currentPage', '1');
                         displayJobAds(data);
@@ -78,6 +77,17 @@
                         console.error('Error fetching personal info:', error);
                     }
                 }
+
+                
+
+
+                function parseJwt(token) {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+
+                return JSON.parse(jsonPayload);
+            }
             
                 function displayJobAds(data) {
                 const showContainer = document.getElementById('show');
@@ -106,12 +116,19 @@
 
                     const matchButton = document.createElement('button');
                     matchButton.textContent = 'Match';
-                    matchButton.addEventListener('click', () => handleMatch('match', jobAd["Mini CV ID"]));
+                    matchButton.addEventListener('click', () => handleMatch('match', jobAd["Job AD ID"]));
+                    matchButton.style.display = 'none'
                     listItem.appendChild(matchButton);
+
+                    const requestButton = document.createElement('button');
+                    requestButton.textContent = 'Requests';
+                    requestButton.addEventListener('click', () => requestsShow(jobAd["Job AD ID"]));
+                    listItem.appendChild(requestButton);
 
                     const cancelButton = document.createElement('button');
                     cancelButton.textContent = 'Cancel';
-                    cancelButton.addEventListener('click', () => cancelMatch('cancel', jobAd["Mini CV ID"]));
+                    cancelButton.addEventListener('click', () => cancelMatch('cancel', jobAd["Job AD ID"]));
+                    cancelButton.style.display = 'none'
                     listItem.appendChild(cancelButton);
 
                     for (const key in jobAd) {
@@ -152,14 +169,38 @@
                         }
                     }
 
-                    async function handleMatch(action,cv_id) {
+                    function showPage(page) {
+                    const itemsPerPage = 3;
+
+                    const allAds = document.querySelectorAll('.job-ad-card');
+                    allAds.forEach((ad) => {
+                        ad.style.display = 'none';
+                    });
+
+                    const start = (page - 1) * itemsPerPage;
+                    const end = start + itemsPerPage;
+
+                    const newAds = document.querySelectorAll(`.job-ad-card`);
+                    newAds.forEach((ad, index) => {
+                        if (index >= start && index < end) {
+                            ad.style.display = 'block';
+                        }
+                    });
+
+                    const paginationButtons = document.querySelectorAll('#pagination button');
+                    paginationButtons.forEach((button, index) => {
+                        button.classList.toggle('active', index + 1 === page);
+                    });
+
+                    localStorage.setItem('currentPage', page);
+                }
+
+                    async function handleMatch(job_ad_id,cv_id) {
                         try {
                             const form = document.getElementById('dataForm');
                             const formData = new FormData(form);
-                            const jobAdId = formData.get('job_ad_id');
-                            const miniCvId = cv_id;
 
-                            const url = `http://127.0.0.1:8000/companies/match/cv?job_ad_id=${jobAdId}&mini_cv_id=${miniCvId}`;
+                            const url = `http://127.0.0.1:8000/companies/match/cv?job_ad_id=${job_ad_id}&mini_cv_id=${cv_id}`;
 
                             const response = await fetch(url, {
                                 method: 'POST',
@@ -170,7 +211,6 @@
                             });
 
                             const data = await response.json();
-                            console.log(data);
 
 
                             if (response.status !== 200) {
@@ -185,14 +225,88 @@
                         }
                     }
 
-                    async function cancelMatch(action,cv_id) {
-                        try {
-                            const form = document.getElementById('dataForm');
-                            const formData = new FormData(form);
-                            const jobAdId = formData.get('job_ad_id');
-                            const miniCvId = cv_id;
 
-                            const url = `http://127.0.0.1:8000/companies/match/cancel?job_ad_id=${jobAdId}&mini_cv_id=${miniCvId}`;
+                    async function requestsShow(job_ad_id) {
+                        try {
+                            console.log(job_ad_id)
+
+                            const url = `http://127.0.0.1:8000/companies/match/requests?job_ad_id=${job_ad_id}`;
+
+                            const response = await fetch(url, {
+                                method: 'GET',
+                                headers: {
+                                    'Authorization': `Bearer ${access_token}`,
+                                    'Content-Type': 'application/json',
+                                },
+                            });
+
+                            const data = await response.json();
+
+                            if (response.status !== 200) {
+                            const errorContainer = document.getElementById('errorContainer');
+                            errorContainer.innerHTML = `<p>${data.detail}</p>`;
+                            return;
+                            }else{
+                                errorContainer.innerHTML = `<p>${data.detail}</p>`; 
+                            }
+                            const showContainer = document.getElementById('show');
+                            showContainer.innerHTML = '';
+
+                            data.forEach((cv) => {
+                                const cvContainer = document.createElement('div');
+                                cvContainer.className = 'cv-container';
+
+                                const matchButton = document.createElement('button');
+                                matchButton.textContent = 'Match';
+                                matchButton.addEventListener('click', () => handleMatch(job_ad_id, cv["Mini CV ID"]));
+                                cvContainer.appendChild(matchButton);
+
+                                const cancelButton = document.createElement('button');
+                                cancelButton.textContent = 'Cancel';
+                                cancelButton.addEventListener('click', () => cancelMatch(job_ad_id, cv["Mini CV ID"]));
+                                cvContainer.appendChild(cancelButton);
+
+                                const backButton = document.createElement('button');
+                                backButton.textContent = 'Back';
+                                backButton.addEventListener('click', () => reloadCards());
+                                cvContainer.appendChild(backButton);
+
+                                for (const key in cv) {
+                                    const value = cv[key];
+
+                                    const pairContainer = document.createElement('div');
+                                    pairContainer.className = 'key-value-pair';
+
+                                    const keyElement = document.createElement('span');
+                                    const valueElement = document.createElement('span');
+
+                                    keyElement.textContent = `${key}: `;
+                                    valueElement.textContent = value;
+
+                                    if (key.toLowerCase().includes('status')) {
+                                        const isMatched = key.toLowerCase().includes('status');
+                                        valueElement.style.color = isMatched ? '#F4E406' : '#e74c3c';
+                                    }
+
+                                    pairContainer.appendChild(keyElement);
+                                    pairContainer.appendChild(valueElement);
+
+                                    cvContainer.appendChild(pairContainer);
+                                }
+
+                                showContainer.appendChild(cvContainer);
+                            });
+
+                            
+                        } catch (error) {
+                            console.error(`Error job ad:`, error);
+                        }
+                    }
+
+                    async function cancelMatch(job_ad_id,cv_id) {
+                        try {
+
+                            const url = `http://127.0.0.1:8000/companies/match/cancel?job_ad_id=${job_ad_id}&mini_cv_id=${cv_id}`;
 
                             const response = await fetch(url, {
                                 method: 'PUT',
@@ -220,10 +334,8 @@
 
                     async function reloadCards() {
                         try {
-                            const form = document.getElementById('dataForm');
-                            const formData = new FormData(form);
-                            const jobAdId = formData.get('job_ad_id');
-                            const url = `http://127.0.0.1:8000/companies/match/requests?job_ad_id=${jobAdId}`;
+                            const decodedToken = parseJwt(access_token);
+                            const url = `http://127.0.0.1:8000/job_ads/companies?name_of_company=${decodedToken.username}`;
 
                             const response = await fetch(url, {
                                 method: 'GET',

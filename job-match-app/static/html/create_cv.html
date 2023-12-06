@@ -8,19 +8,18 @@
     <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
     <script src="/static/js/loading_overlay_home.js"></script>
     <script src="/static/js/button_click_loader.js"></script>
-    <script src="/static/js/get_username_company.js"></script>
     <script src="/static/js/check_is_logged.js"></script>
-    <title>Job AD Create |Skill Sync</title>
+    <title>Create CV | Skill Sync</title>
 </head>
 
 <body>
     <header>
         <div class="header-content">
-            <h1 id="usernameHeader"></h1>
+            <h1>Create CV</h1>
             <nav class="navbar">
-                <h3>Create your Job AD</h3>
+                <h3>Create your CV</h3>
                 <ul class="nav-list">
-                    <li><a href="/company_section/searching/percentage">Search CVS</a></li>
+                    <li><a href="/seeker_section/cv/manage">My personal CVS</a></li>
                 </ul>
             </nav>
         </div>
@@ -37,22 +36,22 @@
             <label for="description">Description:</label>
             <input type="text" id="description" name="description" placeholder="Description">
 
-            <label for="location">Location (city):</label>
-            <input type="text" id="location" name="location" placeholder="Location">
-
-            <label for="remote">Remote:</label>
-            <select id="remote" name="remote_location">
-                <option value="no">No</option>
-                <option value="yes">Yes</option>
-            </select>
-
             <label for="min_salary">Minimum Salary:</label>
             <input type="text" id="min_salary" name="min_salary" placeholder="Minimum Salary">
 
             <label for="max_salary">Maximum Salary:</label>
             <input type="text" id="max_salary" name="max_salary" placeholder="Maximum Salary">
 
-            <input type="hidden" id="skills" name="requirements">
+            <label for="location">Location:</label>
+            <input type="text" id="location" name="location" placeholder="Location">
+
+            <label for="remote">Remote:</label>
+            <select id="remote" name="is_remote">
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+            </select>
+
+            <input type="hidden" id="skills" name="skills">
 
             <label for="skills">Skills:</label>
             <div id="skillsContainer">
@@ -60,7 +59,7 @@
                 <button type="button" id="skillButton" onclick="selectSkill('Python')">Python</button>
                 <button type="button" onclick="selectSkill('JavaScript')">JavaScript</button>
                 <button type="button" onclick="selectSkill('Flask')">Flask</button>
-                <button type="button" onclick="selectSkill('React')">React</button>
+                <button type="button" onclick="selectSkill('SQL')">SQL</button>
                 <button type="button" onclick="selectSkill('Django')">Django</button>
             </div>
 
@@ -102,7 +101,7 @@
 
             console.log(formData)
 
-            fetch('http://127.0.0.1:8000/job_ads/', {
+            fetch('http://127.0.0.1:8000/seekers/cv/', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -126,7 +125,7 @@
             if (data.error) {
                 throw new Error(data.error);
             }
-            document.getElementById('okRegister').innerText = 'Job AD was created successfully!';
+            document.getElementById('okRegister').innerText = 'CV was created successfully!';
             let loadingOverlay = document.createElement('div');
             loadingOverlay.classList.add('loading-overlay');
             let loader = document.createElement('div');
@@ -188,10 +187,10 @@ function resetSkills() {
     var skillsInput = document.getElementById('skills');
     skillsInput.value = '';
 
-    // Reset button text for all skill buttons
+
     var skillButtons = document.querySelectorAll("#skillsContainer button");
     skillButtons.forEach(function(button) {
-        button.textContent = button.textContent.replace(/ - .*/, ''); // Remove the skill level part
+        button.textContent = button.textContent.replace(/ - .*/, ''); 
     });
 }
 
@@ -213,7 +212,7 @@ function resetSkills() {
 <script>
     function redirectToAnotherPage(event) {
         event.preventDefault()
-        window.location.href = '/company_section/job_ad';
+        window.location.href = '/seeker_section/cv';
     }
 </script>
 </body>

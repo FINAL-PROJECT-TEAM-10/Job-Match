@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="static/css/landing_page.css">
     <link rel="shortcut icon" href="/static/images/favicon.ico" type="/x-icon">
     <script src="/static/js/button_click_loader.js"></script>
-    <title>SKILL SYNC</title>
+    <title>Home | Skill Sync</title>
 </head>
 <body>
     <header>
@@ -14,10 +14,10 @@
             <h1>WELCOME TO SKILL SYNC</h1>
             <nav class="navbar">
                 <ul class="nav-list" id="navbarList">
-                    <li id="personalDashboard"><a href="/seeker_tab">Personal Dashboard</a></li>
+                    <li id="personalDashboard"><a href="/profile">Personal Profile</a></li>
                     <li id="personalInfo"><a href="/seeker_section/personal_info">Personal Info</a></li>
                     <li id="companyDashboard"><a href="/company_tab">Company Dashboard</a></li>
-                    <li id="companyInfo"><a href="#">Company Info</a></li>
+                    <li id="companyInfo"><a href="/profile">Company Profile</a></li>
                 </ul>
             </nav>
         </div>
@@ -64,15 +64,15 @@
                 personalInfo.style.display = "none";
                 companyDashboard.style.display = "none";
                 companyInfo.style.display = "none";
-                register_text.textContent = 'Your personal dashboard:'
+                register_text.textContent = 'Your personal dashboard'
                 if (userRole == 'seekers'){
                 registerJobSeekerButton.textContent = 'Personal Dashboard'
-                signButton.textContent = 'SIGN OUT'
+                signButton.textContent = 'Sign Out'
                 registerJobSeekerButton.href = '/seeker_tab'
                 registerCompanyButton.style.display = 'none'
                 } else if (userRole === "companies") {
                 registerCompanyButton.textContent = 'Company Dashboard'
-                signButton.textContent = 'SIGN OUT'
+                signButton.textContent = 'Sign Out'
                 registerCompanyButton.href = '/company_tab'
                 registerJobSeekerButton.style.display = 'none'
                 }

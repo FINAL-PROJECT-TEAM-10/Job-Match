@@ -105,6 +105,8 @@ def create_cv(description: str = Form(),
         raise HTTPException(status_code=403,
                             detail='Only seekers can create cv')
     
+    validate_city(location)
+    
     status = 'Active'
     is_main_cv = False
     seeker_username = current_user_payload.get('username')

@@ -9,7 +9,7 @@
     <script src="/static/js/loading_overlay_home.js"></script>
     <script src="/static/js/get_username.js"></script>
     <script src="/static/js/button_click_loader.js"></script>
-    <title>Skill Sync</title>
+    <title>Profile | Skill Sync</title>
 </head>
 
 <body>
@@ -91,8 +91,17 @@
                         }
                     })
                     .then(data => {
-                        console.log(data);
-    
+                        let loadingOverlay = document.createElement('div');
+                        loadingOverlay.classList.add('loading-overlay');
+                        let loader = document.createElement('div');
+                        loader.classList.add('loader');
+                        loadingOverlay.appendChild(loader);
+                        document.body.appendChild(loadingOverlay);
+                        setTimeout(function () {
+                            loadingOverlay.remove();
+                            refreshProfilePicture()
+                        }, 1000);
+
                         document.getElementById('errorMessage').innerText = '';
                         document.getElementById('okRegister').innerText = 'Image uploaded successfully.';
                     })
@@ -104,33 +113,67 @@
                     });
             }
         }
-    </script>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
+
+        function refreshProfilePicture() {
             const access_token = localStorage.getItem("access_token");
-            fetch('/profile/picture',{
+            
+            fetch('/profile/picture', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${access_token}`,
                     'Content-Type': 'application/json'
                 }
             })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch profile picture');
-                    }
+            .then(response => {
+                if (response.status === 404) {
+                    const defaultImageUrl = '/static/images/no-picture.jpg';
+                    document.querySelector('.profile-picture').innerHTML = `<img src="${defaultImageUrl}" />`;
+                } else if (response.ok) {
                     return response.blob();
-                })
-                .then(blob => {
-                    const imageUrl = URL.createObjectURL(blob);
-                    console.log(imageUrl)
+                } else {
+                    throw new Error('Failed to fetch profile picture');
+                }
+            })
+            .then(blob => {
+                const imageUrl = URL.createObjectURL(blob);
+                console.log(imageUrl);
+                document.querySelector('.profile-picture').innerHTML = `<img src="${imageUrl}" />`;
+            })
+            .catch(error => {
+                console.error('Error:', error.message);
+            });
+        }
+    </script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const access_token = localStorage.getItem("access_token");
 
-                    document.querySelector('.profile-picture').innerHTML = `<img src="${imageUrl}" />`;
-                })
-                .catch(error => {
-                    console.error('Error:', error.message);
-                });
+            fetch('/profile/picture', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${access_token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.status === 404) {
+                    const defaultImageUrl = '/static/images/no_picture_profile.jpg';
+                    document.querySelector('.profile-picture').innerHTML = `<img src="${defaultImageUrl}" />`;
+                } else if (response.ok) {
+                    return response.blob();
+                } else {
+                    throw new Error('Failed to fetch profile picture');
+                }
+            })
+            .then(blob => {
+                const imageUrl = URL.createObjectURL(blob);
+                console.log(imageUrl);
+                document.querySelector('.profile-picture').innerHTML = `<img src="${imageUrl}" />`;
+            })
+            .catch(error => {
+                console.error('Error:', error.message);
+            });
         });
     </script>
 
@@ -159,7 +202,5 @@
         })
     </script>
 
-
-    
 </body>
 </html>

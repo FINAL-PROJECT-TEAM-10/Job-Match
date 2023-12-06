@@ -9,14 +9,15 @@
     <script src="/static/js/loading_overlay_home.js"></script>
     <script src="/static/js/get_username.js"></script>
     <script src="/static/js/button_click_loader.js"></script>
-    <title>Skill Sync</title>
+    <script src="/static/js/check_is_logged.js"></script>
+    <title>Manage CV | Skill Sync</title>
 </head>
 
 <body>
     <header>
         <div class="header-content">
             <h1 id="usernameHeader"></h1>
-            <h3>My CVS</h3>
+            <h3>Manage my CVS</h3>
             <nav class="navbar">
                 <ul class="nav-list">
                     <li><a href="/seeker_section/searching">Search Job</a></li>
@@ -181,31 +182,6 @@
                     localStorage.setItem('currentPage', page);
                 }
 
-                    async function editCV(cv_id) {
-                        try {
-                            const url = `http://127.0.0.1:8000/seekers/match/company?job_ad_id=${jobId}`;
-
-                            const response = await fetch(url, {
-                                method: 'PUT',
-                                headers: {
-                                    'Authorization': `Bearer ${access_token}`,
-                                    'Content-Type': 'application/json',
-                                },
-                            });
-
-                            const data = await response.json();
-
-                            await reloadCards();
-
-                            if (action === 'match') {
-                                alert('Matched successfully!');
-                            } else if (action === 'cancel') {
-                                alert('Cancelled successfully!');
-                            }
-                        } catch (error) {
-                            console.error(`Error ${action}ing job ad:`, error);
-                        }
-                    }
 
                     async function setMainCV(cv_id) {
                         try {
@@ -327,7 +303,7 @@
                 const skillButton = document.createElement('button');
                 skillButton.type = 'button';
                 skillButton.textContent = skill;
-                skillButton.addEventListener('click', () => selectSkill(skill, skillButton)); // Pass the button reference to selectSkill
+                skillButton.addEventListener('click', () => selectSkill(skill, skillButton));
                 skillsContainer.appendChild(skillButton);
             });
 
@@ -380,10 +356,9 @@
                 var skillsInput = document.getElementById('skills');
                 skillsInput.value = '';
 
-                // Reset button text for all skill buttons
                 var skillButtons = document.querySelectorAll("#skillsContainer button");
                 skillButtons.forEach(function(button) {
-                    button.textContent = button.textContent.replace(/ - .*/, ''); // Remove the skill level part
+                    button.textContent = button.textContent.replace(/ - .*/, '');
                 });
             }
 
@@ -407,7 +382,7 @@
         const editForm = document.getElementById('editCVForm');
 
         const selectedSkills = Array.from(editForm.querySelector('#editSkillsContainer').querySelectorAll('button')).filter(skillButton => {
-            return skillButton.dataset.level > 0; // Filter only selected skills
+            return skillButton.dataset.level > 0;
         });
 
         
@@ -445,7 +420,7 @@
             errorContainer.innerHTML = `<p>${data.detail}</p>`;
             return;
             }else{
-                errorContainer.innerHTML = `<p>${data.detail}</p>`; 
+            errorContainer.innerHTML = `<p style="color: lime;">${data.detail}</p>`;
             }
 
         

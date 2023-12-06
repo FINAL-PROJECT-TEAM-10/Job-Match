@@ -4,6 +4,8 @@ body {
     padding: 0;
     box-sizing: border-box;
     background-image: url('/static/images/background.jpg');
+    background-size: cover;
+    background-attachment: fixed;
     color: #fff;
 }
 
@@ -277,4 +279,24 @@ button:hover {
     top: 66%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+#formContainer select {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    background-color: #2e2e2e;
+    color: #fff;
+    width: 100%;
+}
+
+#formContainer select option {
+    background-color: #2e2e2e;
+    color: #fff;
+}
+
+#formContainer select:hover,
+#formContainer select:focus {
+    border-color: #27ae60;
 }

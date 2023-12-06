@@ -4,6 +4,8 @@ body {
     padding: 0;
     box-sizing: border-box;
     background-image: url('/static/images/background.jpg');
+    background-size: cover;
+    background-attachment: fixed;
     color: #fff;
 }
 

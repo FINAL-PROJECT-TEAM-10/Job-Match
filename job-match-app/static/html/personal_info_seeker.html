@@ -9,14 +9,15 @@
     <script src="/static/js/loading_overlay_home.js"></script>
     <script src="/static/js/get_username.js"></script>
     <script src="/static/js/button_click_loader.js"></script>
-    <title>Skill Sync</title>
+    <script src="/static/js/check_is_logged.js"></script>
+    <title>Personal Information | Skill Sync</title>
 </head>
 
 <body>
     <header>
         <div class="header-content">
             <h1 id="usernameHeader"></h1>
-            <h3>Your Personal Info</h3>
+            <h3>Your Personal Information</h3>
             <nav class="navbar">
                 <ul class="nav-list">
                     <!-- Add navigation links here if needed -->
@@ -68,6 +69,7 @@
                     console.log(data)
 
                     const personalInfoContainer = document.getElementById('personalInfoContainer');
+                    personalInfoContainer.style.display = 'block'
                     personalInfoContainer.innerHTML = '<h3>Your Personal Info</h3>';
 
                     personalInfoContainer.innerHTML += `<p>Summary: ${data.summary}</p>`;

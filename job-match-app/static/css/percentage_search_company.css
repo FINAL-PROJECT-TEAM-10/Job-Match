@@ -4,6 +4,8 @@ body {
     padding: 0;
     box-sizing: border-box;
     background-image: url('/static/images/background.jpg');
+    background-size: cover;
+    background-attachment: fixed;
     color: #fff;
 }
 
@@ -59,13 +61,19 @@ body {
 }
 
 .job-ad-card {
-    border: 1px solid;
-    padding: 15px;
-    border-radius: 8px;
-    width: 300px; /* Adjust the width as needed */
+    background: linear-gradient(to right, #242424, #2e2e2e);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    background: linear-gradient(to bottom right, #242424, #2e2e2e);
-    color: #fff; /* Set text color to white for better visibility */
+    transition: transform 0.3s ease-in-out;
+    overflow: hidden;
+    color: #fff;
+}
+
+.job-ad-card:hover{
+    transform: scale(1.05);
+    z-index: 1;
 }
 
 .key-value-pair {
@@ -262,7 +270,8 @@ input:focus:required:invalid {
 
 #statusButtons {
     display: flex;
-    margin-bottom: 15px;
+    align-items: center;
+    margin-top: 10px;
 }
 
 #statusButtons input[type="radio"] {
@@ -270,22 +279,21 @@ input:focus:required:invalid {
 }
 
 #statusButtons label {
-    display: inline-block;
-    margin-right: 10px;
-    padding: 10px;
+    margin-right: 10px; /* Adjust the margin as needed */
+    padding: 8px;
     border-radius: 5px;
     background: linear-gradient(to right, #242424, #2e2e2e);
     color: #fff;
     cursor: pointer;
-    transition: background 0.3s ease;
 }
 
 #statusButtons label:hover {
-    background: rgba(13, 228, 103, 0.712) /* Change this to the color you want for the hover state */
+    background: rgba(13, 228, 103, 0.712);
 }
 
 #statusButtons input[type="radio"]:checked + label {
-    background: #05e061; /* Change this to the color you want for the checked state */
+    background: #05e061;
+    color: #fff;
 }
 
 @keyframes spin {
@@ -310,6 +318,54 @@ input:focus:required:invalid {
 }
 
 #show li:hover {
+    transform: scale(1.05);
+    z-index: 1;
+}
+
+
+/* Styling for the radio buttons */
+.radio-container {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.radio-container input[type="radio"]:checked + label {
+    background: #05e061;
+    color: #fff;
+}
+
+.radio-container input[type="radio"] {
+    display: none;
+}
+
+.radio-container label {
+    margin-right: 10px; /* Adjust the margin as needed */
+    padding: 8px;
+    border-radius: 5px;
+    background: linear-gradient(to right, #242424, #2e2e2e);
+    color: #fff;
+    cursor: pointer;
+}
+
+.radio-container label:hover {
+    background: rgba(13, 228, 103, 0.712);
+}
+
+/* Adjusted selector for the checked state */
+
+.cv-container {
+    background: linear-gradient(to right, #242424, #2e2e2e);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+    overflow: hidden;
+    color: #fff;
+}
+
+.cv-container:hover {
     transform: scale(1.05);
     z-index: 1;
 }

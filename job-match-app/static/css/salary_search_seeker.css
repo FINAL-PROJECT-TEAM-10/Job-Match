@@ -45,13 +45,34 @@ header h1 {
 .nav-list {
     list-style: none;
     display: flex;
-    margin: 0;
-    padding: 0;
+    margin: 10px 10px;
+    padding: 20px 30px;
     position: relative;
 }
 
 .nav-list li {
-    margin-right: 20px;
+    margin-right: 30px;
+    margin-left: 30px;
+}
+
+.job-ad-card {
+    background: linear-gradient(to right, #242424, #2e2e2e);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+    overflow: hidden;
+    color: #fff;
+}
+
+.job-ad-card:hover{
+    transform: scale(1.05);
+    z-index: 1;
+}
+
+#personalInfo{
+    margin-left: auto;
 }
 
 .nav-list a {
@@ -65,6 +86,7 @@ header h1 {
 .nav-list a:hover {
     color: #2ecc71;
 }
+
 
 .nav-list a::after {
     content: '';
@@ -185,6 +207,16 @@ input:focus:required:invalid {
     z-index: 999;
 }
 
+.sections-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    margin: 20px;
+    overflow-x: auto;
+}
+
 .loader {
     border: 8px solid #242424;
     border-top: 8px solid #4CAF50;
@@ -207,7 +239,7 @@ input:focus:required:invalid {
 }
 
 #statusButtons input[type="radio"] {
-    display: none; /* Hide the actual radio buttons */
+    display: none;
 }
 
 #statusButtons label {
@@ -222,11 +254,11 @@ input:focus:required:invalid {
 }
 
 #statusButtons label:hover {
-    background: rgba(13, 228, 103, 0.712) /* Change this to the color you want for the hover state */
+    background: rgba(13, 228, 103, 0.712)
 }
 
 #statusButtons input[type="radio"]:checked + label {
-    background: #05e061; /* Change this to the color you want for the checked state */
+    background: #05e061;
 }
 
 @keyframes spin {
@@ -234,3 +266,70 @@ input:focus:required:invalid {
     100% { transform: rotate(360deg); }
 }
 
+select {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 5px;
+    color: #fff;
+    transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+}
+
+select:focus {
+    background: #555;
+    border-color: #777;
+    transform: scale(1.05);
+}
+
+select::-ms-expand {
+    display: none;
+}
+
+select::-webkit-select {
+    appearance: none;
+    padding-right: 20px;
+    background: url('path/to/arrow.png') no-repeat right center;
+}
+
+select:required:valid, select:required:invalid {
+    border: 1px solid #2ecc71;
+}
+
+select:focus:required, select:focus:required:invalid {
+    outline: none;
+    box-shadow: 0 0 5px rgba(46, 204, 113, 0.8);
+}
+
+select:focus:required:invalid {
+    box-shadow: 0 0 5px rgba(231, 76, 60, 0.8);
+}
+
+input[type="range"] {
+    width: 100%;
+    height: 6px;
+    border-radius: 5px;
+    background: #5e5e5e;
+    outline: none;
+    margin: 10px 0;
+}
+
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #2ecc71; 
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #2ecc71; 
+    cursor: pointer;
+}

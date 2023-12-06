@@ -4,6 +4,8 @@ body {
     padding: 0;
     box-sizing: border-box;
     background-image: url('/static/images/background.jpg');
+    background-size: cover;
+    background-attachment: fixed;
     color: #fff;
 }
 
@@ -43,6 +45,7 @@ header h1 {
     padding: 20px;
     border-radius: 10px;
     text-align: center;
+    display: none;
 }
 
 .sections-container {

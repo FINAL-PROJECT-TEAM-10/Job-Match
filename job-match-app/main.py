@@ -39,8 +39,12 @@ async def read_job_seeker_register(request: Request):
 async def read_login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
+@app.get('/initial_login', response_class=HTMLResponse, include_in_schema=False)
+async def read_initial_login_page(request: Request):
+    return templates.TemplateResponse("login_after_register.html", {"request": request})
+
 @app.get('/company_register', response_class=HTMLResponse, include_in_schema=False)
-async def read_login_page(request: Request):
+async def read_company_register_page(request: Request):
     return templates.TemplateResponse("company_register.html", {"request": request})
 
 @app.get('/seeker_tab', response_class=HTMLResponse, include_in_schema=False)
@@ -55,9 +59,17 @@ async def read_cv_maker(request: Request):
 async def read_seeker_section(request: Request):
     return templates.TemplateResponse("seeker_section.html", {"request": request})
 
-@app.get('/seeker_section/cv', response_class=HTMLResponse, include_in_schema=False)
-async def read_seeker_section(request: Request):
+@app.get('/seeker_section/cv/manage', response_class=HTMLResponse, include_in_schema=False)
+async def read_cv_manage(request: Request):
     return templates.TemplateResponse("cv_section.html", {"request": request})
+
+@app.get('/seeker_section/cv/create', response_class=HTMLResponse, include_in_schema=False)
+async def read_cv_create_page(request: Request):
+    return templates.TemplateResponse("create_cv.html", {"request": request})
+
+@app.get('/seeker_section/cv', response_class=HTMLResponse, include_in_schema=False)
+async def read_cv_dashboard(request: Request):
+    return templates.TemplateResponse("cv_dashboard.html", {"request": request})
 
 @app.get('/seeker_section/personal_info', response_class=HTMLResponse, include_in_schema=False)
 async def read_seeker_personal_info(request: Request):
@@ -78,6 +90,10 @@ async def read_pending_page(request: Request):
 @app.get('/seeker_section/searching/percantage', response_class=HTMLResponse, include_in_schema=False)
 async def read_searching_percent_page(request: Request):
     return templates.TemplateResponse("percentage_search_seeker.html", {"request": request})
+
+@app.get('/seeker_section/searching/salary', response_class=HTMLResponse, include_in_schema=False)
+async def read_searching_salary_page(request: Request):
+    return templates.TemplateResponse("salary_search_seeker.html", {"request": request})
 
 #COMPANY SECTION FROM HERE
 @app.get('/company_tab', response_class=HTMLResponse, include_in_schema=False)

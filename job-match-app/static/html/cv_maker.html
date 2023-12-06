@@ -8,7 +8,7 @@
     <link rel="shortcut icon" href="static/images/favicon.ico" type="image/x-icon">
     <script src="/static/js/loading_overlay_home.js"></script>
     <script src="/static/js/get_username.js"></script>
-    <title>Skill Sync</title>
+    <title>First CV | Skill Sync</title>
 </head>
 
 <body>
@@ -49,7 +49,9 @@
             const questions = [
                 "Type inspiring description for your CV:",
                 "What is your Minimum Salary?",
-                "What is the Maximum Salary you want?",
+                "What is the Maximum Salary you want ?",
+                "What is your current location (city) ?",
+                "What is your prefered location (remote or no) ?",
                 "Select the skills you have and want to apply with them:"
             ];
             const answers = [];
@@ -66,13 +68,25 @@
                         <button onclick="selectSkill('Python')">Python</button>
                         <button onclick="selectSkill('Java')">Java</button>
                         <button onclick="selectSkill('JavaScript')">JavaScript</button>
+                        <button onclick="selectSkill('FastApi')">FastApi</button>
+                        <button onclick="selectSkill('Django')">Django</button>
+                        <button onclick="selectSkill('React')">React</button>
                         <!-- Add more skills as needed -->
-                        <button onclick="displaySubmitButton()">Finish</button>`;
+                        <button onclick="displaySubmitButton()" style="font-weight: bold">Finish</button>`;
+
+                 } else if (currentQuestionIndex === questions.indexOf("What is your prefered location (remote or no) ?")) {
+                    questionElement.innerHTML = `<h2>${question}</h2>
+                        <select locationPreferenceDropdown">
+                            <option id="answerInput" value="yes">Yes</option>
+                            <option id="answerInput" value="no">No</option>
+                        </select>
+                        <button onclick="storeAndNext()">Next</button>`;
+
                 } else {
                     const answer = answers[currentQuestionIndex] || ''; 
                     questionElement.innerHTML = `<h2>${question}</h2>
                         <input type="text" id="answerInput" placeholder="Your answer" value="${answer}" required>
-                        <button onclick="storeAndNext()">Next</button>`;
+                        <button onclick="storeAndNext()">Next</button>`
                 }
         
                 formContainer.innerHTML = '';
@@ -120,6 +134,8 @@
                 formData.append('description', answers[0]);
                 formData.append('min_salary', answers[1]);
                 formData.append('max_salary', answers[2]);
+                formData.append('location', answers[3]);
+                formData.append('is_remote', answers[4])
         
                 const skillsString = Object.entries(selectedSkills).map(([language, level]) => `${language};${level}`).join(',');
         
@@ -149,8 +165,7 @@
                     if (data.error) {
                         throw new Error(data.error);
                     }
-                    document.getElementById('okRegister').innerText = 'Cv maker successfully!';
-                    console.log('CV created successfully:', data);
+                    document.getElementById('okRegister').innerText = 'CV created successfully!';
                 })
                 .catch(error => {
                     console.error('Error creating CV:', error);

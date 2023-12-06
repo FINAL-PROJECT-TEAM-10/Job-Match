@@ -57,6 +57,7 @@ def view_different_specific_company_job_ads(name_of_company: str = Query(), curr
 
     for data in view_ads:
         data_dict = {
+            "Job AD ID": data[0],
             "Description": data[1],
             "Minimum Salary": data[2],
             "Maximum Salary": data[3],

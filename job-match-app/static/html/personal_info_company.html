@@ -9,7 +9,8 @@
     <script src="/static/js/loading_overlay_home.js"></script>
     <script src="/static/js/get_username_company.js"></script>
     <script src="/static/js/button_click_loader.js"></script>
-    <title>Skill Sync</title>
+    <script src="/static/js/check_is_logged.js"></script>
+    <title>Company Information | Skill Sync</title>
 </head>
 
 <body>
@@ -68,6 +69,7 @@
                     console.log(data)
 
                     const personalInfoContainer = document.getElementById('personalInfoContainer');
+                    personalInfoContainer.style.display = 'block'
                     personalInfoContainer.innerHTML = '<h3>Your Company Info</h3>';
 
                     const data_info = data[0];
