@@ -21,6 +21,9 @@ def convert_level(level):
     elif level == 3:
         result = 'Advanced'
 
+    else:
+        raise HTTPException(status_code=404, detail="Invalid input, please look at the description")
+
     return result
 
 
@@ -263,6 +266,9 @@ def create_cv(description: str, location: str, remote_location: str,
     cv_id = find_cv_by_seeker_id_description(job_seeker_id, description)
     try:
         for skill, level in zip(list_skills, skill_levels):
+            if not level:
+                raise HTTPException(status_code=404, detail="Invalid input, please look at the description")
+            
             level = int(level)
             if not check_skill_exist(skill):
                 raise HTTPException(status_code=404,
