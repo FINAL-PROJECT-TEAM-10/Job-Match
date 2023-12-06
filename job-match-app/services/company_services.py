@@ -1,4 +1,4 @@
-from data.database import read_query, insert_query, update_query
+from data.database import read_query, insert_query, update_query, update_queries_transaction
 from fastapi.responses import JSONResponse
 from app_models.company_models import Company
 from services import admin_services, job_seeker_services

@@ -371,56 +371,56 @@ ALTER TABLE job_match.temporary_tokens AUTO_INCREMENT = 1;
 
 -- 1. COMPANIES
 
-INSERT INTO job_match.companies (username, password, description) VALUES ("ubisoft","ubisoft123321","This is ubisoft");
+INSERT INTO job_match.companies (username, password, description) VALUES ("ubisoft","$2b$12$qHW5RyygTGBUoWpll.jZWuA0gyHMvoHCJSwsImGu.ksPH44qCVXTq","This is ubisoft");
 
 INSERT INTO job_match.locations (city, country) VALUES ("Paris","France");
 
 INSERT INTO job_match.company_contacts (email, address, telephone, locations_id, company_id) VALUES ("ubisoft@gmail.com","International 2, avenue Pasteur 94160 Saint-Mandé", "0000000", 1, 1);
 
 
-INSERT INTO job_match.companies (username, password, description) VALUES ("apple","apple123321","We are apple");
+INSERT INTO job_match.companies (username, password, description) VALUES ("apple","$2b$12$1Xd3.PpvVgtZjpO3X1KKRean1nKtxmiOWEJUtJQsiaMQdETmpQt3e","We are apple");
 
 INSERT INTO job_match.locations (city, country) VALUES ("New York","United States");
 
 INSERT INTO job_match.company_contacts (email, address, telephone, locations_id, company_id) VALUES ("apple@gmail.com","One Apple Park Way 95014", "0000001", 2, 2);
 
 
-INSERT INTO job_match.companies (username, password, description) VALUES ("amazon", "amazon789", "This is Amazon");
+INSERT INTO job_match.companies (username, password, description) VALUES ("amazon","$2b$12$qHW5RyygTGBUoWpll.jZWuA0gyHMvoHCJSwsImGu.ksPH44qCVXTq", "This is Amazon");
 
 INSERT INTO job_match.locations (city, country) VALUES ("Luxembourg City", "Luxembourg");
 
 INSERT INTO job_match.company_contacts (email, address, telephone, locations_id, company_id) VALUES ("amazon@gmail.com", "410 Terry Ave N 98109", "3333333", 3, 3);
 
 
-INSERT INTO job_match.companies (username, password, description) VALUES ("google", "google456", "We are Google");
+INSERT INTO job_match.companies (username, password, description) VALUES ("google","$2b$12$1Xd3.PpvVgtZjpO3X1KKRean1nKtxmiOWEJUtJQsiaMQdETmpQt3e", "We are Google");
 
 INSERT INTO job_match.locations (city, country) VALUES ("Mountain View", "United States");
 
 INSERT INTO job_match.company_contacts (email, address, telephone, locations_id, company_id) VALUES ("google@gmail.com", "1600 Amphitheatre Parkway 94043", "2222222", 4, 4);
 
 
-INSERT INTO job_match.companies (username, password, description) VALUES ("microsoft", "microsoft123", "This is Microsoft");
+INSERT INTO job_match.companies (username, password, description) VALUES ("microsoft","$2b$12$qHW5RyygTGBUoWpll.jZWuA0gyHMvoHCJSwsImGu.ksPH44qCVXTq", "This is Microsoft");
 
 INSERT INTO job_match.locations (city, country) VALUES ("Seattle", "United States");
 
 INSERT INTO job_match.company_contacts (email, address, telephone, locations_id, company_id) VALUES ("microsoft@gmail.com", "One Microsoft Way 98052", "1111111", 5, 5);
 
 
-INSERT INTO job_match.companies (username, password, description) VALUES ("facebook", "facebook123", "We are Facebook");
+INSERT INTO job_match.companies (username, password, description) VALUES ("facebook","$2b$12$1Xd3.PpvVgtZjpO3X1KKRean1nKtxmiOWEJUtJQsiaMQdETmpQt3e", "We are Facebook");
 
 INSERT INTO job_match.locations (city, country) VALUES ("Menlo Park", "United States");
 
 INSERT INTO job_match.company_contacts (email, address, telephone, locations_id, company_id) VALUES ("facebook@gmail.com", "1 Hacker Way 94025", "4444444", 6, 6);
 
 
-INSERT INTO job_match.companies (username, password, description) VALUES ("uber", "uber456", "This is Uber");
+INSERT INTO job_match.companies (username, password, description) VALUES ("uber","$2b$12$qHW5RyygTGBUoWpll.jZWuA0gyHMvoHCJSwsImGu.ksPH44qCVXTq", "This is Uber");
 
 INSERT INTO job_match.locations (city, country) VALUES ("San Francisco", "United States");
 
 INSERT INTO job_match.company_contacts (email, address, telephone, locations_id, company_id) VALUES ("uber@gmail.com", "1455 Market St 94103", "5555555", 7, 7);
 
 
-INSERT INTO job_match.companies (username, password, description) VALUES ("netflix", "netflix789", "We are Netflix");
+INSERT INTO job_match.companies (username, password, description) VALUES ("netflix","$2b$12$1Xd3.PpvVgtZjpO3X1KKRean1nKtxmiOWEJUtJQsiaMQdETmpQt3e", "We are Netflix");
 
 INSERT INTO job_match.locations (city, country) VALUES ("Los Gatos", "United States");
 
@@ -433,21 +433,21 @@ INSERT INTO job_match.locations (city, country) VALUES ("Sofia", "Bulgaria");
 
 INSERT INTO job_match.employee_contacts (email, address, telephone, locations_id) VALUES ("ivaylo@gmail.com","ul.Ivan Vazov", "0000000", 9);
 
-INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("ivo21", "ivaylo123", "Ivaylo", "Petrov", "Hello my name is Ivaylo", 0, 1);
+INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("ivo21","$2b$12$qHW5RyygTGBUoWpll.jZWuA0gyHMvoHCJSwsImGu.ksPH44qCVXTq", "Ivaylo", "Petrov", "Hello my name is Ivaylo", 0, 1);
 
 
 INSERT INTO job_match.locations (city, country) VALUES ("Varna", "Bulgaria");
 
 INSERT INTO job_match.employee_contacts (email, address, telephone, locations_id) VALUES ("john_doe@email.com", "123 Marketing St", "2222222", 10);
 
-INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("john_doe", "john123", "John", "Doe", "Passionate about marketing", 0, 2);
+INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("john_doe","$2b$12$1Xd3.PpvVgtZjpO3X1KKRean1nKtxmiOWEJUtJQsiaMQdETmpQt3e", "John", "Doe", "Passionate about marketing", 0, 2);
 
 
 INSERT INTO job_match.locations (city, country) VALUES ("Athens", "Greece");
 
 INSERT INTO job_match.employee_contacts (email, address, telephone, locations_id) VALUES ("sara@gmail.com", "15 Finance Avenue", "3333333", 11);
 
-INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("sara87", "sara789", "Sara", "Smith", "Finance professional with 5+ years of experience", 0, 3);
+INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("sara87","$2b$12$qHW5RyygTGBUoWpll.jZWuA0gyHMvoHCJSwsImGu.ksPH44qCVXTq", "Sara", "Smith", "Finance professional with 5+ years of experience", 0, 3);
 
 
 
@@ -455,13 +455,13 @@ INSERT INTO job_match.locations (city, country) VALUES ("Berlin", "Germany");
 
 INSERT INTO job_match.employee_contacts (email, address, telephone, locations_id) VALUES ("alex@email.com", "123 Tech Street", "4444444", 12);
 
-INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("alex25", "alex789", "Alex", "Johnson", "Detail-oriented project manager", 0, 4);
+INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("alex25","$2b$12$1Xd3.PpvVgtZjpO3X1KKRean1nKtxmiOWEJUtJQsiaMQdETmpQt3e", "Alex", "Johnson", "Detail-oriented project manager", 0, 4);
 
 
 
 INSERT INTO job_match.employee_contacts (email, address, telephone, locations_id) VALUES ("emily@email.com", "789 Design Lane", "5555555", 1);
 
-INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("emily88", "emily123", "Emily", "Miller", "Creative graphic designer", 0, 5);
+INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("emily88","$2b$12$qHW5RyygTGBUoWpll.jZWuA0gyHMvoHCJSwsImGu.ksPH44qCVXTq", "Emily", "Miller", "Creative graphic designer", 0, 5);
 
 
 
@@ -469,7 +469,7 @@ INSERT INTO job_match.locations (city, country) VALUES ("Tokyo", "Japan");
 
 INSERT INTO job_match.employee_contacts (email, address, telephone, locations_id) VALUES ("david@email.com", "456 IT Avenue", "6666666", 13);
 
-INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("david12", "david456", "David", "Taylor", "Skilled IT professional", 0, 6);
+INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("david12","$2b$12$1Xd3.PpvVgtZjpO3X1KKRean1nKtxmiOWEJUtJQsiaMQdETmpQt3e", "David", "Taylor", "Skilled IT professional", 0, 6);
 
 
 
@@ -478,7 +478,7 @@ INSERT INTO job_match.locations (city, country) VALUES ("Sydney", "Australia");
 
 INSERT INTO job_match.employee_contacts (email, address, telephone, locations_id) VALUES ("lucas@email.com", "456 Code Avenue", "7777777", 14);
 
-INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("lucas94", "lucas789", "Lucas", "Garcia", "Experienced software engineer", 0, 7);
+INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("lucas94","$2b$12$qHW5RyygTGBUoWpll.jZWuA0gyHMvoHCJSwsImGu.ksPH44qCVXTq", "Lucas", "Garcia", "Experienced software engineer", 0, 7);
 
 
 
@@ -486,13 +486,13 @@ INSERT INTO job_match.job_seekers (username, password, first_name, last_name, su
 
 INSERT INTO job_match.employee_contacts (email, address, telephone, locations_id) VALUES ("olivia@email.com", "789 Marketing Street", "8888888", 2);
 
-INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("olivia17", "olivia123", "Olivia", "Lopez", "Marketing specialist with a focus on social media", 0, 8);
+INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("olivia17","$2b$12$1Xd3.PpvVgtZjpO3X1KKRean1nKtxmiOWEJUtJQsiaMQdETmpQt3e", "Olivia", "Lopez", "Marketing specialist with a focus on social media", 0, 8);
 
 
 
 INSERT INTO job_match.employee_contacts (email, address, telephone, locations_id) VALUES ("liam@email.com", "123 Finance Lane", "9999999", 3);
 
-INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("liam03", "liam456", "Liam", "Martinez", "Financial analyst with expertise in data analysis", 0, 9);
+INSERT INTO job_match.job_seekers (username, password, first_name, last_name, summary, busy, employee_contacts_id) VALUES ("liam03","$2b$12$qHW5RyygTGBUoWpll.jZWuA0gyHMvoHCJSwsImGu.ksPH44qCVXTq", "Liam", "Martinez", "Financial analyst with expertise in data analysis", 0, 9);
 
 
 -- 3. Skills_or_Requirements
@@ -719,9 +719,9 @@ INSERT INTO job_match.mini_cvs_has_skills (mini_cvs_id, skills_or_requirements_i
 -- 6. Admins
 INSERT INTO job_match.employee_contacts (email, address, telephone, locations_id) VALUES ("margarett@gmail.com", "ul.Hristo Botev", "0033000", 9);
 
-INSERT INTO job_match.admins (username, password, first_name, last_name, employee_contacts_id) VALUES ("Margarett", "margaret123!", "Margaret", "Hions", 10);
+INSERT INTO job_match.admins (username, password, first_name, last_name, employee_contacts_id) VALUES ("Margarett", "$2b$12$1Xd3.PpvVgtZjpO3X1KKRean1nKtxmiOWEJUtJQsiaMQdETmpQt3e", "Margaret", "Hions", 10);
 
 
 INSERT INTO job_match.employee_contacts (email, address, telephone, locations_id) VALUES ("simon1@gmail.com", "Unter den Linden", "0033000", 12);
 
-INSERT INTO job_match.admins (username, password, first_name, last_name, employee_contacts_id) VALUES ("Simon1", "simo321123!", "Simon", "Higins", 11);
+INSERT INTO job_match.admins (username, password, first_name, last_name, employee_contacts_id) VALUES ("Simon1", "$2b$12$qHW5RyygTGBUoWpll.jZWuA0gyHMvoHCJSwsImGu.ksPH44qCVXTq", "Simon", "Higins", 11);

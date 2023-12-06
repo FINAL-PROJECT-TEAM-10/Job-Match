@@ -1,5 +1,5 @@
 from common import mailing
-from data.database import read_query, insert_query, update_query
+from data.database import read_query, insert_query, update_query, update_queries_transaction
 from datetime import datetime
 from fastapi import HTTPException
 from mariadb import IntegrityError

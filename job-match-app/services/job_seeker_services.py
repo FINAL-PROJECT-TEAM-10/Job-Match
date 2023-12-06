@@ -1,4 +1,4 @@
-from data.database import read_query, insert_query, update_query
+from data.database import read_query, insert_query, update_query, update_queries_transaction
 from app_models.job_seeker_models import JobSeekerInfo, JobSeeker
 from app_models.cv_models import CvCreation
 from services import admin_services, company_services, job_ads_services, job_seeker_matching_services

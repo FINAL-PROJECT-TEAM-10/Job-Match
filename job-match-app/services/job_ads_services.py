@@ -1,4 +1,4 @@
-from data.database import read_query, insert_query, update_query
+from data.database import read_query, insert_query, update_query, update_queries_transaction
 from datetime import datetime
 from app_models.job_ads_models import Job_ad
 from fastapi.responses import JSONResponse
