@@ -77,7 +77,7 @@ def password_reset_email(payload, generated_password):
 def company_match_request_notification(cv: CvCreation, job_ad: Job_ad, job_ad_id, mini_cv_id):
         receiver_email, receiver_username = company_services.find_company_email_username_by_job_ad(job_ad_id)
         sender_email, sender_username = job_seeker_services.get_email_username_by_cv(mini_cv_id)
-        pending_matches: str = skill_sync_address + f'companies_match/requests'
+        pending_matches: str = skill_sync_address + f'company_section/searching/pending_requests'
         match_request = {
             'Messages': [
                 {
@@ -128,7 +128,7 @@ def company_match_request_notification(cv: CvCreation, job_ad: Job_ad, job_ad_id
 def job_seeker_match_request_notification(job_ad: Job_ad, job_ad_id, mini_cv_id):
     sender_email, sender_username = company_services.find_company_email_username_by_job_ad(job_ad_id)
     receiver_email, receiver_username = job_seeker_services.get_email_username_by_cv(mini_cv_id)
-    pending_matches: str = skill_sync_address + f'job_seekers_match/pending_list'
+    pending_matches: str = skill_sync_address + f'seeker_section/searching/pending_requests'
     match_request = {
         'Messages': [
             {
