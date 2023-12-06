@@ -1,10 +1,47 @@
 import unittest
+from datetime import datetime
 
 from unittest.mock import Mock, patch
 
 from services import job_ads_services
+from app_models.job_ads_models import Job_ad
+
+def fake_job_ad():
+    job_ad = Mock()
+    job_ad.description = 'description'
+    job_ad.location_name = 'city'
+    job_ad.remote_status = 0
+    job_ad.min_salary = 1000
+    job_ad.max_salary = 2000
+    job_ad.status = 'status'
+
+    return job_ad
 
 class JobAdsServices_Should(unittest.TestCase):
+    # The bottom two tests will be the basis for the object-centred future
+    # direction of the project.
+    def test_getJobAdAsObject_ReturnsJobAdObject(self):
+        job_ad_id = 1
+        now = datetime.now()
+
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = (
+                'description', 'city', 0, 1000, 2000, 'status', now
+            )
+
+            result = job_ads_services.get_job_ad_as_object(job_ad_id)
+
+        self.assertIsInstance(result, Job_ad)
+        self.assertEqual('description', result.description)
+        self.assertEqual('city', result.location_name)
+        self.assertEqual(0, result.remote_status)
+        self.assertEqual(1000, result.min_salary)
+        self.assertEqual(2000, result.max_salary)
+        self.assertEqual('status', result.status)
+        self.assertEqual(now, result.date_posted)
+
+    def test_getJobAdAsObject_ReturnsNone_IfNotFound(self):
+        pass
 
     def test_findCompany_ReturnsInteger(self):
         pass
@@ -180,10 +217,3 @@ class JobAdsServices_Should(unittest.TestCase):
     def test_getCvLocationDirectlyById_ReturnsNone_IfNotFound(self):
         pass
 
-    # The bottom tests will be the basis for the object-centred future direction
-    # of the project.
-    def test_getJobAdAsObject_ReturnsJobAdObject(self):
-        pass
-
-    def test_getJobAdAsObject_ReturnsNone_IfNotFound(self):
-        pass
