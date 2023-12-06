@@ -15,7 +15,7 @@ from fastapi.responses import HTMLResponse
 
 app = FastAPI(title='Skill Sync', description='to be continued')
 templates = Jinja2Templates(directory='job-match-app/static/html')
-app.mount('/static', StaticFiles(directory='job-match-app/static'), name='static')
+# app.mount('/static', StaticFiles(directory='job-match-app/static'), name='static')
 app.include_router(companies_router)
 app.include_router(job_ads_router)
 app.include_router(admin_router)

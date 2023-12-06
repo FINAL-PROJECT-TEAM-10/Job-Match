@@ -1,12 +1,13 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
+from app_models.validation_models import ALLOWED_USERNAME
 
 class Company(BaseModel):
     id: Optional[int] = None
     group: str = 'companies'
-    username: str
-    email: str
+    username: ALLOWED_USERNAME
+    email: EmailStr
     work_address: str
     telephone: str
     country: str

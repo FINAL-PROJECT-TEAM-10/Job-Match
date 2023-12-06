@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Body, HTTPException
 from fastapi.responses import JSONResponse, StreamingResponse
 from app_models.admin_models import Admin
+from app_models.validation_models import ALLOWED_PASSWORD
 from common.auth import get_current_user
 from common.country_validators_helpers import validate_location
 from services import admin_services, upload_services
@@ -35,7 +36,7 @@ admin_router = APIRouter(prefix='/admin',tags={'Admins section'})
         }
 }, description= "If you are on our moderation team, you can create a specific admin from this section.")
 
-def add_admin(registration_details: Admin, password: Annotated[str, Body()], current_user_payload=Depends(get_current_user)):
+def add_admin(registration_details: Admin, password: Annotated[ALLOWED_PASSWORD, Body()], current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'admins':
         raise HTTPException(status_code=403,
                             detail='Only admins can register other admins.')
@@ -59,7 +60,7 @@ def add_admin(registration_details: Admin, password: Annotated[str, Body()], cur
 def delete_all_temp_tokens(current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'admins':
         raise HTTPException(status_code=403,
-                            detail='Only admins can register other admins.')
+                            detail='Only admins can delete temporary tokens.')
 
     admin_services.delete_temp_tokens()
 

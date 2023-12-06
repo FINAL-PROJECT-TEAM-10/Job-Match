@@ -1,18 +1,20 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+
+from app_models.validation_models import ALLOWED_USERNAME
 
 
 class Admin(BaseModel):
     id: Optional[int] = None
     group: str = 'admins'
-    username: str
+    username: ALLOWED_USERNAME
     first_name: str
     last_name: str
     summary: Optional[str] = None
     picture: Optional[str] = None
 
-    email: str
+    email: EmailStr
     address: Optional[str] = None
     phone: Optional[str] = None
 

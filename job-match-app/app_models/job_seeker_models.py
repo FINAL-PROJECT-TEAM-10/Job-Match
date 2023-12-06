@@ -1,12 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import Optional
 
-class JobSeekerInfo(BaseModel):
+from app_models.validation_models import ALLOWED_USERNAME
 
+
+class JobSeekerInfo(BaseModel):
     summary: Optional[str]
-    location : Optional[str]
+    location: Optional[str]
     status: Optional[str]
     number_of_matches_from_diffrent_cvs: Optional[int]
+
 
 class JobSeekerOptionalInfo:
     username: Optional[str] = None
@@ -20,20 +23,21 @@ class JobSeekerOptionalInfo:
     country: Optional[str] = None
 
     @classmethod
-    def from_query_result(cls, username, first_name,last_name, summary,status):
-        return cls(username = username,
-                   first_name = first_name,
-                   last_name = last_name,
-                   summary = summary,
-                   status = status
-            )
+    def from_query_result(cls, username, first_name, last_name, summary, status):
+        return cls(username=username,
+                   first_name=first_name,
+                   last_name=last_name,
+                   summary=summary,
+                   status=status
+                   )
+
 
 class JobSeeker(BaseModel):
     id: Optional[int] = None
     group: str = 'seekers'
-    username: str
+    username: ALLOWED_USERNAME
     first_name: str
-    email: str
+    email: EmailStr
     last_name: str
     summary: Optional[str] = None
     blocked: Optional[bool] = 0

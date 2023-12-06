@@ -1,6 +1,11 @@
 import io
+from typing import Annotated
+
 from fastapi import APIRouter, Query,Depends
 from fastapi.responses import JSONResponse, StreamingResponse
+from pydantic import EmailStr
+
+from app_models.validation_models import ALLOWED_PASSWORD, ALLOWED_USERNAME
 from services import company_services, upload_services
 from fastapi import APIRouter, Query,Depends,Form
 from fastapi.responses import JSONResponse
@@ -41,14 +46,14 @@ def view_all_companies(current_user_payload=Depends(get_current_user)):
 @companies_router.post('/register', description= 'You can register your company from this section.', 
                        response_model= Company, tags= ['Seeker & Company Signup'])
 
-def company_registration(Company_Name: str = Form(), Password: str = Form(), 
+def company_registration(Company_Name: Annotated[ALLOWED_USERNAME, Form()], Password: Annotated[ALLOWED_PASSWORD, Form()],
                          Company_City: str = Form(), Company_Country: str = Form(), Company_Adress: str = Form(),
-                         Telephone_Number: int = Form(), Email_Adress: str = Form(),):
+                         Telephone_Number: int = Form(), Email_Adress: EmailStr = Form(),):
     
     validate_location(Company_City, Company_Country)
 
     if company_services.check_company_exist(Company_Name):
-        return JSONResponse(status_code=409,content=f'Company with this {Company_Name} already exists.')
+        return JSONResponse(status_code=409,content=f'Company with username {Company_Name} already exists.')
 
     create_company = company_services.create_company(Company_Name, Password, Company_City, Company_Country, 
                                                      Company_Adress, Telephone_Number, Email_Adress)

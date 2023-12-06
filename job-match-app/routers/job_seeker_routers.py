@@ -1,5 +1,9 @@
 import io
+from typing import Annotated
+
 from fastapi.responses import JSONResponse, StreamingResponse
+
+from app_models.validation_models import ALLOWED_PASSWORD
 from services import job_seeker_services, upload_services
 from fastapi import APIRouter, Query, Depends, Form
 from fastapi.responses import JSONResponse
@@ -214,11 +218,11 @@ def view_personal_cvs(current_user_payload=Depends(get_current_user)):
 @job_seekers_router.post('/register', description= 'You can register with your personal information in this section.', 
                          tags=['Seeker & Company Signup'])
 
-def add_seeker(seeker_username: str = Form(),
-              seeker_password: str = Form(),
+def add_seeker(seeker_username: Annotated[ALLOWED_USERNAME, Form()],
+              seeker_password: Annotated[ALLOWED_PASSWORD, Form()],
               seeker_first_name: str = Form(), 
               seeker_last_name: str = Form(),
-              seeker_email_adress: str = Form(),
+              seeker_email_adress: EmailStr = Form(),
               seeker_city: str = Form(),
               seeker_country: str = Form()):
     
