@@ -10,6 +10,7 @@ import services.job_ads_services
 from services import job_ads_services
 from app_models.job_ads_models import Job_ad
 
+
 def fake_job_ad():
     job_ad = Mock()
     job_ad.description = 'description'
@@ -20,6 +21,7 @@ def fake_job_ad():
     job_ad.status = 'status'
 
     return job_ad
+
 
 class JobAdsServices_Should(unittest.TestCase):
     # The bottom two tests will be the basis for the object-centred future
@@ -54,22 +56,46 @@ class JobAdsServices_Should(unittest.TestCase):
 
         self.assertIsNone(result)
 
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_findCompany_ReturnsInteger(self):
-        pass
+        username = 'company'
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = [
+                (100,)
+            ]
 
+            result = job_ads_services.find_company(username)
+
+        self.assertIsInstance(result, int)
+
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_findCompany_ReturnsNone_IfNotFound(self):
-        pass
-
-    def test_findNameById_ReturnsStr(self):
-        pass
-
-    def test_findNameById_ReturnsNone_IfNotFound(self):
-        company_id = 1
-        description = 'description'
+        username = 'company'
         with patch('services.job_ads_services.read_query') as read_query:
             read_query.return_value = []
 
-            result = job_ads_services.find_job_ad_by_id(company_id, description)
+            result = job_ads_services.find_company(username)
+
+        self.assertIsNone(result)
+
+    def test_findNameById_ReturnsStr(self):
+        company_id = 1
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = [
+                ('username',)
+            ]
+
+            result = job_ads_services.find_name_by_id(company_id)
+
+        self.assertIsInstance(result, str)
+
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
+    def test_findNameById_ReturnsNone_IfNotFound(self):
+        company_id = 1
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.find_name_by_id(company_id)
 
         self.assertIsNone(result)
 
@@ -109,7 +135,6 @@ class JobAdsServices_Should(unittest.TestCase):
             self.assertEqual(1000, result.min_salary)
             self.assertEqual(2000, result.max_salary)
             self.assertEqual('status', result.status)
-
 
     @unittest.skip("Proud of test: will be used for future bug-testing")
     def test_createJobAd_RaisesException_WhenIntegrityError(self):
@@ -182,7 +207,7 @@ class JobAdsServices_Should(unittest.TestCase):
         requirements = []
         requirements_levels = []
 
-        #Added patch to protect database
+        # Added patch to protect database
         with patch('services.job_ads_services.read_query') as read_query, \
                 patch('services.job_ads_services.insert_query') as insert_query, \
                 patch('services.job_ads_services.update_query') as update_query:
@@ -206,8 +231,6 @@ class JobAdsServices_Should(unittest.TestCase):
         self.assertEqual(400, bad_query.exception.status_code)
 
 
-        company_id = 1
-
     def test_checkCompanyExists_ReturnsTrue_IfCompany(self):
         username = 'company'
         with patch('services.job_ads_services.read_query') as read_query:
@@ -226,10 +249,46 @@ class JobAdsServices_Should(unittest.TestCase):
 
         self.assertFalse(result)
 
-    def test_viewAllJobAds_ReturnsList(self):
-        pass
+    # Method is being used a lot. That is why it is tested.
+    # At a future time we will move to testing for a list of objects.')
+    def test_viewAllJobAds_ReturnsListWithDict(self):
+        job_ad_id = 1
+        status = 'status'
+        now = datetime.now()
+        with patch('services.job_ads_services.read_query') as read_query, \
+                patch('services.job_seeker_services.get_cv_location_name') as gln, \
+                patch('services.job_ads_services.get_cv_location_id') as gclid:
+            gln.return_value = 'city'
+            gclid.return_value = 1
+            read_query.return_value = [
+                (1, 'description', 1000, 2000, 'status', now)
+            ]
 
-    @unittest.skip("Optional test: will be used for future object-centred refactoring")
+            result = job_ads_services.view_job_ads_by_id(job_ad_id, status)
+
+        self.assertIsInstance(result, list)
+        self.assertIsInstance(result[0], dict)
+        self.assertEqual(1, result[0]['Job Ad ID'])
+        self.assertEqual('description', result[0]['Job Description'])
+        self.assertEqual(1000, result[0]['Minimum Salary'])
+        self.assertEqual(2000, result[0]['Maximum Salary'])
+        self.assertEqual('city', result[0]['Location'])
+        self.assertEqual('status', result[0]['Status'])
+        self.assertEqual(now, result[0]['Date Posted'])
+
+
+    def test_viewAllJobAds_ReturnsNone_IfNotFound(self):
+        job_ad_id = 1
+        status = 'status'
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.view_job_ads_by_id(job_ad_id, status)
+
+        self.assertIsNone(result)
+
+    @unittest.skip("Optional test: will be written out at future object-centred refactoring.\n"
+                   "Similar to test_getJobAdAsObject_ReturnsJobAdObject")
     def test_viewJobAdsById_ReturnsJobAd(self):
         pass
 
@@ -280,7 +339,6 @@ class JobAdsServices_Should(unittest.TestCase):
                    "Conclusion: testing for this is a waste of resources.")
     def test_checkCompanyInformation_ReturnsList(self):
         pass
-
 
     def test_editJobAds_UsesUpdateQuery(self):
         pass
@@ -399,7 +457,7 @@ class JobAdsServices_Should(unittest.TestCase):
     def test_getCurrentJobAd_ReturnsCorrectlyFormattedList(self):
         pass
 
-    #HARD TO TEST, needs lots of patching
+    # HARD TO TEST, needs lots of patching
     def test_calculatePercentageCv_ReturnsCorrectPercentages(self):
         pass
 
@@ -435,6 +493,7 @@ class JobAdsServices_Should(unittest.TestCase):
 
     def test_filterByCvSalaries_ReturnsListWithDicts(self):
         pass
+
     @unittest.skip("Currently this returns a JSONResponse.\n"
                    "The logic would be identical for a HTTPException with a status code 200.\n"
                    "Which can be used better by our front-end.")
@@ -506,4 +565,3 @@ class JobAdsServices_Should(unittest.TestCase):
             result = job_ads_services.get_cv_location_directly_by_id(cv_id)
 
             self.assertIsNone(result)
-
