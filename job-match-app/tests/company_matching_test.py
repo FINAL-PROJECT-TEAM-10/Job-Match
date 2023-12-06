@@ -66,8 +66,12 @@ class CompanyMatching_Should(unittest.TestCase):
 
         with patch('services.company_matching_services.matching_exist') as matching_exist:
             matching_exist.return_value = False
-            with patch('services.company_matching_services.insert_query') as insert_query:
+            with patch('services.company_matching_services.insert_query') as insert_query, \
+                    patch('services.job_ads_services.get_job_ad_as_object') as gjaas, \
+                    patch('common.mailing.job_seeker_match_request_notification') as mailing:
                 insert_query.return_value = None
+                gjaas.return_value = fake_job_ad()
+                mailing.return_value = None
 
                 try:
                     company_matching_services.match_cv(job_ad.id, cv.id)
@@ -76,7 +80,7 @@ class CompanyMatching_Should(unittest.TestCase):
 
 
 
-    def test_matchCVRaisesCorrectHTTPException_IfMatchHasBeenDone(self):
+    def test_matchCvRaisesCorrectHTTPException_IfMatchHasBeenDone(self):
         job_ad = fake_job_ad()
         cv = fake_mini_cv()
 
@@ -90,8 +94,12 @@ class CompanyMatching_Should(unittest.TestCase):
                 self.assertEqual(200, conflict.exception.status_code)
 
             matching_exist.return_value = False
-            with patch('services.company_matching_services.insert_query') as insert_query:
+            with patch('services.company_matching_services.insert_query') as insert_query, \
+                    patch('services.job_ads_services.get_job_ad_as_object') as gjaas, \
+                    patch('common.mailing.job_seeker_match_request_notification') as mailing:
                 insert_query.return_value = None
+                gjaas.return_value = fake_job_ad()
+                mailing.return_value = None
 
                 with self.assertRaises(HTTPException) as conflict:
                     company_matching_services.match_cv(job_ad.id, cv.id)
