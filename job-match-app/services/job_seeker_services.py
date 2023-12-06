@@ -602,14 +602,28 @@ def get_email_username_by_cv(mini_cv_id):
 
 
 def get_cv_as_object(mini_cv_id):
-    cv_data = read_query('''
-        SELECT mc.description, l.city, mcal.remote_status, mc.min_salary, mc.max_salary, mc.status, mc.date_posted
-        FROM mini_cvs as mc, mini_cv_has_locations as mcal, locations as l 
-        WHERE mc.id = mcal.mini_cv_id AND mcal.locations_id = l.id
-        AND mc.id = ?
+    is_location = read_query('''
+        SELECT mcal.locations_id
+        FROM mini_cv_has_locations as mcal
+        WHERE mcal.mini_cv_id = ?
+        ''', (mini_cv_id,))
+
+    if is_location:
+        cv_data = read_query('''
+            SELECT mc.description, l.city, mcal.remote_status, mc.min_salary, mc.max_salary, mc.status, mc.date_posted
+            FROM mini_cvs as mc, mini_cv_has_locations as mcal, locations as l 
+            WHERE mc.id = mcal.mini_cv_id AND mcal.locations_id = l.id
+            AND mc.id = ?
+            ''', (mini_cv_id,))
+    else:
+        cv_data = read_query('''
+        SELECT mc.description, "Fully Remote", 1, mc.min_salary, mc.max_salary, mc.status, mc.date_posted
+        FROM mini_cvs as mc
+        WHERE mc.id = ?
         ''', (mini_cv_id,))
 
     return next((CvCreation.from_query_results(*row) for row in cv_data), None)
+
 def check_is_matched(cv_id):
 
     check = read_query('SELECT min_salary FROM mini_cvs WHERE id = ? AND status = "Matched" AND main_cv = 1', 
