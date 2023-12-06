@@ -316,7 +316,7 @@ def get_job_ads_from_companies(current_user_payload=Depends(get_current_user)):
                         tags=['Seeker Section'])
 
 def get_seeker_avatar(id: int, current_user_payload=Depends(get_current_user)):
-    image_data = upload_services.get_picture(id, 'admins')
+    image_data = upload_services.get_picture(id, 'seekers')
 
     if not job_seeker_services.seeker_exists_by_id(id):
         raise HTTPException(status_code=404,
