@@ -1,6 +1,6 @@
 from fastapi.responses import JSONResponse
 from data.database import read_query
-from services import job_seeker_services, job_ads_services
+from services import job_seeker_services
 from fastapi import HTTPException
 
 def percent_section_helper(current_sort, list_of_percentages, perms, matched_skills, unmatched_skills): 

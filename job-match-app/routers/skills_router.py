@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
-
 from app_models.skill_requirement_models import SkillRequirement
 from common.auth import get_current_user
 from services import skill_requirement_services

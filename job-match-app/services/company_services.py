@@ -1,13 +1,8 @@
 from data.database import read_query, insert_query, update_query
-from fastapi import Response
 from fastapi.responses import JSONResponse
 from app_models.company_models import Company
-from services import admin_services
-
+from services import admin_services, job_seeker_services
 from common.country_validators_helpers import *
-from services import job_seeker_services
-
-from data.database import update_queries_transaction
 
 
 def read_companies():
@@ -31,8 +26,6 @@ def read_company_information(company: str):
     return next((Company.from_company_result(*row) for row in data), None)
 
 
-# TODO: The get below doesn't consider multiple addresses for a company!!!
-#  Consider having a main column to get a company's main address (medium priority)
 def get_company(username) -> None | Company:
     company_data = read_query('''
         SELECT c.id, c.username, cc.email, cc.address, cc.telephone, l.country, l.city, c.blocked
@@ -68,8 +61,9 @@ def find_company_id_byusername(nickname: str):
     return data[0][0]
 
 
-def create_company(Company_Name, Password, Company_City, Company_Country, Company_Adress, Telephone_Number,
-                   Email_Adress):
+def create_company(Company_Name, Password, Company_City, Company_Country, 
+                   Company_Adress, Telephone_Number, Email_Adress):
+    
     from services.authorization_services import get_password_hash
     location_id = admin_services.find_location_id(Company_City, Company_Country)
 
@@ -144,7 +138,6 @@ def edit_company_information(username: str, description: str, city: str, address
     return JSONResponse(status_code=200, content="You successfully edited your personal company information")
 
 
-# TODO: rename: this returns username by id, not the other way around
 def find_company_id_byusername_for_job_seeker(id: int):
     data = read_query('SELECT username FROM companies WHERE id = ?', (id,))
     return data[0][0]

@@ -1,12 +1,9 @@
 import io
 from time import time
 from http.client import HTTPException
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, Body, Query, UploadFile, File
+from fastapi import APIRouter, Depends, Query, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 from jose import ExpiredSignatureError
-
 from app_models.input_models import PasswordUpdater
 from app_models.token_models import ActivationDataModel
 from common.auth import TokenInfo, get_current_user
@@ -136,7 +133,7 @@ def upload_picture(image_file: UploadFile, current_user_payload=Depends(get_curr
         image_file.file.seek(0)
         max_file_size_bytes = 1024 * 1024
         # Interestingly, .size does not affect the reading of the image.
-        
+
         if image_file.size > max_file_size_bytes:
             return JSONResponse(status_code=413,
                                 content=f'Image file too big. Please upload a file that is less than 1 MB.')

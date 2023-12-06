@@ -1,5 +1,4 @@
 from fastapi import HTTPException
-
 from app_models.skill_requirement_models import SkillRequirement
 from data.database import read_query, insert_query, update_query, update_queries_transaction
 

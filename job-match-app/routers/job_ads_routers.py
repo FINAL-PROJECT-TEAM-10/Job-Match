@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query,Depends, Form , HTTPException
 from services import job_ads_services
 from fastapi.responses import JSONResponse
 from common.auth import get_current_user
-from services import company_services, job_seeker_services, job_ads_services
+from services import job_seeker_services, job_ads_services
 from common.separators_validators import parse_skills
 
 job_ads_router = APIRouter(prefix='/job_ads')

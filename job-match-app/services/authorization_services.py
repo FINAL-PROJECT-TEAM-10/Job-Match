@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from jose import JWTError, jwt
+from jose import jwt
 from passlib.context import CryptContext
 from app_models.admin_models import Admin
 from app_models.company_models import Company

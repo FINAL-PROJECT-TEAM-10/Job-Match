@@ -3,7 +3,7 @@ from data.database import read_query, insert_query, update_query
 from datetime import datetime
 from fastapi import HTTPException
 from mariadb import IntegrityError
-from services import job_ads_services, job_seeker_services
+from services import job_seeker_services
 from services.company_matching_services import get_job_ad_as_object
 
 def match_ad(job_ad_id: int, mini_cv_id: int, seeker_id: int):

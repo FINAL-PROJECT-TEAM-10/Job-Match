@@ -1,8 +1,7 @@
 from time import time
-
 from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, ExpiredSignatureError
+from jose import ExpiredSignatureError
 from pydantic import BaseModel
 
 from services.authorization_services import is_authenticated

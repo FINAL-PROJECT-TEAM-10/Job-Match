@@ -1,10 +1,10 @@
 from data.database import read_query, insert_query, update_query
-from datetime import date, datetime
+from datetime import datetime
 from app_models.job_ads_models import Job_ad
 from fastapi.responses import JSONResponse
 from services import job_seeker_services, company_services
 from mariadb import IntegrityError
-from common.percent_sections import percent_section_helper, find_names
+from common.percent_sections import percent_section_helper
 from common.salary_threshold_calculator_seeker import calculate_cv_salaries
 from common.percent_jobad_calculator import *
 from fastapi import HTTPException
@@ -60,7 +60,7 @@ def create_job_add(description: str, location: str, remote_location: str, min_sa
             levels = int(levels)
             if not job_seeker_services.check_skill_exist(requirement):
                 return JSONResponse(status_code=404,
-                                    content='That is not a valid requirement name. You can send a ticker suggestion for this requirement to our moderation team')
+                    content='That is not a valid requirement name. You can send a ticker suggestion for this requirement to our moderation team')
             else:
                 requirement_level_convertor = job_seeker_services.convert_level(levels)
                 requirement_id = job_seeker_services.find_skill_id_by_name(requirement)
@@ -227,8 +227,6 @@ def get_level_job_ad(job_ad_id: int, requirement_id: int):
 
     return data[0][0]
 
-
-# TODO: The function and variables below need to be renamed
 def get_current_job_ad(job_ads_id: int):
     data = read_query('''
     SELECT sr.id, sr.name, jar.level

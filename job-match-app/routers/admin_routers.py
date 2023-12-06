@@ -1,12 +1,9 @@
 import io
 from typing import Annotated
-
 from fastapi import APIRouter, Depends, Body, HTTPException
-
 from fastapi.responses import JSONResponse, StreamingResponse
-
 from app_models.admin_models import Admin
-from common.auth import get_current_user, TokenInfo
+from common.auth import get_current_user
 from common.country_validators_helpers import validate_location
 from services import admin_services, upload_services
 

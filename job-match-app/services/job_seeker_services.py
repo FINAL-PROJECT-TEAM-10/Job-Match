@@ -1,6 +1,5 @@
 from data.database import read_query, insert_query, update_query
-from app_models.job_seeker_models import JobSeekerInfo
-from app_models.job_seeker_models import JobSeeker
+from app_models.job_seeker_models import JobSeekerInfo, JobSeeker
 from app_models.cv_models import CvCreation
 from services import admin_services, company_services, job_ads_services, job_seeker_matching_services
 from common.country_validators_helpers import find_country_by_city
@@ -8,7 +7,7 @@ from common.job_seeker_status_check import recognize_status
 from datetime import datetime
 from mariadb import IntegrityError
 from common.percent_jobad_calculator import *
-from common.percent_sections import percent_section_helper, find_names
+from common.percent_sections import percent_section_helper
 from common.salary_threshold_calculator_seeker import calculate_salaries
 from fastapi import HTTPException
 
@@ -225,7 +224,7 @@ def find_skill_id_by_name(name: str):
 def create_cv(description: str, location: str, remote_location: str,
               min_salary: int, max_salary: int,
               status: str, job_seeker_id: int, list_skills: list,
-              skill_levels: list, is_main_cv: bool):  # ['python','js']
+              skill_levels: list, is_main_cv: bool):
 
     date_posted = datetime.now()
     location_id = read_query('SELECT id FROM locations WHERE city = ?', (location,))

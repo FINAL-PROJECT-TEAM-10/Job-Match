@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Depends
 from common.auth import get_current_user
 from services import job_seeker_matching_services
 from fastapi import HTTPException
@@ -37,7 +37,7 @@ def view_pending_list(current_user_payload=Depends(get_current_user)):
         return HTTPException(status_code=403,
                             detail='Only seekers can view all pending matches')
 
-    seeker_id = current_user_payload.get('id') #36
+    seeker_id = current_user_payload.get('id')
     cv_id = job_seeker_matching_services.get_main_cv(seeker_id)
     return job_seeker_matching_services.pending_list(cv_id)
 

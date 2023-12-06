@@ -4,8 +4,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from services import company_services, upload_services
 from fastapi import APIRouter, Query,Depends,Form
 from fastapi.responses import JSONResponse
-from services import company_services
-from services import job_ads_services
+from services import company_services, job_ads_services
 from app_models.company_models import Company
 from common.auth import get_current_user
 from common.country_validators_helpers import *
