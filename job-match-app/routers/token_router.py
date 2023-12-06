@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app_models.token_models import Token
 from services.authorization_services import authenticate_admin, authenticate_seeker, authenticate_company, create_access_token
 
-token_router = APIRouter(prefix='/token',tags={'Get token upon registration section'})
+token_router = APIRouter(prefix='/token', tags={'Get token upon registration section'})
 
 @token_router.post('/', response_model=Token, description= "You can receive a token upon registration in this section.")
 

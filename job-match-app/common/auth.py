@@ -42,8 +42,6 @@ def get_current_user(token: str = Depends(oauth_2_scheme)):
         raise HTTPException(status_code=401,
                             detail='Expired token.')
 
-
-# For info purposes
 class TokenInfo(BaseModel):
     id: int
     group: str

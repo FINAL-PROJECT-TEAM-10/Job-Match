@@ -7,5 +7,4 @@ def recognize_status(status: int):
     else:
         result = 'Active'
 
-
     return result

@@ -12,7 +12,9 @@ from common.country_validators_helpers import *
 
 companies_router = APIRouter(prefix='/companies')
 
-@companies_router.get('/', description= 'You can view every company from this section.', tags=['Company Section'])
+@companies_router.get('/', description= 'You can view every company from this section.', 
+                      tags=['Company Section'])
+
 def view_all_companies(current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'companies':
         return JSONResponse(status_code=403,
@@ -37,10 +39,12 @@ def view_all_companies(current_user_payload=Depends(get_current_user)):
 
     return result
 
-@companies_router.post('/register', description= 'You can register your company from this section.', response_model= Company, tags= ['Seeker & Company Signup'])
+@companies_router.post('/register', description= 'You can register your company from this section.', 
+                       response_model= Company, tags= ['Seeker & Company Signup'])
+
 def company_registration(Company_Name: str = Form(), Password: str = Form(), 
                          Company_City: str = Form(), Company_Country: str = Form(), Company_Adress: str = Form(),
-                         Telephone_Number: int = Form(),Email_Adress: str = Form(),):
+                         Telephone_Number: int = Form(), Email_Adress: str = Form(),):
     
     validate_location(Company_City, Company_Country)
 
@@ -53,7 +57,9 @@ def company_registration(Company_Name: str = Form(), Password: str = Form(),
     return create_company
 
 
-@companies_router.get('/information', description= 'You can view your company private information from this section.', tags= ['Company Section'])
+@companies_router.get('/information', description= 'You can view your company private information from this section.', 
+                      tags= ['Company Section'])
+
 def your_company_information(current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'companies':
@@ -95,7 +101,9 @@ def your_company_information(current_user_payload=Depends(get_current_user)):
 
     return all_information
 
-@companies_router.put('/information/edit', description= 'You can edit your private company information from this section.', tags= ['Company Section'])
+@companies_router.put('/information/edit', description= 'You can edit your private company information from this section.', 
+                      tags= ['Company Section'])
+
 def edit_your_company_information(description: str = Query(None),
                              city: str = Query(None),
                              address: str = Query(None),
@@ -126,7 +134,10 @@ def edit_your_company_information(description: str = Query(None),
 
     return company_services.edit_company_information(username, final_company_description, final_company_city, final_company_adress, final_company_telephone)
 
-@companies_router.get('/job_seekers/cv', description= 'You can view every job seeker cv from this section.', tags= ['Company Section'])
+
+@companies_router.get('/job_seekers/cv', description= 'You can view every job seeker cv from this section.', 
+                      tags= ['Company Section'])
+
 def get_main_cv_from_job_seeker(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'companies':
@@ -135,7 +146,10 @@ def get_main_cv_from_job_seeker(current_user_payload=Depends(get_current_user)):
 
     return company_services.view_all_cvs()
 
-@companies_router.get('{id}/avatar', description= 'You can view your company profile avatar from here.', tags=['Company Section'])
+
+@companies_router.get('{id}/avatar', description= 'You can view your company profile avatar from here.', 
+                      tags=['Company Section'])
+
 def get_company_avatar(id: int, current_user_payload=Depends(get_current_user)):
     image_data = upload_services.get_picture(id, 'companies')
 

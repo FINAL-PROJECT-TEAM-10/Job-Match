@@ -136,11 +136,11 @@ def upload_picture(image_file: UploadFile, current_user_payload=Depends(get_curr
         image_file.file.seek(0)
         max_file_size_bytes = 1024 * 1024
         # Interestingly, .size does not affect the reading of the image.
+        
         if image_file.size > max_file_size_bytes:
             return JSONResponse(status_code=413,
                                 content=f'Image file too big. Please upload a file that is less than 1 MB.')
 
-        # image_file.file.seek(0)
         image_data = image_file.file.read()
         upload_services.upload_picture(current_user_payload, image_data)
 
