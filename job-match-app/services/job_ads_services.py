@@ -59,8 +59,7 @@ def create_job_add(description: str, location: str, remote_location: str, min_sa
         for requirement, levels in zip(requirements_names, requirements_levels):
             levels = int(levels)
             if not job_seeker_services.check_skill_exist(requirement):
-                return JSONResponse(status_code=404,
-                    content='That is not a valid requirement name. You can send a ticker suggestion for this requirement to our moderation team')
+                raise HTTPException(status_code=404, detail='That is not a valid requirement name. You can send a ticker suggestion for this requirement to our moderation team')
             else:
                 requirement_level_convertor = job_seeker_services.convert_level(levels)
                 requirement_id = job_seeker_services.find_skill_id_by_name(requirement)
@@ -68,7 +67,7 @@ def create_job_add(description: str, location: str, remote_location: str, min_sa
                     'INSERT INTO job_ads_has_requirements (job_ads_id,skills_or_requirements_id,level) VALUES (?,?,?)',
                     (job_ad_id, requirement_id, requirement_level_convertor))
     except IntegrityError:
-        return JSONResponse(status_code=404, content="Duplicating description or requirements")
+        raise HTTPException(status_code=404, detail="Duplicating description or requirements")
 
     try:
 
@@ -102,6 +101,9 @@ def view_job_ads_by_id(ads_id: int, status: str):
                 "Location": job_seeker_services.get_cv_location_name(get_cv_location_id(row[0])),
                 'Status': row[4], 'Date Posted': row[5]} for row in data]
         return ads
+    else:
+        raise HTTPException(status_code=404, detail='There are no current job ads found')
+
 
 
 def get_current_active_job_ads(company_id: int):
@@ -169,7 +171,7 @@ def edit_job_ads(company_id: int, job_ads_id: int, min_salary: int, max_salary: 
                         'UPDATE job_ads_has_requirements SET level = ? WHERE job_ads_id = ? AND skills_or_requirements_id = ?',
                         (converted_level, job_ads_id, requirements_id))
 
-    return JSONResponse(status_code=200, content='You successfully edited your selected Job AD.')
+    raise HTTPException(status_code=200, detail='You successfully edited your selected Job AD.')
 
 
 def existing_requirements(job_ad_id: int):
@@ -339,7 +341,7 @@ def filter_by_cv_salaries(job_ad_range, cvs_calculated_salaries):
                 result.append(filtered_ads)
 
     if not result:
-        return JSONResponse(status_code=404, content="There are no found cv's in this salary search range")
+        raise HTTPException(status_code=404, detail="There are no found cv's in this salary search range")
     return result
 
 

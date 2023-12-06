@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/cv_maker.css">
+    <link rel="shortcut icon" href="static/images/favicon.ico" type="image/x-icon">
+    <script src="/static/js/loading_overlay_home.js"></script>
+    <script src="/static/js/get_username.js"></script>
+    <title>First CV | Skill Sync</title>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1 id="usernameHeader"></h1>
+                <nav class="navbar">
+                    <ul class="nav-list">
+                        <h2>Lets make your CV</h2>
+                    </ul>
+                </nav>
+            </div>
+            <div class="header-logo">
+                <a class="site-logo" href="/">
+                    <img src="/static/images/logo.png" alt="Homepage">
+                </a>
+            </div>
+        </header>
+
+        <div class="sections-container" id="formContainer">
+
+        </div>
+
+        <div class="error-container">
+            <div id="errorContainer">
+                <p id="errorMessage"></p>
+                <p id="okRegister"></p>
+            </div>
+        </div>
+        
+
+        <script>
+            const formContainer = document.getElementById('formContainer');
+            let currentQuestionIndex = 0;
+            
+        
+            const questions = [
+                "Type inspiring description for your CV:",
+                "What is your Minimum Salary?",
+                "What is the Maximum Salary you want ?",
+                "What is your current location (city) ?",
+                "What is your prefered location (remote or no) ?",
+                "Select the skills you have and want to apply with them:"
+            ];
+            const answers = [];
+            const selectedSkills = {};
+            const access_token = localStorage.getItem("access_token");
+        
+            function displayQuestion() {
+                const question = questions[currentQuestionIndex];
+        
+                const questionElement = document.createElement('div');
+        
+                if (currentQuestionIndex === questions.length - 1) {
+                    questionElement.innerHTML = `<h2>${question}</h2>
+                        <button onclick="selectSkill('Python')">Python</button>
+                        <button onclick="selectSkill('Java')">Java</button>
+                        <button onclick="selectSkill('JavaScript')">JavaScript</button>
+                        <button onclick="selectSkill('FastApi')">FastApi</button>
+                        <button onclick="selectSkill('Django')">Django</button>
+                        <button onclick="selectSkill('React')">React</button>
+                        <!-- Add more skills as needed -->
+                        <button onclick="displaySubmitButton()" style="font-weight: bold">Finish</button>`;
+
+                 } else if (currentQuestionIndex === questions.indexOf("What is your prefered location (remote or no) ?")) {
+                    questionElement.innerHTML = `<h2>${question}</h2>
+                        <select locationPreferenceDropdown">
+                            <option id="answerInput" value="yes">Yes</option>
+                            <option id="answerInput" value="no">No</option>
+                        </select>
+                        <button onclick="storeAndNext()">Next</button>`;
+
+                } else {
+                    const answer = answers[currentQuestionIndex] || ''; 
+                    questionElement.innerHTML = `<h2>${question}</h2>
+                        <input type="text" id="answerInput" placeholder="Your answer" value="${answer}" required>
+                        <button onclick="storeAndNext()">Next</button>`
+                }
+        
+                formContainer.innerHTML = '';
+                formContainer.appendChild(questionElement);
+        
+                if (currentQuestionIndex > 0) {
+                    const previousButton = document.createElement('button');
+                    previousButton.textContent = 'Previous';
+                    previousButton.onclick = goBack;
+                    formContainer.appendChild(previousButton);
+                }
+            }
+        
+            function storeAndNext() {
+                const answerInput = document.getElementById('answerInput');
+                const answer = answerInput.value.trim();
+
+                if (answer === '') {
+                    document.getElementById('errorMessage').innerText = 'Fill the input before continue';
+                    return;
+                }
+
+                answers[currentQuestionIndex] = answer;
+                currentQuestionIndex++;
+        
+                if (currentQuestionIndex < questions.length) {
+                    displayQuestion();
+                } else {
+                    displaySubmitButton();
+                }
+            }
+        
+            function goBack() {
+                currentQuestionIndex--;
+        
+                if (currentQuestionIndex < questions.length - 1) {
+                    formContainer.removeChild(formContainer.lastChild);
+                }
+        
+                displayQuestion();
+            }
+        
+            function storeAndSubmit() {
+                const formData = new FormData();
+                formData.append('description', answers[0]);
+                formData.append('min_salary', answers[1]);
+                formData.append('max_salary', answers[2]);
+                formData.append('location', answers[3]);
+                formData.append('is_remote', answers[4])
+        
+                const skillsString = Object.entries(selectedSkills).map(([language, level]) => `${language};${level}`).join(',');
+        
+                formData.append('skills', skillsString);
+                console.log(formData);
+        
+                fetch('/seekers/cv', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Authorization': `Bearer ${access_token}`,
+                    },
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else if (response.status === 422) {
+                        throw new Error("Fill all information");
+                    } else {
+                        return response.json().then(data => {
+                            throw new Error(data.detail || "An unexpected error occurred.");
+                        });
+                    }
+                })
+                .then(data => {
+                    document.getElementById('errorMessage').innerText = '';
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    document.getElementById('okRegister').innerText = 'CV created successfully!';
+                })
+                .catch(error => {
+                    console.error('Error creating CV:', error);
+                    document.getElementById('errorMessage').innerText = error.message;
+                    document.getElementById('okRegister').innerText = '';
+                });
+            }
+        
+            function selectSkill(language) {
+                const level = prompt(`Select proficiency level for ${language} (1 - Beginner, 2 - Intermediate, 3 - Advanced):`);
+                if (level && (level === '1' || level === '2' || level === '3')) {
+                    selectedSkills[language] = level;
+        
+                    let levelText = '';
+        
+                    switch (level) {
+                        case '1':
+                            levelText = 'Beginner';
+                            break;
+                        case '2':
+                            levelText = 'Intermediate';
+                            break;
+                        case '3':
+                            levelText = 'Advanced';
+                            break;
+                        default:
+                            return;
+                    }
+                    const button = document.querySelector(`button[onclick="selectSkill('${language}')"]`);
+                    button.textContent = `${language} - Level ${levelText}`;
+                }
+            }
+        
+            function displaySubmitButton() {
+                const submitButton = document.createElement('button');
+                submitButton.textContent = 'Create CV';
+                submitButton.onclick = confirmSubmit;
+        
+                const lastQuestionMessage = document.createElement('h2');
+                lastQuestionMessage.textContent = "Confirm your creation:";
+        
+                formContainer.innerHTML = '';
+                formContainer.appendChild(lastQuestionMessage);
+                formContainer.appendChild(submitButton);
+            }
+        
+            function confirmSubmit() {
+                const isConfirmed = confirm('Are you sure you want to create your CV?');
+                if (isConfirmed) {
+                    storeAndSubmit();
+                }
+            }
+            displayQuestion();
+        </script>
+    </div>
+</body>
+</html>

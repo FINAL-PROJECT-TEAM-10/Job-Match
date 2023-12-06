@@ -6,6 +6,7 @@ from app_models.company_models import Company
 from app_models.job_seeker_models import JobSeeker
 from data.database import read_query, update_query, insert_query
 from services import admin_services, job_seeker_services, company_services
+from fastapi import HTTPException
 
 # TODO: shorten token expiration
 _SECRET_KEY = '2d776838352e75a9f95de915c269c8ce45b12de47f720213c5f71c4e25618c25'
@@ -126,8 +127,11 @@ def create_activation_token(activation_data, expiration_delta: timedelta = _ACTI
 
 
 def is_authenticated(token: str):
-    return jwt.decode(token, _SECRET_KEY, algorithms=[_ALGORITHM])
-
+    try:
+        return jwt.decode(token, _SECRET_KEY, algorithms=[_ALGORITHM])
+    except JWTError:
+        raise HTTPException(status_code=307, detail='Login to proceed')
+    
 def is_authenticated_custom(token: str):
     return jwt.decode(token, _CUSTOM_SECRET_KEY, algorithms=[_ALGORITHM])
 

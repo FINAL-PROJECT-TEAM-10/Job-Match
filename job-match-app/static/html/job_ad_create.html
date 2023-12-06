@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/job_ad_create.css">
+    <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
+    <script src="/static/js/loading_overlay_home.js"></script>
+    <script src="/static/js/button_click_loader.js"></script>
+    <script src="/static/js/get_username_company.js"></script>
+    <script src="/static/js/check_is_logged.js"></script>
+    <title>Job AD Create |Skill Sync</title>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <h1 id="usernameHeader"></h1>
+            <nav class="navbar">
+                <h3>Create your Job AD</h3>
+                <ul class="nav-list">
+                    <li><a href="/company_section/searching/percentage">Search CVS</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="header-logo">
+            <a class="site-logo" href="/">
+                <img src="/static/images/logo.png" alt="Homepage">
+            </a>
+        </div>
+    </header>
+
+    <div class="form-container">
+        <form id="dataForm">
+
+            <label for="description">Description:</label>
+            <input type="text" id="description" name="description" placeholder="Description">
+
+            <label for="location">Location (city):</label>
+            <input type="text" id="location" name="location" placeholder="Location">
+
+            <label for="remote">Remote:</label>
+            <select id="remote" name="remote_location">
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+            </select>
+
+            <label for="min_salary">Minimum Salary:</label>
+            <input type="text" id="min_salary" name="min_salary" placeholder="Minimum Salary">
+
+            <label for="max_salary">Maximum Salary:</label>
+            <input type="text" id="max_salary" name="max_salary" placeholder="Maximum Salary">
+
+            <input type="hidden" id="skills" name="requirements">
+
+            <label for="skills">Skills:</label>
+            <div id="skillsContainer">
+                <!-- Add the buttons with the name of the skill as in the CV maker form -->
+                <button type="button" id="skillButton" onclick="selectSkill('Python')">Python</button>
+                <button type="button" onclick="selectSkill('JavaScript')">JavaScript</button>
+                <button type="button" onclick="selectSkill('Flask')">Flask</button>
+                <button type="button" onclick="selectSkill('React')">React</button>
+                <button type="button" onclick="selectSkill('Django')">Django</button>
+            </div>
+
+            <div class="button-container">
+                <button type="submit" onclick="submitData(event)">Create</button>
+                <div class="error-container">
+                    <p id="errorMessage"></p>
+                    <p id="okRegister"></p>
+                    <button id="goBackButton" onclick="redirectToAnotherPage(event)">Go Back To Previous Page</button>
+                </div>
+            </div>
+        </form>
+        <div id="personalInfoContainer"></div>
+    </div>
+
+    <script>
+        function submitData(event) {
+            event.preventDefault();
+            const access_token = localStorage.getItem("access_token");
+            var form = document.getElementById('dataForm');
+            var formData = new FormData(form);
+
+            resetForm()
+            resetSkills()
+            var skillsInput = document.getElementById('skills');
+            var skillsValue = skillsInput.value;
+            var remoteSelect = document.getElementById('remote');
+
+            
+
+            var payload = {};
+            formData.forEach((value, key) => {
+                if (key === 'skills') {
+                    payload[key] = value.split(',');
+                } else {
+                    payload[key] = value;
+                }
+            });
+
+            console.log(formData)
+
+            fetch('http://127.0.0.1:8000/job_ads/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Authorization': `Bearer ${access_token}`,
+                }
+            })
+            .then(response => {
+            if (response.ok) {
+                return response.json();
+            }else if (response.status == 422){
+                throw new Error("Fill all information");
+            }
+             else {
+                return response.json().then(data =>{
+                    throw new Error(data.detail || "An unexpected error occurred.");
+                })
+            }
+        })
+        .then(data => {
+            document.getElementById('errorMessage').innerText = '';
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            document.getElementById('okRegister').innerText = 'Job AD was created successfully!';
+            let loadingOverlay = document.createElement('div');
+            loadingOverlay.classList.add('loading-overlay');
+            let loader = document.createElement('div');
+            loader.classList.add('loader');
+
+            loadingOverlay.appendChild(loader);
+            document.body.appendChild(loadingOverlay);
+
+            setTimeout(function () {
+                loadingOverlay.remove();
+            }, 1000);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('errorMessage').innerText = error.message;
+            document.getElementById('okRegister').innerText = '';
+        });
+        }
+
+
+        function resetForm() {
+        var form = document.getElementById('dataForm');
+        form.reset();
+
+        // Reset skills
+        resetSkills();
+    }
+    </script>
+
+
+<script>
+    function selectSkill(skill) {
+    var level = prompt("Enter skill level for " + skill + " (1 for Beginner, 2 for Intermediate, 3 for Advanced):");
+    if (level !== null) {
+        level = parseInt(level);
+        if (level >= 1 && level <= 3) {
+            var skillsInput = document.getElementById('skills');
+            
+            var currentSkills = skillsInput.value || '';
+
+            var updatedSkills = currentSkills.length > 0 ? currentSkills + ',' : '';
+            updatedSkills += skill.toLowerCase() + ';' + level;
+
+            skillsInput.value = updatedSkills;
+
+            var skillButtons = document.querySelectorAll("#skillsContainer button");
+            skillButtons.forEach(function(button) {
+                if (button.textContent.startsWith(skill)) {
+                    button.textContent = skill + " - " + getSkillLevelText(level);
+                }
+            });
+        } else {
+            alert("Invalid skill level. Please enter a number between 1 and 3.");
+        }
+    }
+}
+
+function resetSkills() {
+    var skillsInput = document.getElementById('skills');
+    skillsInput.value = '';
+
+    // Reset button text for all skill buttons
+    var skillButtons = document.querySelectorAll("#skillsContainer button");
+    skillButtons.forEach(function(button) {
+        button.textContent = button.textContent.replace(/ - .*/, ''); // Remove the skill level part
+    });
+}
+
+    function getSkillLevelText(level) {
+        switch (level) {
+            case 1:
+                return "Beginner";
+            case 2:
+                return "Intermediate";
+            case 3:
+                return "Advanced";
+            default:
+                return "";
+        }
+    }
+</script>
+
+
+<script>
+    function redirectToAnotherPage(event) {
+        event.preventDefault()
+        window.location.href = '/company_section/job_ad';
+    }
+</script>
+</body>
+</html>

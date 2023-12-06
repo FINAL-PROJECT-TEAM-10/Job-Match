@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/logged_seeker.css">
+    <link rel="shortcut icon" href="static/images/favicon.ico" type="image/x-icon">
+    <script src="/static/js/loading_overlay_home.js"></script>
+    <script src="/static/js/get_username.js"></script>
+    <script src="/static/js/button_click_loader.js"></script>
+    <script src="/static/js/check_is_logged.js"></script>
+    <title>Seeker Dashboard | Skill Sync</title>
+</head>
+
+<body>
+    <script>
+        const token = localStorage.getItem('access_token');
+
+        if (!token) {
+            window.location.href = '/login';
+        }
+    </script>
+
+
+    <header>
+        <div class="header-content">
+            <h1 id="usernameHeader"></h1>
+            <nav class="navbar">
+                <ul class="nav-list">
+                    <h3>Welcome to your dashboard</h3>
+                </ul>
+            </nav>
+        </div>
+        <div class="header-logo">
+            <a class="site-logo" href="/">
+                <img src="/static/images/logo.png" alt="Homepage">
+            </a>
+        </div>
+    </header>
+
+    <div class="sections-container">
+        <!-- Seeker Section -->
+        <section class="position-selection">
+            <h2>Seeker Section</h2>
+            <a href="/seeker_section" class="button">Everything for you</a>
+        </section>
+
+        <!-- CV Section -->
+        <section class="position-selection">
+            <h2>CV Section</h2>
+            <a href="/seeker_section/cv" class="button">Everything for your CV</a>
+        </section>
+
+        <!-- Matching Section -->
+        <section class="position-selection">
+            <h2>Matching Section</h2>
+            <a href="/seeker_section/searching" class="button">Find Matching Jobs</a>
+        </section>
+
+        <!-- Image Section -->
+        <section class="position-selection">
+            <h2>Profile Section</h2>
+            <a href="/profile" class="button">Manage your profile</a>
+        </section>
+    </div>
+
+</div>
+</body>
+
+</html>

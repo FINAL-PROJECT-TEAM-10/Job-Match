@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/login.css">
+    <link rel="shortcut icon" href="static/images/favicon.ico" type="image/x-icon">
+    <script src="/static/js/loading_overlay_home.js"></script>
+    <title>Login | Skill Sync</title>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>LOGIN PAGE</h1>
+            <nav class="navbar">
+                <ul class="nav-list">
+                </ul>
+            </nav>
+        </div>
+        <div class="header-logo">
+            <a class="site-logo" href="/">
+                <img src="/static/images/logo.png" alt="Homepage">
+            </a>
+        </div>
+    </header>
+
+    <div class="form-container">
+        <form id="dataForm">
+            <label for="seeker_username">Username:</label>
+            <input type="text" id="seeker_username" name="username" placeholder="username" required>
+        
+            <label for="seeker_password">Password:</label>
+            <input type="password" id="seeker_password" name="password" placeholder="your password" required>
+        
+            <div class="button-container">
+                <button type="submit" onclick="submitData(event)">Login & Create CV</button>
+                <a href="/login/forgot_password">Forgot password?</a>
+                <div class="error-container">
+                    <p id="errorMessage"></p>
+                    <p id="okRegister"></p>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function submitData(event) {
+            event.preventDefault();
+            var form = document.getElementById('dataForm');
+            var formData = new FormData(form);
+
+            fetch('http://127.0.0.1:8000/token/', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else if (response.status === 409) {
+                return response.json();
+            }else if (response.status === 401){
+                throw new Error('Invalid username or password!')
+            } else {
+                throw new Error("Fill all information or other error");
+            }
+        })
+        .then(data => {
+            document.getElementById('errorMessage').innerText = '';
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            const roleUser = data.role
+            const access_token = data.access_token
+            document.getElementById('okRegister').innerText = 'Login successfully!';
+            let loadingOverlay = document.createElement('div');
+            loadingOverlay.classList.add('loading-overlay');
+            let loader = document.createElement('div');
+            loader.classList.add('loader');
+
+            loadingOverlay.appendChild(loader);
+            document.body.appendChild(loadingOverlay);
+
+            setTimeout(function () {
+                loadingOverlay.remove();
+                if (roleUser == 'seekers'){
+                    window.location.href = '/cv_maker'
+                } else if (roleUser == 'companies'){
+                    window.location.href = '/company_tab'
+                }
+            }, 1000);
+
+            localStorage.setItem("access_token", access_token)
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('errorMessage').innerText = error.message;
+            document.getElementById('okRegister').innerText = '';
+        });
+        }
+    </script>
+
+
+    
+</html>

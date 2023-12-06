@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/cv_section.css">
+    <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
+    <script src="/static/js/loading_overlay_home.js"></script>
+    <script src="/static/js/get_username.js"></script>
+    <script src="/static/js/button_click_loader.js"></script>
+    <script src="/static/js/check_is_logged.js"></script>
+    <title>Manage CV | Skill Sync</title>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <h1 id="usernameHeader"></h1>
+            <h3>Manage my CVS</h3>
+            <nav class="navbar">
+                <ul class="nav-list">
+                    <li><a href="/seeker_section/searching">Search Job</a></li>
+                    <li><a href="/seeker_section">Back to your dashboard</li></a>
+                </ul>
+            </nav>
+        </div>
+        <div class="header-logo">
+            <a class="site-logo" href="/">
+                <img src="/static/images/logo.png" alt="Homepage">
+            </a>
+        </div>
+    </header>
+    <div class="form-container">
+        <form id="dataForm">
+            <p>View all of your CVS</p>
+            <div id="statusButtons">
+
+            </div>
+
+            <div class="button-container">
+                <button type="submit" onclick="submitData(event)">View</button>
+            </div>
+
+        </form>
+
+        <div class="sections-container">
+            <div id="show"></div>
+        </div>
+
+        <div id="pagination"></div>
+        <div id="errorContainer"></div>
+        
+            <script>
+                const access_token = localStorage.getItem("access_token");
+                async function submitData(event) {
+                    event.preventDefault();
+                    try {
+                        const url = `http://127.0.0.1:8000/seekers/personal/cv`;
+            
+                        const response = await fetch(url, {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${access_token}`,
+                                'Content-Type': 'application/json'
+                            },
+                        });
+                        
+                        const data = await response.json();
+                        localStorage.setItem('currentPage', '1');
+                        displayJobAds(data);
+                        showPage(1)
+                    } catch (error) {
+                        console.error('Error fetching personal info:', error);
+                    }
+                }
+            
+                function displayJobAds(data) {
+                const showContainer = document.getElementById('show');
+                const paginationContainer = document.getElementById('pagination');
+
+                showContainer.innerHTML = '';
+                paginationContainer.innerHTML = '';
+
+                const itemsPerPage = 3;
+                const totalPages = Math.ceil(data.length / itemsPerPage);
+
+                const currentPage = parseInt(localStorage.getItem('currentPage')) || 1;
+
+                if (!Array.isArray(data)) {
+                    const noAdsMessage = document.createElement('div');
+                    noAdsMessage.className = 'job-ad-card'
+                    noAdsMessage.textContent = 'No CVS found!';
+                    showContainer.appendChild(noAdsMessage);
+                    return;
+                }
+                data.forEach((jobAd, index) => {
+                    const page = Math.ceil((index + 1) / itemsPerPage);
+                    const listItem = document.createElement('div');
+                    listItem.className = `job-ad-card page-${page}`;
+
+                    const matchButton = document.createElement('button');
+                    matchButton.textContent = 'Edit CV';
+                    matchButton.addEventListener('click', () => editCVForm(jobAd["Cv ID"], jobAd));
+                    listItem.appendChild(matchButton);
+
+                    const cancelButton = document.createElement('button');
+                    cancelButton.textContent = 'Set Main CV';
+                    cancelButton.addEventListener('click', () => setMainCV(jobAd["Cv ID"]));
+                    listItem.appendChild(cancelButton);
+
+                    for (const key in jobAd) {
+                        const value = jobAd[key];
+
+                        const pairContainer = document.createElement('div');
+                        pairContainer.className = 'key-value-pair';
+
+                        const keyElement = document.createElement('span');
+                        const valueElement = document.createElement('span');
+
+                        keyElement.textContent = `${key}: `;
+                        valueElement.textContent = value;
+
+                        if (key.toLowerCase().includes('status')) {
+                            const isActive = value.includes('Active')
+                            const isPrivate = value.includes('Private')
+                            const isHidden = value.includes('Hidden')
+                            if (isActive) {
+                                valueElement.style.color = '#00FF00';
+                            } else if (isPrivate) {
+                                valueElement.style.color = '#FF0000';
+                            } else if (isHidden) {
+                                valueElement.style.color = '#808080';
+                            }
+                        }
+
+                        pairContainer.appendChild(keyElement);
+                        pairContainer.appendChild(valueElement);
+
+                        listItem.appendChild(pairContainer);
+                    }
+
+                    showContainer.appendChild(listItem);
+                });
+
+                        for (let page = 1; page <= totalPages; page++) {
+                            const pageButton = document.createElement('button');
+                            pageButton.textContent = page;
+                            pageButton.addEventListener('click', () => showPage(page));
+                            paginationContainer.appendChild(pageButton);
+
+                            if (page === currentPage) {
+                                pageButton.classList.add('active');
+                            }
+                        }
+                    }
+
+
+                    function showPage(page) {
+                    const itemsPerPage = 3;
+
+                    const allAds = document.querySelectorAll('.job-ad-card');
+                    allAds.forEach((ad) => {
+                        ad.style.display = 'none';
+                    });
+
+                    const start = (page - 1) * itemsPerPage;
+                    const end = start + itemsPerPage;
+
+                    const newAds = document.querySelectorAll(`.job-ad-card`);
+                    newAds.forEach((ad, index) => {
+                        if (index >= start && index < end) {
+                            ad.style.display = 'block';
+                        }
+                    });
+
+                    const paginationButtons = document.querySelectorAll('#pagination button');
+                    paginationButtons.forEach((button, index) => {
+                        button.classList.toggle('active', index + 1 === page);
+                    });
+
+                    localStorage.setItem('currentPage', page);
+                }
+
+
+                    async function setMainCV(cv_id) {
+                        try {
+                            console.log(cv_id)
+                            const url = `http://127.0.0.1:8000/seekers/main/cv?cv_id=${cv_id}`;
+
+                            const response = await fetch(url, {
+                                method: 'PUT',
+                                headers: {
+                                    'Authorization': `Bearer ${access_token}`,
+                                    'Content-Type': 'application/json',
+                                },
+                            });
+
+                            const data = await response.json();
+                            console.log(data);
+                            if (response.status !== 200) {
+                            const errorContainer = document.getElementById('errorContainer');
+                            errorContainer.innerHTML = `<p>${data.detail}</p>`;
+                            return;
+                            }else{
+                                errorContainer.innerHTML = `<p>${data.detail}</p>`; 
+                            }
+
+                            await reloadCards();
+
+                        } catch (error) {
+                            console.error(`Error ${action}ing job ad:`, error);
+                        }
+                    }
+
+                    async function reloadCards() {
+                        try {
+                            const url = `http://127.0.0.1:8000/seekers/personal/cv`;
+
+                            const response = await fetch(url, {
+                                method: 'GET',
+                                headers: {
+                                    'Authorization': `Bearer ${access_token}`,
+                                    'Content-Type': 'application/json'
+                                },
+                            });
+
+                            const data = await response.json();
+                            const current_page = localStorage.getItem('currentPage')
+                            displayJobAds(data);
+                            showPage(current_page)
+                        } catch (error) {
+                            console.error('Error reloading cards:', error);
+                        }
+                    }
+
+
+            function editCVForm(cv_id, currentData) {
+            const editFormContainer = document.createElement('div');
+            editFormContainer.className = 'edit-form';
+
+            const editForm = document.createElement('form');
+            editForm.id = 'editCVForm';
+
+            // Description
+            const descriptionLabel = document.createElement('label');
+            descriptionLabel.for = 'editDescription';
+            descriptionLabel.textContent = 'Description:';
+            const descriptionInput = document.createElement('textarea');
+            descriptionInput.id = 'editDescription';
+            descriptionInput.name = 'description';
+            descriptionInput.value = currentData['Cv Description'];
+
+            // Min Salary
+            const minSalaryLabel = document.createElement('label');
+            minSalaryLabel.for = 'editMinSalary';
+            minSalaryLabel.textContent = 'Min Salary:';
+            const minSalaryInput = document.createElement('input');
+            minSalaryInput.type = 'number';
+            minSalaryInput.id = 'editMinSalary';
+            minSalaryInput.name = 'min_salary';
+            minSalaryInput.value = currentData['Minimum Salary'];
+
+            // Max Salary
+            const maxSalaryLabel = document.createElement('label');
+            maxSalaryLabel.for = 'editMaxSalary';
+            maxSalaryLabel.textContent = 'Max Salary:';
+            const maxSalaryInput = document.createElement('input');
+            maxSalaryInput.type = 'number';
+            maxSalaryInput.id = 'editMaxSalary';
+            maxSalaryInput.name = 'max_salary';
+            maxSalaryInput.placeholder = 'Enter the new salary'
+            maxSalaryInput.value = currentData['Maximum Salary'];
+
+
+            const statusLabel = document.createElement('label');
+            statusLabel.for = 'editStatus';
+            statusLabel.textContent = 'Status:';
+            const statusSelect = document.createElement('select');
+            statusSelect.id = 'editStatus';
+            statusSelect.name = 'status';
+
+            const statusOptions = ['Active', 'Hidden', 'Private'];
+            statusOptions.forEach(status => {
+                const option = document.createElement('option');
+                option.value = status;
+                option.text = status;
+                statusSelect.appendChild(option);
+            });
+
+            statusSelect.value = currentData.status;
+
+           // Skills
+           const skillsLabel = document.createElement('label');
+            skillsLabel.for = 'editSkills';
+            skillsLabel.textContent = 'Skills:';
+
+            const skillsContainer = document.createElement('div');
+            skillsContainer.id = 'editSkillsContainer';
+
+            const skillButtons = ['Python', 'JavaScript', 'Flask', 'SQL', 'Django'];
+            skillButtons.forEach(skill => {
+                const skillButton = document.createElement('button');
+                skillButton.type = 'button';
+                skillButton.textContent = skill;
+                skillButton.addEventListener('click', () => selectSkill(skill, skillButton));
+                skillsContainer.appendChild(skillButton);
+            });
+
+            const selectedSkills = Array.isArray(currentData.skills) ? currentData.skills : [];
+
+            selectedSkills.forEach(selectedSkill => {
+                const skillButton = skillsContainer.querySelector(`button:contains('${selectedSkill.name}')`);
+                if (skillButton) {
+                    skillButton.textContent = `${selectedSkill.name} - ${getSkillLevelText(selectedSkill.level)}`;
+                }
+            });
+
+            const saveButton = document.createElement('button');
+            saveButton.type = 'button';
+            saveButton.textContent = 'Save Changes';
+            saveButton.addEventListener('click', () => saveChanges(cv_id));
+
+            editForm.appendChild(descriptionLabel);
+            editForm.appendChild(descriptionInput);
+            editForm.appendChild(minSalaryLabel);
+            editForm.appendChild(minSalaryInput);
+            editForm.appendChild(maxSalaryLabel);
+            editForm.appendChild(maxSalaryInput);
+            editForm.appendChild(statusLabel);
+            editForm.appendChild(statusSelect);
+            editForm.appendChild(skillsLabel);
+            editForm.appendChild(skillsContainer);
+            editForm.appendChild(saveButton);
+
+            editFormContainer.appendChild(editForm);
+            const showContainer = document.getElementById('show');
+            showContainer.innerHTML = '';
+            showContainer.appendChild(editFormContainer);
+        }
+
+        function selectSkill(skill, skillButton) {
+            var level = prompt("Enter skill level for " + skill + " (1 for Beginner, 2 for Intermediate, 3 for Advanced):");
+            if (level !== null) {
+                level = parseInt(level);
+                if (level >= 1 && level <= 3) {
+                    skillButton.textContent = `${skill} - ${getSkillLevelText(level)}`;
+                    skillButton.dataset.level = level;
+                } else {
+                    alert("Invalid skill level. Please enter a number between 1 and 3.");
+                }
+            }
+        }
+
+            function resetSkills() {
+                var skillsInput = document.getElementById('skills');
+                skillsInput.value = '';
+
+                var skillButtons = document.querySelectorAll("#skillsContainer button");
+                skillButtons.forEach(function(button) {
+                    button.textContent = button.textContent.replace(/ - .*/, '');
+                });
+            }
+
+    function getSkillLevelText(level) {
+        switch (level) {
+            case 1:
+                return "Beginner";
+            case 2:
+                return "Intermediate";
+            case 3:
+                return "Advanced";
+            default:
+                return "";
+        }
+    }
+
+
+
+    async function saveChanges(cv_id) {
+    try {
+        const editForm = document.getElementById('editCVForm');
+
+        const selectedSkills = Array.from(editForm.querySelector('#editSkillsContainer').querySelectorAll('button')).filter(skillButton => {
+            return skillButton.dataset.level > 0;
+        });
+
+        
+        const editedData = {
+        cv_id: cv_id,
+        description: editForm.querySelector('#editDescription').value,
+        min_salary: parseInt(editForm.querySelector('#editMinSalary').value),
+        max_salary: parseInt(editForm.querySelector('#editMaxSalary').value),
+        status: editForm.querySelector('#editStatus').value,
+        skills: selectedSkills.map(skillButton => {
+            const [skillName, levelText] = skillButton.textContent.trim().split(' - ');
+            const skillLevel = getSkillLevelFromText(levelText) || 1;
+            return `${skillName.toLowerCase()};${skillLevel}`;
+        }).join(','),
+    };
+    
+        var formData = new FormData();
+
+    for (const key in editedData) {
+        formData.append(key, editedData[key]);
+    }
+
+        const url = `http://127.0.0.1:8000/seekers/cv/edit`;
+        const response = await fetch(url, {
+            method: 'PUT',
+            body: formData,
+            headers: {
+                'Authorization': `Bearer ${access_token}`,
+            },
+        });
+
+        const data = await response.json();
+        if (response.status !== 200) {
+            const errorContainer = document.getElementById('errorContainer');
+            errorContainer.innerHTML = `<p>${data.detail}</p>`;
+            return;
+            }else{
+            errorContainer.innerHTML = `<p style="color: lime;">${data.detail}</p>`;
+            }
+
+        
+        reloadCards();
+    } catch (error) {
+        console.error('Error saving changes:', error);
+    }
+}
+
+function getSkillLevelFromText(levelText) {
+    switch (levelText.trim().toLowerCase()) {
+        case 'beginner':
+            return 1;
+        case 'intermediate':
+            return 2;
+        case 'advanced':
+            return 3;
+        default:
+            return null;
+    }
+}
+            </script>
+
+
+            
+</body>
+
+</html>

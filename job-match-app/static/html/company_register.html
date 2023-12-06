@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/css/job_seeker_register.css">
+    <link rel="stylesheet" href="/static/css/company_register.css">
     <link rel="shortcut icon" href="static/images/favicon.ico" type="image/x-icon">
     <script src="/static/js/loading_overlay_home.js"></script>
-    <title>Skill Sync</title>
+    <title>Company Registration | Skill Sync</title>
 </head>
 <body>
     <header>
@@ -70,10 +70,13 @@
             .then(response => {
             if (response.ok) {
                 return response.json();
-            } else if (response.status === 409) {
-                return response.json();
-            } else {
-                throw new Error("Fill all information or other error");
+            }else if (response.status == 422){
+                throw new Error("Fill all information");
+            }
+             else {
+                return response.json().then(data =>{
+                    throw new Error(data.detail || "An unexpected error occurred.");
+                })
             }
         })
         .then(data => {
@@ -92,7 +95,7 @@
 
             setTimeout(function () {
                 loadingOverlay.remove();
-                window.location.href = '/';
+                window.location.href = '/login';
             }, 1000);
         })
         .catch(error => {

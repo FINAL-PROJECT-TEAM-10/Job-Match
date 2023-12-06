@@ -21,8 +21,8 @@ companies_router = APIRouter(prefix='/companies')
 
 def view_all_companies(current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'companies':
-        return JSONResponse(status_code=403,
-                            content='This option is only available for Companies')
+        raise HTTPException(status_code=403,
+                            detail ='This option is only available for Companies')
     
     get_companies = company_services.read_companies()
     result = []
@@ -53,7 +53,7 @@ def company_registration(Company_Name: Annotated[ALLOWED_USERNAME, Form()], Pass
     validate_location(Company_City, Company_Country)
 
     if company_services.check_company_exist(Company_Name):
-        return JSONResponse(status_code=409,content=f'Company with username {Company_Name} already exists.')
+        raise HTTPException(status_code=409, detail=f'Company with this {Company_Name} already exists.')
 
     create_company = company_services.create_company(Company_Name, Password, Company_City, Company_Country, 
                                                      Company_Adress, Telephone_Number, Email_Adress)
@@ -67,8 +67,8 @@ def company_registration(Company_Name: Annotated[ALLOWED_USERNAME, Form()], Pass
 def your_company_information(current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'companies':
-            return JSONResponse(status_code=403,
-                                content='This option is only available for Companies')  
+            raise HTTPException(status_code=403,
+                                detail ='This option is only available for Companies')  
     
     company_name = current_user_payload.get('username')
 
@@ -116,8 +116,8 @@ def edit_your_company_information(description: str = Query(None),
                              ):
      
     if current_user_payload['group'] != 'companies':
-        return JSONResponse(status_code=403,
-                            content='This option is only available for Companies')
+        raise HTTPException(status_code=403,
+                            detail ='This option is only available for Companies')
      
     username = current_user_payload.get('username')
 
@@ -132,7 +132,7 @@ def edit_your_company_information(description: str = Query(None),
     final_company_telephone = telephone or get_company_contacts[0][3]
     
     if not description and not city and not address and not telephone:
-        return JSONResponse(status_code=203,content= "You haven't done any changes to your personal company information")
+        raise HTTPException(status_code=203, detail= "You haven't done any changes to your personal company information")
 
     validate_city(final_company_city)
 
@@ -145,8 +145,8 @@ def edit_your_company_information(description: str = Query(None),
 def get_main_cv_from_job_seeker(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'companies':
-        return JSONResponse(status_code=403,
-                            content='This option is only available for Companies')
+        raise HTTPException(status_code=403,
+                            detail ='This option is only available for Companies')
 
     return company_services.view_all_cvs()
 
@@ -158,11 +158,11 @@ def get_company_avatar(id: int, current_user_payload=Depends(get_current_user)):
     image_data = upload_services.get_picture(id, 'companies')
 
     if not company_services.company_exists_by_id(id):
-        return JSONResponse(status_code=404,
-                            content='No such company.')
+        raise HTTPException(status_code=404,
+                            detail ='No such company.')
     if image_data is None:
-        return JSONResponse(status_code=404,
-                            content='No picture associated with the company.')
+        raise HTTPException(status_code=404,
+                            detail ='No picture associated with the company.')
 
     return StreamingResponse(io.BytesIO(image_data), media_type="image/jpeg")
 

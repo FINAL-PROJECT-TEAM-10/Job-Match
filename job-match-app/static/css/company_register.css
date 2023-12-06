@@ -4,6 +4,8 @@ body {
     padding: 0;
     box-sizing: border-box;
     background-image: url('/static/images/background.jpg');
+    background-size: cover;
+    background-attachment: fixed;
     color: #fff;
 }
 
@@ -24,6 +26,13 @@ header h1 {
 .header-logo {
     display: flex;
     align-items: center;
+}
+
+.header-content {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .site-logo img {

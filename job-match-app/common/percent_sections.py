@@ -101,7 +101,7 @@ def create_current_dict(company_id, job_ad_info, value, perms, matched_skills, u
     
     else:
         result_cv = {
-
+            "CV ID": job_ad_info[0][0],
             "Job Seeker": find_name_by_id_for_job_seeker(company_id),
             "CV Description": job_ad_info[0][3],
             "Minimum Salary": job_ad_info[0][1],

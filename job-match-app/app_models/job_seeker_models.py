@@ -6,12 +6,14 @@ from app_models.validation_models import ALLOWED_USERNAME
 
 class JobSeekerInfo(BaseModel):
     summary: Optional[str]
-    location: Optional[str]
+    email: Optional[str]
+    address: Optional[str]
+    telephone: Optional[str]
+    location : Optional[str]
     status: Optional[str]
     number_of_matches_from_diffrent_cvs: Optional[int]
 
-
-class JobSeekerOptionalInfo:
+class JobSeekerOptionalInfo(BaseModel):
     username: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
@@ -21,6 +23,8 @@ class JobSeekerOptionalInfo:
     email: Optional[str] = None
     password: Optional[str] = None
     country: Optional[str] = None
+    telephone: Optional[str] = None
+    address: Optional[str] = None
 
     @classmethod
     def from_query_result(cls, username, first_name, last_name, summary, status):

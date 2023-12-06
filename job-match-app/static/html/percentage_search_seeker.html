@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/percentage_search_seeker.css">
+    <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
+    <script src="/static/js/loading_overlay_home.js"></script>
+    <script src="/static/js/get_username.js"></script>
+    <script src="/static/js/button_click_loader.js"></script>
+    <script src="/static/js/check_is_logged.js"></script>
+    <title>Search Percentage | Skill Sync</title>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <h1 id="usernameHeader"></h1>
+            <h3>Check where you can match and apply</h3>
+            <nav class="navbar">
+                <ul class="nav-list">
+                    <li><a href="/seeker_section/searching">Back To Searching</li></a>
+                    <li><a href="/seeker_section">Back to your dashboard</li></a>
+                </ul>
+            </nav>
+        </div>
+        <div class="header-logo">
+            <a class="site-logo" href="/">
+                <img src="/static/images/logo.png" alt="Homepage">
+            </a>
+        </div>
+    </header>
+    <div class="form-container">
+        <form id="dataForm">
+            <label>Sort ADS by:</label>
+            <br>
+            <br>
+            <div id="statusButtons">
+                <input type="radio" id="bestRadio" name="status" value="Best" onclick="setStatus('Best')">
+                <label for="bestRadio">Best</label>
+                
+                <input type="radio" id="veryGoodRadio" name="status" value="Very good" onclick="setStatus('Very good')">
+                <label for="veryGoodRadio">Very good</label>
+
+                <input type="radio" id="goodRadio" name="status" value="Good" onclick="setStatus('Good')">
+                <label for="goodRadio">Good</label>
+
+                <input type="radio" id="badRadio" name="status" value="Bad" onclick="setStatus('Bad')">
+                <label for="badRadio">Bad</label>
+
+                <input type="radio" id="worstRadio" name="status" value="Worst" onclick="setStatus('Worst')">
+                <label for="worstRadio">Worst</label>
+
+            </div>
+
+            <div class="button-container">
+                <button type="submit" onclick="submitData(event)">Search</button>
+            </div>
+
+        </form>
+
+        <div class="sections-container">
+            <div id="show"></div>
+        </div>
+
+        <div id="pagination"></div>
+        <div id="errorContainer"></div>
+        
+            <script>
+                const access_token = localStorage.getItem("access_token");
+                async function submitData(event) {
+                    event.preventDefault();
+                    try {
+            
+                        var form = document.getElementById('dataForm');
+                        var formData = new FormData(form);
+            
+                        const queryParams = new URLSearchParams(formData);
+                        queryParams.set('sort_percent', queryParams.get('status'));
+                        queryParams.delete('status');
+            
+                        const url = `http://127.0.0.1:8000/seekers/search/job_ads?${queryParams}`;
+            
+                        const response = await fetch(url, {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${access_token}`,
+                                'Content-Type': 'application/json'
+                            },
+                        });
+            
+                        const data = await response.json();
+
+                        displayJobAds(data)
+                        showPage(1)
+                    } catch (error) {
+                        console.error('Error fetching personal info:', error);
+                    }
+                }
+            
+                function displayJobAds(data) {
+                const showContainer = document.getElementById('show');
+                const paginationContainer = document.getElementById('pagination');
+
+                showContainer.innerHTML = '';
+                paginationContainer.innerHTML = '';
+
+                const itemsPerPage = 3;
+                const totalPages = Math.ceil(data.length / itemsPerPage);
+
+                const currentPage = parseInt(localStorage.getItem('currentPage')) || 1;
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    const noAdsMessage = document.createElement('div');
+                    noAdsMessage.className = 'job-ad-card';
+                    noAdsMessage.textContent = 'No job ads found!';
+                    showContainer.appendChild(noAdsMessage);
+                    return;
+                }
+
+                data.forEach((jobAd, index) => {
+                    const page = Math.ceil((index + 1) / itemsPerPage);
+                    const listItem = document.createElement('div');
+                    listItem.className = `job-ad-card page-${page}`;
+
+                    const matchButton = document.createElement('button');
+                    matchButton.textContent = 'Match';
+                    matchButton.addEventListener('click', () => handleMatch('match', jobAd["Job AD ID"]));
+                    listItem.appendChild(matchButton);
+
+                    for (const key in jobAd) {
+                        const value = jobAd[key];
+
+                        const pairContainer = document.createElement('div');
+                        pairContainer.className = 'key-value-pair';
+
+                        const keyElement = document.createElement('span');
+                        const valueElement = document.createElement('span');
+
+                        keyElement.textContent = `${key}: `;
+                        valueElement.textContent = value;
+
+                        if (key.toLowerCase().includes('matched')) {
+                            const isMatched = key.toLowerCase().includes('matched skills from');
+                            const all_requirements = value.toLowerCase().includes('you meet all the');
+                            valueElement.style.color = isMatched ? '#2ecc71' : '#e74c3c';
+                            if (all_requirements) {
+                                valueElement.style.color = all_requirements ? '#2ecc71' : '#e74c3c';
+                            }
+                        }
+
+                        pairContainer.appendChild(keyElement);
+                        pairContainer.appendChild(valueElement);
+
+                        listItem.appendChild(pairContainer);
+                    }
+
+                    showContainer.appendChild(listItem);
+                });
+
+                for (let page = 1; page <= totalPages; page++) {
+                    const pageButton = document.createElement('button');
+                    pageButton.textContent = page;
+                    pageButton.addEventListener('click', () => showPage(page));
+                    paginationContainer.appendChild(pageButton);
+
+                    if (page === currentPage) {
+                        pageButton.classList.add('active');
+                    }
+                }
+            }
+
+                    function showPage(page) {
+                    const currentPage = parseInt(localStorage.getItem('currentPage')) || 1;
+
+                    const allAds = document.querySelectorAll('.job-ad-card');
+                    allAds.forEach((ad) => {
+                        ad.style.display = 'none';
+                    });
+
+                    const newAds = document.querySelectorAll(`.job-ad-card.page-${page}`);
+                    newAds.forEach((ad) => {
+                        ad.style.display = 'block';
+                    });
+
+                    const paginationButtons = document.querySelectorAll('#pagination button');
+                    paginationButtons.forEach((button, index) => {
+                        button.classList.toggle('active', index + 1 === page);
+                    });
+
+                    localStorage.setItem('currentPage', page);
+                }
+
+                async function handleMatch(action, jobId) {
+                        try {
+                            const url = `http://127.0.0.1:8000/seekers/match/company?job_ad_id=${jobId}`;
+
+                            const response = await fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${access_token}`,
+                                    'Content-Type': 'application/json',
+                                },
+                            });
+
+                            const data = await response.json();
+                            console.log(data);
+
+
+                            if (response.status !== 200) {
+                            const errorContainer = document.getElementById('errorContainer');
+                            errorContainer.innerHTML = `<p>Error ${action}ing job ad: ${data.detail}</p>`;
+                            return;
+                            }else{
+                            errorContainer.innerHTML = `<p style="color: lime;">${data.detail}</p>`;
+                            }
+                        } catch (error) {
+                            console.error(`Error ${action}ing job ad:`, error);
+                        }
+                    }
+            </script>
+
+
+        <script>
+            function setStatus(status) {
+                selectedStatus = status;
+
+                const radioButtons = document.getElementsByName('status');
+            
+                for (const radio of radioButtons) {
+                    const label = radio.nextElementSibling;
+                    if (radio.value === status) {
+                        radio.checked = true;
+                        label.classList.add('clicked');
+                    } else {
+                        radio.checked = false; 
+                        label.classList.remove('clicked');
+                    }
+                }
+            }
+            </script> 
+</body>
+
+</html>

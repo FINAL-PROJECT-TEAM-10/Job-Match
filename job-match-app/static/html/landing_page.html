@@ -5,17 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="static/css/landing_page.css">
     <link rel="shortcut icon" href="/static/images/favicon.ico" type="/x-icon">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-    <title>SKILL SYNC</title>
+    <script src="/static/js/button_click_loader.js"></script>
+    <title>Home | Skill Sync</title>
 </head>
 <body>
     <header>
         <div class="header-content">
             <h1>WELCOME TO SKILL SYNC</h1>
             <nav class="navbar">
-                <ul class="nav-list">
-                    <li><a href="#">About</a></li>
-                    <li><a href="#">Contact</a></li>
+                <ul class="nav-list" id="navbarList">
+                    <li id="personalDashboard"><a href="/profile">Personal Profile</a></li>
+                    <li id="personalInfo"><a href="/seeker_section/personal_info">Personal Info</a></li>
+                    <li id="companyDashboard"><a href="/company_tab">Company Dashboard</a></li>
+                    <li id="companyInfo"><a href="/profile">Company Profile</a></li>
                 </ul>
             </nav>
         </div>
@@ -28,44 +30,96 @@
     
     <div class="square-container">
         <section class="position-selection">
-            <h2>REGISTER AS:</h2>
-            <a href="job_seeker_register" class="button job-seeker">JOB SEEKER</a>
-            <a href="/company_register" class="button company">COMPANY</a>
-            <h2>OR</h2>
-            <a href="/login" class="button company">LOGIN</a>
-            
+            <h2 id="register-text">REGISTER</h2>
+            <a href="job_seeker_register" class="button job-seeker" id="job-seeker-button">JOB SEEKER</a>
+            <a href="/company_register" class="button company" id="company-button">COMPANY</a>
+            <h2 id="sign-button">SIGN IN</h2>
+            <a href="/login" class="button company" id="loginButton">LOGIN</a>
+            <a href="#" class="button company" id="logoutButton">LOGOUT</a>
         </section>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            let buttons = document.querySelectorAll('.button');
+        function updateNavigation() {
+            const navbarList = document.getElementById("navbarList");
+            const personalDashboard = document.getElementById("personalDashboard");
+            const personalInfo = document.getElementById("personalInfo");
+            const companyDashboard = document.getElementById("companyDashboard");
+            const companyInfo = document.getElementById("companyInfo");
+            const register_text = document.getElementById('register-text')
+            const registerJobSeekerButton = document.getElementById('job-seeker-button')
+            const registerCompanyButton = document.getElementById('company-button')
+            const signButton = document.getElementById('sign-button')
 
-            buttons.forEach(function (button) {
-                button.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    document.body.classList.add('loading');
-                    let loadingOverlay = document.createElement('div');
-                    loadingOverlay.classList.add('loading-overlay');
-                    let loader = document.createElement('div');
-                    loader.classList.add('loader');
+            const token = localStorage.getItem("access_token");
+            console.log(token)
+    
+            if (token) {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+    
+                const userRole = payload.group;
+                console.log(userRole)
+    
+                personalDashboard.style.display = "none";
+                personalInfo.style.display = "none";
+                companyDashboard.style.display = "none";
+                companyInfo.style.display = "none";
+                register_text.textContent = 'Your personal dashboard'
+                if (userRole == 'seekers'){
+                registerJobSeekerButton.textContent = 'Personal Dashboard'
+                signButton.textContent = 'Sign Out'
+                registerJobSeekerButton.href = '/seeker_tab'
+                registerCompanyButton.style.display = 'none'
+                } else if (userRole === "companies") {
+                registerCompanyButton.textContent = 'Company Dashboard'
+                signButton.textContent = 'Sign Out'
+                registerCompanyButton.href = '/company_tab'
+                registerJobSeekerButton.style.display = 'none'
+                }
+    
+                if (userRole === "seekers") {
+                    personalDashboard.style.display = "block";
+                    personalInfo.style.display = "block";
+                } else if (userRole === "companies") {
+                    companyDashboard.style.display = "block";
+                    companyInfo.style.display = "block";
+                }
+            } else {
+                navbarList.style.display = "none";
+            }
+        }
+    
+        window.addEventListener("load", updateNavigation);
+    </script>
 
-                    loadingOverlay.appendChild(loader);
-
-                    document.body.appendChild(loadingOverlay);
-
-                    setTimeout(function () {
-                        document.body.classList.remove('loading');
-                        loadingOverlay.remove();
-
-                        window.location.href = button.getAttribute('href');
-                    }, 1000);
+        <!-- Logout logic -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const accessToken = localStorage.getItem("access_token");
+            
+                const loginButton = document.getElementById("loginButton");
+                const logoutButton = document.getElementById("logoutButton");
+            
+                if (accessToken) {
+                    loginButton.style.display = "none";
+                    logoutButton.style.display = "inline-block";
+                } else {
+                    loginButton.style.display = "inline-block";
+                    logoutButton.style.display = "none";
+                }
+            
+                logoutButton.addEventListener("click", function() {
+                    localStorage.removeItem("access_token");
+            
+                    window.location.href = '/'
+                    loginButton.style.display = "inline-block";
+                    logoutButton.style.display = "none";
                 });
             });
-        });
-    </script>
+            </script>
 </body>
 </html>
+
 
 
 

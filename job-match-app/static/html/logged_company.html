@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/logged_company.css">
+    <link rel="shortcut icon" href="static/images/favicon.ico" type="image/x-icon">
+    <script src="/static/js/loading_overlay_home.js"></script>
+    <script src="/static/js/get_username_company.js"></script>
+    <script src="/static/js/button_click_loader.js"></script>
+    <script src="/static/js/check_is_logged.js"></script>
+    <title>Company Dashboard | Skill Sync</title>
+</head>
+
+<body>
+    <script>
+        const token = localStorage.getItem('access_token');
+
+        if (!token) {
+            window.location.href = '/login';
+        }
+    </script>
+
+
+    <header>
+        <div class="header-content">
+            <h1 id="usernameHeader"></h1>
+            <nav class="navbar">
+                <ul class="nav-list">
+                    <h3>Welcome to your company dashboard</h3>
+                </ul>
+            </nav>
+        </div>
+        <div class="header-logo">
+            <a class="site-logo" href="/">
+                <img src="/static/images/logo.png" alt="Homepage">
+            </a>
+        </div>
+    </header>
+
+    <div class="sections-container">
+        <!-- Company Section -->
+        <section class="position-selection">
+            <h2>Company Section</h2>
+            <a href="/company_section" class="button">Everything for your company</a>
+        </section>
+
+        <!-- Job Ad Section -->
+        <section class="position-selection">
+            <h2>Job Ad Section</h2>
+            <a href="/company_section/job_ad" class="button">Everything for your ADS</a>
+        </section>
+
+        <!-- Matching Section -->
+        <section class="position-selection">
+            <h2>Matching Section</h2>
+            <a href="/company_section/searching" class="button">Find Employees</a>
+        </section>
+
+        <!-- Profile Section -->
+        <section class="position-selection">
+            <h2>Profile Section</h2>
+            <a href="/profile" class="button">Manage your profile</a>
+        </section>
+    </div>
+
+</div>
+</body>
+
+</html>
