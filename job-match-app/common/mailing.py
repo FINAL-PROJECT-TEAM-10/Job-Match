@@ -1,5 +1,4 @@
 from mailjet_rest import Client
-
 from app_models.cv_models import CvCreation
 from app_models.job_ads_models import Job_ad
 from private_details import mailjet_public_api_key as api_key, mailjet_secret_api_key as api_secret, skill_sync_address

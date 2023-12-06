@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -21,7 +20,7 @@ class Admin(BaseModel):
     country: str
 
     @classmethod
-    def from_query_results(cls, id, username, first_name, last_name,                            email, address, telephone,
+    def from_query_results(cls, id, username, first_name, last_name, email, address, telephone,
                            city, country):
         return cls(
             id=id, group='admins',

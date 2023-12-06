@@ -13,13 +13,14 @@ from fastapi import HTTPException
 job_seekers_router = APIRouter(prefix='/job_seekers')
 
 
-@job_seekers_router.get('/', description= 'You can view every available job seeker in this section.', tags=['Seeker Section'])
+@job_seekers_router.get('/', description= 'You can view every available job seeker in this section.', 
+                        tags=['Seeker Section'])
+
 def get_all_seekers(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'seekers':
         return JSONResponse(status_code=403,
                             content='Only seekers can view all seekers')
-
 
     get_seekers = job_seeker_services.read_seekers()
 
@@ -44,7 +45,9 @@ def get_all_seekers(current_user_payload=Depends(get_current_user)):
     return result
 
 
-@job_seekers_router.get('/personal_info', description= 'You can view your personal information in this section.', tags=['Seeker Section'])
+@job_seekers_router.get('/personal_info', description= 'You can view your personal information in this section.', 
+                        tags=['Seeker Section'])
+
 def your_information(current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'seekers':
@@ -63,7 +66,9 @@ def your_information(current_user_payload=Depends(get_current_user)):
     return current_job_seeker_info
 
 
-@job_seekers_router.put('/personal_info/edit', description= 'You can edit your personal information in this section.', tags=['Seeker Section'])
+@job_seekers_router.put('/personal_info/edit', description= 'You can edit your personal information in this section.', 
+                        tags=['Seeker Section'])
+
 def edit_proffesional_info(summary: str = Query(None),
                            city: str = Query(None),
                            current_user_payload=Depends(get_current_user)):
@@ -87,9 +92,12 @@ def edit_proffesional_info(summary: str = Query(None),
 
     validate_city(job_seeker.city)
     
-    return job_seeker_services.edit_info(job_seeker.username, job_seeker.summary,job_seeker.city)
+    return job_seeker_services.edit_info(job_seeker.username, job_seeker.summary, job_seeker.city)
 
-@job_seekers_router.post('/cv', description= 'You can create your cvs from this section.', tags =['CV Section'])
+
+@job_seekers_router.post('/cv', description= 'You can create your cvs from this section.', 
+                         tags =['CV Section'])
+
 def create_cv(description: str = Form(),
               min_salary: int = Form(),
               max_salary: int = Form(),
@@ -107,7 +115,7 @@ def create_cv(description: str = Form(),
     seeker_username = current_user_payload.get('username')
     seeker_id = current_user_payload.get('id')
     seeker_id = job_seeker_services.get_job_seeker_info(seeker_username)
-    skill_list = parse_skills(skills)#['python;2', 'javascript;3']
+    skill_list = parse_skills(skills)
 
     if min_salary and max_salary:
         if min_salary > max_salary:
@@ -115,7 +123,7 @@ def create_cv(description: str = Form(),
 
     try:
         skill_names = [skill.split(';')[0] for skill in skill_list]
-        skill_levels = [skill.split(';')[1] for skill in skill_list] #[2,3]
+        skill_levels = [skill.split(';')[1] for skill in skill_list]
     except IndexError:
         return JSONResponse(status_code=400, content='Invalid input look at the description')
     
@@ -124,12 +132,17 @@ def create_cv(description: str = Form(),
     if len(skill_list) > 5:
         return JSONResponse(status_code=400, content='The maximum skill limit of 5 has been reached!')
     
-    return job_seeker_services.create_cv(description, location, is_remote, min_salary,max_salary,status,seeker_id[0][0], skill_names, skill_levels, is_main_cv)
+    return job_seeker_services.create_cv(description, location, is_remote, min_salary, max_salary, 
+                                         status,seeker_id[0][0], skill_names, skill_levels, is_main_cv)
 
-@job_seekers_router.put('/cv/edit', description= 'You can edit your cvs from this section.', tags =['CV Section'])
+
+@job_seekers_router.put('/cv/edit', description= 'You can edit your cvs from this section.', 
+                        tags =['CV Section'])
+
 def edit_cv(cv_id: int = Query(),description: str = Query(None), min_salary: int = Query(None),
             max_salary: int = Query(None), status: str =  Query(enum=['Active', 'Hidden', 'Private']),
-            skills: str = Query(None, description = 'Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'),
+            skills: str = Query(None, 
+                description = 'Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'),
             current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'seekers':
@@ -145,11 +158,13 @@ def edit_cv(cv_id: int = Query(),description: str = Query(None), min_salary: int
     try:
         skill_list = parse_skills(skills)
         skill_names = [skill.split(';')[0] for skill in skill_list]
-        skill_levels = [skill.split(';')[1] for skill in skill_list] #[2,3]
+        skill_levels = [skill.split(';')[1] for skill in skill_list]
+
     except IndexError:
         return JSONResponse(status_code=400, content='Invalid input look at the description')
+    
     except TypeError:
-        cv_skills_info_ids = job_seeker_services.get_existing_skills(cv_id) #2,10
+        cv_skills_info_ids = job_seeker_services.get_existing_skills(cv_id)
         skill_names = []
         skill_levels = []
 
@@ -159,6 +174,7 @@ def edit_cv(cv_id: int = Query(),description: str = Query(None), min_salary: int
                 skill_names.append(current_name)
                 current_skill_level = job_seeker_services.find_level_by_ids(cv_id, skill_id)
                 skill_levels.append(current_skill_level)
+        
         except IndexError:
             skill_names = []
             skill_list = []
@@ -177,10 +193,13 @@ def edit_cv(cv_id: int = Query(),description: str = Query(None), min_salary: int
     arg_max_salary = max_salary or cv_info[0][2]
     arg_description = description or cv_info[0][3]
 
-    return job_seeker_services.edit_cv(seeker_id, cv_id, arg_min_salary,arg_max_salary,arg_description, status, skill_names, skill_levels)
+    return job_seeker_services.edit_cv(seeker_id, cv_id, arg_min_salary, arg_max_salary, 
+                                       arg_description, status, skill_names, skill_levels)
 
 
-@job_seekers_router.get('/cv', description= 'You can view your cvs from this section.', tags =['CV Section'])
+@job_seekers_router.get('/cv', description= 'You can view your cvs from this section.', 
+                        tags =['CV Section'])
+
 def view_personal_cvs(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'seekers':
@@ -192,7 +211,9 @@ def view_personal_cvs(current_user_payload=Depends(get_current_user)):
     return job_seeker_services.view_personal_cvs(seeker_id)
 
 
-@job_seekers_router.post('/register', description= 'You can register with your personal information in this section.', tags=['Seeker & Company Signup'])
+@job_seekers_router.post('/register', description= 'You can register with your personal information in this section.', 
+                         tags=['Seeker & Company Signup'])
+
 def add_seeker(seeker_username: str = Form(),
               seeker_password: str = Form(),
               seeker_first_name: str = Form(), 
@@ -218,12 +239,16 @@ def add_seeker(seeker_username: str = Form(),
         return JSONResponse(status_code=409,
                             content=f'Seeker with username {current_seeker.username} already exists.')
 
-    new_seeker = job_seeker_services.create_seeker(current_seeker.username, current_seeker.password, current_seeker.first_name, current_seeker.last_name,
+    new_seeker = job_seeker_services.create_seeker(current_seeker.username, current_seeker.password, current_seeker.first_name, 
+                                                   current_seeker.last_name,
                                                    current_seeker.email, current_seeker.city, current_seeker.country)
+    
     return new_seeker
 
 
-@job_seekers_router.get('/search/job_ads', description= 'You can search specific job ads in this section by their salary.', tags=['Seeker Matching Section'])
+@job_seekers_router.get('/search/job_ads', description= 'You can search specific job ads in this section by their salary.', 
+                        tags=['Seeker Matching Section'])
+
 def search_job_ads_by_status(current_user_payload=Depends(get_current_user),
                               sort_percent: str =  Query(enum=['Best', 'Very good', 'Good', 'Bad', 'Worst'])):
 
@@ -234,10 +259,13 @@ def search_job_ads_by_status(current_user_payload=Depends(get_current_user),
     job_seeker_id = current_user_payload.get('id')
 
 
-    return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent, threshold_percent= None, perms = 'Seeker')
+    return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent, 
+                                                         threshold_percent= None, perms = 'Seeker')
 
 
-@job_seekers_router.get('/sorting_salary', description= 'You can search job ads by salary range in this section.', tags =['Seeker Matching Section'])
+@job_seekers_router.get('/sorting_salary', description= 'You can search job ads by salary range in this section.', 
+                        tags =['Seeker Matching Section'])
+
 def search_job_ads_by_salary(current_user_payload=Depends(get_current_user),
                               min_salary: int = Query(), max_salary: int = Query(),
                               threshold_percent: int = Query()):
@@ -254,10 +282,13 @@ def search_job_ads_by_salary(current_user_payload=Depends(get_current_user),
     salary_input = [min_salary, max_salary]
     perms = 'Seeker'
 
-    return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent,perms,threshold_percent, salary_input)
+    return job_seeker_services.calculate_percents_job_ad(job_seeker_id, sort_percent, perms, 
+                                                         threshold_percent, salary_input)
     
 
-@job_seekers_router.get('/companies/job_ads', description= 'You can view every specific company job ad from this section.', tags =['Seeker Section'])
+@job_seekers_router.get('/companies/job_ads', description= 'You can view every specific company job ad from this section.', 
+                        tags =['Seeker Section'])
+
 def get_job_ads_from_companies(current_user_payload=Depends(get_current_user)):
 
     if current_user_payload['group'] != 'seekers':
@@ -267,8 +298,9 @@ def get_job_ads_from_companies(current_user_payload=Depends(get_current_user)):
     return job_seeker_services.get_all_job_ads()
 
 
-# TODO: Test below (low priority)
-@job_seekers_router.get('{id}/avatar', description= 'You can view a specific job seeker avatar from this section.', tags=['Seeker Section'])
+@job_seekers_router.get('{id}/avatar', description= 'You can view a specific job seeker avatar from this section.', 
+                        tags=['Seeker Section'])
+
 def get_seeker_avatar(id: int, current_user_payload=Depends(get_current_user)):
     image_data = upload_services.get_picture(id, 'admins')
 
@@ -281,7 +313,10 @@ def get_seeker_avatar(id: int, current_user_payload=Depends(get_current_user)):
 
     return StreamingResponse(io.BytesIO(image_data), media_type="image/jpeg")
 
-@job_seekers_router.put('/main_cv', description= 'You can choose a main cv from this section.', tags=['CV Section'])
+
+@job_seekers_router.put('/main_cv', description= 'You can choose a main cv from this section.', 
+                        tags=['CV Section'])
+
 def select_main_cv(cv_id: int = Query(), current_user_payload=Depends(get_current_user)):
     
     if current_user_payload['group'] != 'seekers':

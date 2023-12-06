@@ -1,8 +1,7 @@
 from time import time
-
 from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, ExpiredSignatureError
+from jose import ExpiredSignatureError
 from pydantic import BaseModel
 
 from services.authorization_services import is_authenticated
@@ -42,8 +41,6 @@ def get_current_user(token: str = Depends(oauth_2_scheme)):
         raise HTTPException(status_code=401,
                             detail='Expired token.')
 
-
-# For info purposes
 class TokenInfo(BaseModel):
     id: int
     group: str

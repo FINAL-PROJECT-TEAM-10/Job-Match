@@ -1,16 +1,9 @@
 from data.database import read_query, insert_query, update_query
-from fastapi import Response
 from fastapi.responses import JSONResponse
 from app_models.company_models import Company
-from services import admin_services
-
+from services import admin_services, job_seeker_services
 from common.country_validators_helpers import *
-from services import job_seeker_services
 
-from data.database import update_queries_transaction
-
-
-# TODO: Consider using models to process data selects:
 
 def read_companies():
     data = read_query('SELECT * FROM companies')
@@ -33,8 +26,6 @@ def read_company_information(company: str):
     return next((Company.from_company_result(*row) for row in data), None)
 
 
-# TODO: The get below doesn't consider multiple addresses for a company!!!
-#  Consider having a main column to get a company's main address (medium priority)
 def get_company(username) -> None | Company:
     company_data = read_query('''
         SELECT c.id, c.username, cc.email, cc.address, cc.telephone, l.country, l.city, c.blocked
@@ -70,8 +61,9 @@ def find_company_id_byusername(nickname: str):
     return data[0][0]
 
 
-def create_company(Company_Name, Password, Company_City, Company_Country, Company_Adress, Telephone_Number,
-                   Email_Adress):
+def create_company(Company_Name, Password, Company_City, Company_Country, 
+                   Company_Adress, Telephone_Number, Email_Adress):
+    
     from services.authorization_services import get_password_hash
     location_id = admin_services.find_location_id(Company_City, Company_Country)
 
@@ -127,7 +119,6 @@ def everything_from_companies_by_username(username: str):
 def edit_company_information(username: str, description: str, city: str, address: str, telephone: int):
     company_id = find_company_id_byusername(username)
 
-    # This could also be a transaction
     update_query('UPDATE companies SET description = ? WHERE username = ?', (description, username,))
     update_query('UPDATE company_contacts SET address = ?, telephone = ? WHERE company_id = ?',
                  (address, telephone, company_id,))
@@ -140,15 +131,13 @@ def edit_company_information(username: str, description: str, city: str, address
         update_query('UPDATE company_contacts SET locations_id = ? WHERE company_id = ?',(location_id,company_id,))
 
     else:
-        # TODO: Consider removing the UPDATE query
-        #   If you already have a location, you don't need to, you don't need to update
+        
         location_id = job_seeker_services.find_location_id_by_city(city)
         update_query('UPDATE company_contacts SET locations_id = ? WHERE company_id = ?', (location_id, company_id,))
 
     return JSONResponse(status_code=200, content="You successfully edited your personal company information")
 
 
-# TODO: rename: this returns username by id, not the other way around
 def find_company_id_byusername_for_job_seeker(id: int):
     data = read_query('SELECT username FROM companies WHERE id = ?', (id,))
     return data[0][0]

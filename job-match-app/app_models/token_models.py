@@ -5,8 +5,6 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-
-# Mainly Used For Testing
 class AccessDataModel(BaseModel):
     id: int
     group: str

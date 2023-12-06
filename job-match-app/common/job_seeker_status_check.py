@@ -1,3 +1,4 @@
+
 def recognize_status(status: int):
 
     result =''
@@ -6,6 +7,5 @@ def recognize_status(status: int):
         result = 'Busy'
     else:
         result = 'Active'
-
 
     return result

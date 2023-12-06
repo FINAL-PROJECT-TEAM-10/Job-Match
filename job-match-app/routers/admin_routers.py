@@ -1,16 +1,13 @@
 import io
 from typing import Annotated
-
 from fastapi import APIRouter, Depends, Body, HTTPException
-
 from fastapi.responses import JSONResponse, StreamingResponse
-
 from app_models.admin_models import Admin
-from common.auth import get_current_user, TokenInfo
+from common.auth import get_current_user
 from common.country_validators_helpers import validate_location
 from services import admin_services, upload_services
 
-admin_router = APIRouter(prefix='/admin',tags={'Only for Admins'})
+admin_router = APIRouter(prefix='/admin',tags={'Admins section'})
 
 
 @admin_router.post('/register', response_model=Admin, responses={
@@ -36,7 +33,8 @@ admin_router = APIRouter(prefix='/admin',tags={'Only for Admins'})
             "text/plain": {"example": "Admin [USERNAME] already exists."}
                    }
         }
-})
+}, description= "If you are on our moderation team, you can create a specific admin from this section.")
+
 def add_admin(registration_details: Admin, password: Annotated[str, Body()], current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'admins':
         raise HTTPException(status_code=403,
@@ -56,7 +54,8 @@ def add_admin(registration_details: Admin, password: Annotated[str, Body()], cur
                         content=new_admin.json())
 
 
-@admin_router.delete('/temporary_tokens', description='Admin can delete all temporary tokens. Use with caution.')
+@admin_router.delete('/temporary_tokens', description='Admins can delete every temporary token from this section. Use with caution!')
+
 def delete_all_temp_tokens(current_user_payload=Depends(get_current_user)):
     if current_user_payload['group'] != 'admins':
         raise HTTPException(status_code=403,
@@ -68,9 +67,9 @@ def delete_all_temp_tokens(current_user_payload=Depends(get_current_user)):
                         content='All temporary tokens were deleted.')
 
 
-@admin_router.get('/{id}/avatar', description='This endpoint is not strictly for admins only.'
-                                              'It allows other users to view their avatars.'
-                                              'But only if authenticated.')
+@admin_router.get('/{id}/avatar', description='This section is not for admins only.'
+                                              ' It allows other users to view admins avatars.')
+
 def get_admin_avatar(id: int, current_user_payload=Depends(get_current_user)):
     image_data = upload_services.get_picture(id, 'admins')
 

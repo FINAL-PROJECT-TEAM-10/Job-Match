@@ -1,12 +1,9 @@
 import io
 from time import time
 from http.client import HTTPException
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, Body, Query, UploadFile, File
+from fastapi import APIRouter, Depends, Query, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 from jose import ExpiredSignatureError
-
 from app_models.input_models import PasswordUpdater
 from app_models.token_models import ActivationDataModel
 from common.auth import TokenInfo, get_current_user
@@ -14,17 +11,21 @@ from common.mailing import password_reset_email, password_reset_activation_email
 from services import authorization_services, company_services, job_seeker_services, admin_services, upload_services
 from services.upload_services import is_file_jpeg
 
-profile_router = APIRouter(prefix='/profile', tags={'Profile info and password management'})
+profile_router = APIRouter(prefix='/profile')
 
 
-@profile_router.get('/info', response_model=TokenInfo,
-                    responses={200: {"description": "Informs the user of basic info, which is included in the token."}})
+@profile_router.get('/info', response_model=TokenInfo, tags={'Profile information section'},
+                    responses={200: {"description": "Informs the user of basic info, which is included in the token."}}, 
+                    description="You can view additional information for your profile in this section.")
+
 def get_self(current_user_payload=Depends(get_current_user)):
     return JSONResponse(status_code=200,
                         content=current_user_payload)
 
 
-@profile_router.patch('/password')
+@profile_router.patch('/password', tags={'Profile information section'}, 
+                      description= "You can update your profile password in this section.")
+
 def update_password(credentials: PasswordUpdater,
                     current_user_payload=Depends(get_current_user)):
     if authorization_services.is_password_identical_by_type(current_user_payload, credentials.old_password):
@@ -39,7 +40,9 @@ def update_password(credentials: PasswordUpdater,
                             content='You did not input correctly your current password.')
 
 
-@profile_router.patch('/password/forgotten')
+@profile_router.patch('/password/forgotten', tags={'Password management section'}, 
+                      description= "You can reset your password using your email from this section.")
+
 def forgotten_password_activation_link(email: str, user_type: str):
     fake_payload = {}
     if user_type == 'admins':
@@ -67,7 +70,9 @@ def forgotten_password_activation_link(email: str, user_type: str):
                         content='If there is a user with such an email, an email will be sent.')
 
 
-@profile_router.get('/password/reset/')
+@profile_router.get('/password/reset/', tags={'Password management section'}, 
+                    description= "You can reset your profile password using your activation token in this section.")
+
 def password_reset(activation_token: str = Query()):
     if not authorization_services.activation_token_exists(activation_token):
         return JSONResponse(status_code=401,
@@ -94,11 +99,11 @@ def password_reset(activation_token: str = Query()):
 
     return JSONResponse(status_code=200,
                         content='Your password has been updated. A new password has been sent to your email.')
-    # return JSONResponse(status_code=200,
-    #                     content=response.json())
 
 
-@profile_router.get('/picture')
+@profile_router.get('/picture', tags={'Profile information section'}, 
+                    description= "You can view your profile avatar from this section.")
+
 def get_avatar(current_user_payload=Depends(get_current_user)):
     image_data = upload_services.get_picture(current_user_payload['id'], current_user_payload['group'])
 
@@ -109,7 +114,9 @@ def get_avatar(current_user_payload=Depends(get_current_user)):
     return StreamingResponse(io.BytesIO(image_data), media_type="image/jpeg")
 
 
-@profile_router.post('/picture')
+@profile_router.post('/picture', tags={'Profile information section'}, 
+                     description= "You can upload a profile avatar picture from this section.")
+
 def upload_picture(image_file: UploadFile, current_user_payload=Depends(get_current_user)):
     try:
         # NOTE: After spending hours on investigating why the image was not returned,
@@ -126,11 +133,11 @@ def upload_picture(image_file: UploadFile, current_user_payload=Depends(get_curr
         image_file.file.seek(0)
         max_file_size_bytes = 1024 * 1024
         # Interestingly, .size does not affect the reading of the image.
+
         if image_file.size > max_file_size_bytes:
             return JSONResponse(status_code=413,
                                 content=f'Image file too big. Please upload a file that is less than 1 MB.')
 
-        # image_file.file.seek(0)
         image_data = image_file.file.read()
         upload_services.upload_picture(current_user_payload, image_data)
 
