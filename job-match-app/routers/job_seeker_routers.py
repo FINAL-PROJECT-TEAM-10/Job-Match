@@ -48,7 +48,7 @@ def get_all_seekers(current_user_payload=Depends(get_current_user)):
     return result
 
 
-@job_seekers_router.get('/personal_info', description= 'You can view your personal information in this section.', 
+@job_seekers_router.get('/information', description= 'You can view your personal information in this section.', 
                         tags=['Seeker Section'])
 
 def your_information(current_user_payload=Depends(get_current_user)):
@@ -146,7 +146,6 @@ def create_cv(description: str = Form(),
 @job_seekers_router.put('/cv/edit', description= 'You can edit your cvs from this section.', 
                         tags =['CV Section'])
 
-@job_seekers_router.put('/cv/edit', description= 'You can edit your cvs from this section.', tags =['CV Section'])
 def edit_cv(cv_id: int = Form(),description: str = Form(None), min_salary: int = Form(None),
             max_salary: int = Form(None), status: str =  Form(enum=['Active', 'Hidden', 'Private']),
             skills: str = Form(None, description = 'Example: python;3,java;2,javascript;1 [1 - Beginner, 2 - Intermidiate, 3 - Advanced]'),
@@ -210,7 +209,7 @@ def edit_cv(cv_id: int = Form(),description: str = Form(None), min_salary: int =
                                        arg_description, status, skill_names, skill_levels)
 
 
-@job_seekers_router.get('/cv', description= 'You can view your cvs from this section.', 
+@job_seekers_router.get('/personal/cv', description= 'You can view your cvs from this section.', 
                         tags =['CV Section'])
 
 def view_personal_cvs(current_user_payload=Depends(get_current_user)):
@@ -279,7 +278,7 @@ def search_job_ads_by_status(current_user_payload=Depends(get_current_user),
                                                          threshold_percent= None, perms = 'Seeker')
 
 
-@job_seekers_router.get('/sorting_salary', description= 'You can search job ads by salary range in this section.', 
+@job_seekers_router.get('/search/salary', description= 'You can search job ads by salary range in this section.', 
                         tags =['Seeker Matching Section'])
 
 def search_job_ads_by_salary(current_user_payload=Depends(get_current_user),
@@ -329,7 +328,7 @@ def get_seeker_avatar(id: int, current_user_payload=Depends(get_current_user)):
     return StreamingResponse(io.BytesIO(image_data), media_type="image/jpeg")
 
 
-@job_seekers_router.put('/main_cv', description= 'You can choose a main cv from this section.', 
+@job_seekers_router.put('/main/cv', description= 'You can choose a main cv from this section.', 
                         tags=['CV Section'])
 
 def select_main_cv(cv_id: int = Query(), current_user_payload=Depends(get_current_user)):
