@@ -2,7 +2,9 @@ import unittest
 from datetime import datetime
 
 from unittest.mock import Mock, patch
+from fastapi.exceptions import HTTPException
 
+import services.job_ads_services
 from services import job_ads_services
 from app_models.job_ads_models import Job_ad
 
@@ -25,9 +27,9 @@ class JobAdsServices_Should(unittest.TestCase):
         now = datetime.now()
 
         with patch('services.job_ads_services.read_query') as read_query:
-            read_query.return_value = (
-                'description', 'city', 0, 1000, 2000, 'status', now
-            )
+            read_query.return_value = [
+                ('description', 'city', 0, 1000, 2000, 'status', now)
+            ]
 
             result = job_ads_services.get_job_ad_as_object(job_ad_id)
 
@@ -41,7 +43,14 @@ class JobAdsServices_Should(unittest.TestCase):
         self.assertEqual(now, result.date_posted)
 
     def test_getJobAdAsObject_ReturnsNone_IfNotFound(self):
-        pass
+        job_ad_id = 1
+
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.get_job_ad_as_object(job_ad_id)
+
+        self.assertIsNone(result)
 
     def test_findCompany_ReturnsInteger(self):
         pass
@@ -56,19 +65,122 @@ class JobAdsServices_Should(unittest.TestCase):
         pass
 
     def test_createJobAd_ReturnsJobAd(self):
-        pass
+        job_ad = fake_job_ad()
+        company_id = 1
+        requirements = []
+        requirements_levels = []
+
+        with patch('services.job_ads_services.read_query') as read_query, \
+                patch('services.job_ads_services.insert_query') as insert_query, \
+                patch('services.job_ads_services.update_query') as update_query, \
+                patch('services.company_services.find_location') as fl, \
+                patch('services.job_seeker_services.check_skill_exist') as cse:
+            read_query.return_value = [(1,)]
+            insert_query.return_value = 1
+            update_query.return_value = None
+            fl.return_value = [(job_ad.location_name,)]
+            cse.return_value = True
+
+            result = job_ads_services.create_job_add(
+                job_ad.description,
+                job_ad.location_name,
+                'No',
+                job_ad.min_salary,
+                job_ad.max_salary,
+                job_ad.status,
+                company_id,
+                requirements,
+                requirements_levels
+            )
+
+            self.assertIsInstance(result, Job_ad)
+            self.assertEqual('description', result.description)
+            self.assertEqual('city', result.location_name)
+            self.assertEqual(0, result.remote_status)
+            self.assertEqual(1000, result.min_salary)
+            self.assertEqual(2000, result.max_salary)
+            self.assertEqual('status', result.status)
+
+
 
     def test_createJobAd_UsesInsertQuery(self):
-        pass
+        job_ad = fake_job_ad()
+        company_id = 1
+        requirements = []
+        requirements_levels = []
+
+        with patch('services.job_ads_services.read_query') as read_query, \
+                patch('services.job_ads_services.insert_query') as insert_query, \
+                patch('services.job_ads_services.update_query') as update_query, \
+                patch('services.company_services.find_location') as fl:
+            read_query.return_value = [(1,)]
+            insert_query.return_value = 1
+            update_query.return_value = None
+            fl.return_value = [(job_ad.location_name,)]
+
+            result = job_ads_services.create_job_add(
+                job_ad.description,
+                job_ad.location_name,
+                job_ad.remote_status,
+                job_ad.min_salary,
+                job_ad.max_salary,
+                job_ad.status,
+                company_id,
+                requirements,
+                requirements_levels
+            )
+
+            insert_query.assert_called()
 
     def test_createJobAd_RaisesException_IfNoLocationAndNotRemote(self):
-        pass
+        job_ad = fake_job_ad()
+        company_id = 1
+        requirements = []
+        requirements_levels = []
+
+        #Added patch to protect database
+        with patch('services.job_ads_services.read_query') as read_query, \
+                patch('services.job_ads_services.insert_query') as insert_query, \
+                patch('services.job_ads_services.update_query') as update_query:
+            read_query.return_value = None
+            insert_query.return_value = None
+            update_query.return_value = None
+
+            with self.assertRaises(HTTPException) as bad_query:
+                job_ads_services.create_job_add(
+                    job_ad.description,
+                    None,
+                    'No',
+                    job_ad.min_salary,
+                    job_ad.max_salary,
+                    job_ad.status,
+                    company_id,
+                    requirements,
+                    requirements_levels
+                )
+
+        self.assertEqual(400, bad_query.exception.status_code)
+
+
+        company_id = 1
 
     def test_checkCompanyExists_ReturnsTrue_IfCompany(self):
-        pass
+        username = 'company'
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = [('random data from table',)]
+
+            result = job_ads_services.check_company_exist(username)
+
+        self.assertTrue(result)
 
     def test_checkCompanyExists_ReturnsFalse_IfNotFound(self):
-        pass
+        username = 'company'
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.check_company_exist(username)
+
+        self.assertFalse(result)
 
     def test_viewAllJobAds_ReturnsList(self):
         pass
@@ -84,14 +196,36 @@ class JobAdsServices_Should(unittest.TestCase):
     def test_findJobAdById_ReturnsInteger(self):
         pass
 
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_findJobAdById_ReturnsNone_IfNotFound(self):
-        pass
+        company_id = 1
+        description = 'description'
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.find_job_ad_by_id(company_id, description)
+
+        self.assertIsNone(result)
 
     def test_checkOwnerCompanyReturnsTrue_IfFound(self):
-        pass
+        job_ad_id = 1
+        company_id = 1
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = [('random data from table',)]
+
+            result = job_ads_services.check_requirement_ad_exist(job_ad_id, company_id)
+
+        self.assertTrue(result)
 
     def test_checkOwnerCompanyReturnsFalse_IfNotFound(self):
-        pass
+        job_ad_id = 1
+        company_id = 1
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.check_requirement_ad_exist(job_ad_id, company_id)
+
+        self.assertFalse(result)
 
     @unittest.skip("Testing for this was skipped.\n"
                    "Reason: The logic for this test is identical to the logic\n"
@@ -122,38 +256,100 @@ class JobAdsServices_Should(unittest.TestCase):
     def test_findRequirementById_ReturnsString(self):
         pass
 
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_findRequirementById_ReturnsNone_WhenNotFound(self):
-        pass
+        skill_id = 1
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.find_requirement_by_name(skill_id)
+
+            self.assertIsNone(result)
 
     def test_findRequirementsLevel_ReturnsString(self):
         pass
 
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_findRequirementLevel_ReturnsNone_WhenNotFound(self):
-        pass
+        job_ad_id = 1
+        requirement_id = 1
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.find_requirements_level(job_ad_id, requirement_id)
+
+        self.assertIsNone(result)
 
     def test_findRequirementByName_ReturnsString(self):
         pass
 
-    def test_findRequirementByName_ReturnsNone_WhenNotFound(self):
-        pass
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
+    def test_findRequirementByName_ReturnsNone_IfNotFound(self):
+        skill_name = 'skill'
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
 
-    def test_checkRequirementAdExist_ReturnsTrue_WhenFound(self):
-        pass
+            result = job_ads_services.find_requirement_by_name(skill_name)
+
+            self.assertIsNone(result)
+
+    def test_findRequirementByName_ReturnsTrue_WhenFound(self):
+        job_ad_id = 1
+        requirement_id = 1
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = [(1,)]
+
+            result = job_ads_services.check_requirement_ad_exist(job_ad_id, requirement_id)
+
+        self.assertTrue(result)
+
+    def test_checkRequirementAdExist_ReturnsFalse_WhenNotFound(self):
+        job_ad_id = 1
+        requirement_id = 1
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.check_requirement_ad_exist(job_ad_id, requirement_id)
+
+        self.assertFalse(result)
 
     def test_checkRequirementAdExist_ReturnsFalse_WhenNotFound(self):
         pass
 
     def test_convertLevelName_ReturnsCorrectInts(self):
-        pass
+        level = 'Beginner'
+        result = job_ads_services.convert_level_name(level)
+        self.assertEqual(1, result)
+
+        level = 'Intermidiate'
+        result = job_ads_services.convert_level_name(level)
+        self.assertEqual(2, result)
+
+        level = 'Advanced'
+        result = job_ads_services.convert_level_name(level)
+        self.assertEqual(3, result)
 
     def test_convertLevelName_RaisesException_InvalidInput(self):
-        pass
+        level = 'NotValid'
+
+        with self.assertRaises(HTTPException) as bad_query:
+            job_ads_services.convert_level_name(level)
+
+        self.assertEqual(400, bad_query.exception.status_code)
 
     def test_getLevelJobAd_ReturnsString(self):
         pass
 
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_getLevelJobAd_ReturnsNone_IfNotFound(self):
-        pass
+        job_ad_id = 1
+        skill_id = 1
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.get_level(job_ad_id, skill_id)
+
+            self.assertIsNone(result)
 
     # Method in services needs to be renamed to get_current_job_ads requirements
     def test_getCurrentJobAd_ReturnsCorrectlyFormattedList(self):
@@ -166,14 +362,29 @@ class JobAdsServices_Should(unittest.TestCase):
     def test_GetSkillName_ReturnsString(self):
         pass
 
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_GetSkillName_ReturnsNone_IfNotFound(self):
-        pass
+        skill_id = 1
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.get_skill_name(skill_id)
+
+            self.assertIsNone(result)
 
     def test_getLevel_ReturnsString(self):
         pass
 
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_getLevel_ReturnsNone_IfNotFound(self):
-        pass
+        cv_id = 1
+        skill_id = 1
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.get_level(cv_id, skill_id)
+
+            self.assertIsNone(result)
 
     def test_mainCvSkills_ReturnsCorrectlyFormattedList(self):
         pass
@@ -186,34 +397,69 @@ class JobAdsServices_Should(unittest.TestCase):
     def test_filterByCvSalaries_RaisesNotFoundException(self):
         pass
 
-    # This needs to be renamed in services and here
+    # Below two needs to be renamed in services and here
     def test_findNameForJobSeeker_ReturnsInteger(self):
         pass
 
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_findNameForJobSeeker_ReturnsNone_IfNotFound(self):
-        pass
+        cv_id = 1
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.find_name_for_job_seeker(cv_id)
+
+            self.assertIsNone(result)
 
     def test_findUsernameJobSeeker_ReturnsString(self):
         pass
 
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_findUsernameJobSeeker_IfNotFound(self):
-        pass
+        job_seeker_id = 1
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.find_username_job_seeker(job_seeker_id)
+
+            self.assertIsNone(result)
 
     def test_findSeekerNameCVDescriptionFromCV_ReturnsTwoStrings(self):
         pass
 
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_findSeekerNameCVDescriptionFromCV_ReturnsEmptyList_IfNotFound(self):
-        pass
+        cv_id = 1
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.find_seeker_name_cv_description_from_cv(cv_id)
+
+            self.assertIsNone(result)
 
     def test_getCvLocationId_ReturnsInteger(self):
         pass
 
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_getCvLocationId_ReturnsNone_IfNotFound(self):
-        pass
+        cv_id = 1
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.get_cv_location_id(cv_id)
+
+            self.assertIsNone(result)
 
     def test_getCvLocationDirectlyById_ReturnsString(self):
         pass
 
+    @unittest.skip("Optional test: this test will be activated at more thorough bug testing")
     def test_getCvLocationDirectlyById_ReturnsNone_IfNotFound(self):
-        pass
+        cv_id = 1
+        with patch('services.job_ads_services.read_query') as read_query:
+            read_query.return_value = []
+
+            result = job_ads_services.get_cv_location_directly_by_id(cv_id)
+
+            self.assertIsNone(result)
 
