@@ -67,6 +67,20 @@
                         });
             
                         const data = await response.json();
+                        if (response.status === 400) {
+                            const errorContainer = document.getElementById('errorContainer');
+                                errorContainer.innerHTML = `<p>${data.detail}</p>`;
+                            return;
+                            }else if (response.status === 404){
+                                const showContainer = document.getElementById('show');
+                                const noAdsMessage = document.createElement('div');
+                                noAdsMessage.className = 'job-ad-card';
+                                noAdsMessage.textContent = 'No pending matches found!';
+                                showContainer.appendChild(noAdsMessage);
+                                return;
+                            }
+
+
                         localStorage.setItem('currentPage', '1');
                         displayJobAds(data);
                         showPage(1)

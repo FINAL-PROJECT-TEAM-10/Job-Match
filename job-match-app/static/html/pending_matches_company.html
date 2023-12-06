@@ -70,6 +70,14 @@
                         });
                         
                         const data = await response.json();
+
+                        if (response.status !== 200) {
+                            const errorContainer = document.getElementById('errorContainer');
+                            errorContainer.innerHTML = `<p>${data.detail}</p>`;
+                            return;
+                            }else{
+                                errorContainer.innerHTML = `<p>${data.detail}</p>`; 
+                            }
                         localStorage.setItem('currentPage', '1');
                         displayJobAds(data);
                         showPage(1)
@@ -322,7 +330,7 @@
 
                             if (response.status !== 200) {
                             const errorContainer = document.getElementById('errorContainer');
-                            errorContainer.innerHTML = `<p>Error ${action}ing job ad: ${data.detail}</p>`;
+                            errorContainer.innerHTML = `<p> ${data.detail}</p>`;
                             return;
                             }else{
                                 errorContainer.innerHTML = `<p>${data.detail}</p>`; 
