@@ -6,10 +6,70 @@ _Skill, Sync, Match!_
 Borislav Bonev, Ivaylo Petrov, Andrey Filipov
 
 ## 🗺️Overview 🗺️
-[To be finalized]
+Skill Sync is a job matching app. The focus of Skill Sync is a backend
+with a normalized database. The backend was developed alongside a frontend in less than
+a month and the whole code totals over 10,000 lines. While future work involves,
+optimizing the code, a great chunk of its logic is necessary for all the functionality
+we support.
+
+Skill Sync matches professionals to companies by comparing features of a professional's CV
+to a companies posted Job Ad. Matches are mainly determined by two factors:
+demanded/offered salary and complementary skills listed in a CV/
+requirements listed in a Job Ad.
+
+These two types of users can also maintain some privacy
+regarding their activity on the website.
 
 ## ⚒️ Functionality ⚒️
-[To be finalized]
+
+### ⭐ Job Match ⭐
+The functionality of Skill Sync is best seen by running the frontend.
+
+Two types of users can be created by customers: job seekers and companies.
+
+Job seekers can create multiple CVs and choose one CV with which they can apply for
+open positions. CVs include a qualitative description, quantitative minimum and maximum
+expected salaries, list of skills that are relevant to the CV and applicable locations for
+work. Our application supports CVs and job offers that are fully remote. Job seekers
+can have only one main CV active at a time.
+
+Similarly, companies can post job ads that contain information mirroring the CVs.
+Most importantly, job ads have salary conditions and required skills. Companies can have
+more than one active job ads. What is more, companies can match multiple CVs to a single
+job ad.
+
+Our matching logic aimed for user-experience flexibility. Users can adjust how strict
+their salary requirements are by extending their search in both directions by a
+percentage they input. Moreover, our platform supports searching for potential matches
+based on skills/requirements.
+
+'Best' potential matches are 100% matches. 'Very good' potential matches are between 75% and 100%.
+'Good' potential matches are 50% to 75%.
+If the customer wants to see 'Bad' matches, they receive results for 25% to 50 match.
+Users can still see the remaining potential matches by choosing 'Worst'.
+
+Once receiving the results of the search, a user can choose to match to the complementary
+offer (CV/Job ad). This informs the opposing user via email that somebody is trying
+to match with them alongside with contact details of the one who sent the invitation.
+They can also see the pending matches in the frontend, where they can finalize the match.
+
+### 🎛️ Admins 🎛️
+
+A third type of user is the admin user. Only admins can create other admins.
+Similar, to the job seeker, the admin is a person and shares a lot of
+the attributes a job seeker has, and this is reflected in the normalized database.
+
+The admin current admin functionality allows for managing their own profile,
+adding other admins, as well as adding and deleting skills/requirements.
+Our vision was that companies and job seekers would use the frontend to
+sample from a predetermined database of skills (for CVs) and requirements (for Job ads)
+
+Admins can also delete temporary tokens. Temporary tokens are currently used when a
+user has forgotten their password. A confirmation email carrying a 60 minunte token
+is sent to the user's given email address. On activating the password reset link,
+the user receives a second email with the randomly generated password that they can
+use immediately. The token in this case is deleted automatically, but admins can delete
+all temporary tokens that were to keep the database clean from unactivated tokens.
 
 ## 💿Installation 💿
 [To be finalized]
@@ -18,23 +78,30 @@ Borislav Bonev, Ivaylo Petrov, Andrey Filipov
 
 
 ### 🗿 Models 🗿
-Models are found in _/data/models.py_
+We have several models that support OOP principles in our API.
+These will be used and expanded on in future iterations of the codebase, as we
+transition to a more object-centred approach.
 
-| Modeled | Number of Models | Types of Models | Purpose |
-|---------|------------------|-----------------|---------|
-|         |                  |                 |         |
-|         |                  |                 |
-|         |                  |                 |         |
-|         |                  |                 |         |
-|         |                  |                 |         |
-|         |                  |                 |         |
-|         |                  |                 |         |
+We have models for all types of users as well as class methods that help us
+create objects from SQL queries. For the same reason we created models for CVs and Job
+ads, as well as skills and requirements.
+
+We have a couple of validators for usernames and passwords. For email validation we use
+an extra validator in pydantic called EmailStr.
+
+There are also three token models. One used for functioning of the app, one exclusively
+for testing, and one used both for testing and functioning of the app.
 
 ### 🗃️ Common Files 🗃️
-
 #### 🗝️ Authorization 🗝️
+Getting a user based on a token has been written out here. The main token info
+was decided to be placed here, so that it can be found easily.
 
 #### 🌍 Country Validators 🌍
+
+We validate locations used by users of Skill Sync through OpenCageGeocode.
+That way we ensure that the location-based part of our searches doesn't fail because
+validation kicks during the creation of database entries such as users, CVs, and job ads.
 
 #### ☑️ Job Seeker Status Check ☑️
 
@@ -137,7 +204,6 @@ There are four types of queries that are written out in _database.py_
 
 
 ## 🔬 Future Work 🔬
-
 ### 🔐 Password reset 🔐
 A possible addition to the database is to track when a password is last modified and prompt the user to change
 their password once a certain threshold has been passed.
@@ -157,8 +223,7 @@ The token is generated after querying the database.
 
 For example, old admins and malicious
 attackers only have 20 minutes to carry out token-based requests with old or hijacked tokens,
-while normal users can have sessions of 1440 minutes (24 hours) without being reprompted to log back in.
-[NOTE: Change it to 20 min before going live]
+while normal users can have sessions of 20 minutes without being reprompted to log back in.
 
 However, it would be better to use shorter access tokens (that do not query every time the database)
 ) and use refresh tokens, while also whitelisting/blacklisting tokens so that tokens can be managed better.
@@ -169,6 +234,38 @@ If important user changes happen or if we believe the database has been compromi
 order to force users to login again and receive their new, updated.
 
 ### 💥 Cascade deletions 💥
+Deletions should be developed further in the future.
+Currently, an admin can delete skills and requirements as admins are part of the
+moderation team that supports what skills/requirements other users can pick from
+the database to form their CVs/Job ads.
+
+These are implemented through transactions. However, as the database grows,
+the complexity and readability of these transactions will shrink. Cascade deletions
+directly supported by the database will be the answer to this.
+
+However, it is important to note that this might lead to unexpected behaviour for users.
+Great care must be observed to assure that if a modular entry in the database is affected
+all relevant information is also deleted.
+
+As the database does not contain dynamic information such as, for example,
+the percent of matching between a CV and a Job Ad, updating such variables is not needed.
+
+### 🔧 Refactoring 🔧
+The code is over 10,000 lines (frontend and backend), which is both a blessing and a curse.
+
+As the project grew, the SQL-heavy strategy of the project came at a price.
+By calling queries for needed on the spot information from a table, our connections
+are not optimal.
+
+We recognized the need for an OOP-centric approach midway, however, it would have
+taken a significant amount of refactoring to obtain even a fraction of our functionality
+before the cut-off date for a project.
+
+In the future, most queries to the database will be culled, and objects would be passed
+around in the backend. Future unit tests would reflect the anticipated
+emphasis on the OOP paradigm.
+
+Some refactoring needs to be done for typos and method naming.
 
 
 # Appendix
@@ -198,7 +295,7 @@ order to force users to login again and receive their new, updated.
   - picture, logo: dark orange
 - String data: columns that contain string information necessary for application functionality
   - username, password, description, etc.: grey
-- Unconnected data: primary keys that do not interact with other tables but are necessary for Skill-Sync
+- Unconnected data: primary keys that do not interact with other tables but are necessary for Skill Sync
   - temporary tokens (id): purple
 
 Note*: approval status, career type, date posted, and date matched logic has not been
@@ -277,9 +374,9 @@ The guide to setting up Mailjet is provided on their website. You need to follow
 Within the guide, it is explained [how to create a Mailjet account](https://app.mailjet.com/signup),
 then how to retrieve [both your API and Secret keys](https://app.mailjet.com/account/api_keys).
 
-For the mailing functionality of Skill-Sync to function, you need to include four things in
+For the mailing functionality of Skill Sync to function, you need to include four things in
 _job-match-app/private_details.py_: the public API, the Secret key, and the sender's email
-(the registration email). The fourth is the address of Skill-Sync.
+(the registration email). The fourth is the address of Skill Sync.
 
 ```
 mailjet_public_api_key = 'XXXXXXXXXXXXXXXXXXXXXXXXXXX'
@@ -287,7 +384,7 @@ mailjet_secret_api_key = 'XXXXXXXXXXXXXXXXXXXXXXXXXXX'
 mailjet_sender_email = 'XXXXXXXXXXXXXXXXXXXX@XXXX.XXX'
 ```
 
-You also need to define the address on which the Skill-Sync API is run.
+You also need to define the address on which the Skill Sync API is run.
 ```
 skill_sync_address = 'XXXXXXXXXXXXXXXXX'
 ```

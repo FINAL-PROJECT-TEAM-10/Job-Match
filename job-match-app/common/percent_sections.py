@@ -30,7 +30,7 @@ def percent_section_helper(current_sort, list_of_percentages, perms, matched_ski
             result.append(create_current_dict(company_id, job_ad_info, value, 
                                               perms, skills_matched_ad, skills_unmatched_ad))
         
-        if current_sort == 'Bad' and  25 <= value < 49:
+        if current_sort == 'Bad' and  25 <= value < 50:
             job_ad_info = find_info_by_id(int(key), perms)
             company_id = find_names(job_ad_info[0][0], perms)
             skills_matched_ad = matched_skills[key]
@@ -38,7 +38,7 @@ def percent_section_helper(current_sort, list_of_percentages, perms, matched_ski
             result.append(create_current_dict(company_id, job_ad_info, value, perms, 
                                               skills_matched_ad, skills_unmatched_ad))
 
-        if current_sort == 'Worst' and  0 <= value < 24:
+        if current_sort == 'Worst' and  0 <= value < 25:
             job_ad_info = find_info_by_id(int(key), perms)
             company_id = find_names(job_ad_info[0][0], perms)
             skills_matched_ad = matched_skills[key]

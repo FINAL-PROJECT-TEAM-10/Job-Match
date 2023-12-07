@@ -12,7 +12,7 @@ from fastapi import HTTPException
 _SECRET_KEY = '2d776838352e75a9f95de915c269c8ce45b12de47f720213c5f71c4e25618c25'
 _CUSTOM_SECRET_KEY = 'b1b2c3d4e5f6g7890123456789abcdef0123456789194def0123456789e2186a'
 _ALGORITHM = 'HS256'
-_TOKEN_EXPIRATION_TIME_MINUTES = timedelta(minutes=1440)
+_TOKEN_EXPIRATION_TIME_MINUTES = timedelta(minutes=20)
 _ACTIVATION_TOKEN_EXPIRATION_TIME_MINUTES = timedelta(minutes=60)
 
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated="auto")
