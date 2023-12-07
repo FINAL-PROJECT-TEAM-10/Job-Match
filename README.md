@@ -20,6 +20,10 @@ requirements listed in a Job Ad.
 These two types of users can also maintain some privacy
 regarding their activity on the website.
 
+🔴YouTube video showcase for our back-end functionality🔴
+
+🎥 https://www.youtube.com/watch?v=Api-EOCmOC8 🎥
+
 ## ⚒️ Functionality ⚒️
 
 ### ⭐ Job Match ⭐
@@ -72,7 +76,31 @@ use immediately. The token in this case is deleted automatically, but admins can
 all temporary tokens that were to keep the database clean from unactivated tokens.
 
 ## 💿Installation 💿
-[To be finalized]
+💻 Clone the Repository 💻
+
+  Download or clone the repository to your local machine.
+
+📁 Navigate to the Application Folder 📁
+
+  Open the folder that contains the application on your computer.
+
+🛢️ Configure Database 🛢️
+
+  If you are using a database, execute the provided SQL script or perform the necessary steps to set up the database for the application.
+
+📄 Create _private_details.py File 📄
+
+  Create a file named _private_details.py in the root of the application. This file holds private information such as API keys, database credentials, etc.
+
+📦 Install Required Packages 📦
+
+  Install the required Python packages mentioned in the README.
+
+✅ Start the Application ✅
+
+  Run the application using the main.py file.
+
+  The application should now be up and running. If you encounter any issues during the installation process, please refer to our documentation.
 
 ## 🏭 API Structure ️🏭
 
@@ -337,8 +365,6 @@ Some refactoring needs to be done for typos and method naming.
 
 # Appendix
 
-## 💻 Front-End  💻
-[To be updated]
 
 ## 🗺️ Database Overview 🗺️
 
