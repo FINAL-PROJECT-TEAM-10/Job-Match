@@ -484,6 +484,7 @@ pip install bcrypt
 pip install mailjet_rest
 pip install jinja2
 pip install pillow
+pip install pydantic[email]
 ```
 
 # Thanks!
