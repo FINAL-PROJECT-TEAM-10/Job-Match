@@ -301,16 +301,24 @@ def get_level(mini_cv_id, skill_id):
 
 
 def get_main_cv_skills(mini_cv_id: int):
-    data = read_query('SELECT skills_or_requirements_id FROM mini_cvs_has_skills WHERE mini_cvs_id = ?', (mini_cv_id,))
+    # data = read_query('SELECT skills_or_requirements_id FROM mini_cvs_has_skills WHERE mini_cvs_id = ?', (mini_cv_id,))
+    #
+    # result_pairs = [
+    #     f"{get_skill_name(id)};{get_level(mini_cv_id, id)}"
+    #     for job_ad in data
+    #     for id in job_ad
+    # ]
 
-    result_pairs = [
-        f"{get_skill_name(id)};{get_level(mini_cv_id, id)}"
-        for job_ad in data
-        for id in job_ad
-    ]
+    data = read_query('''
+        SELECT sr.id, sr.name, mcs.level
+        FROM mini_cvs_has_skills as mcs
+        JOIN skills_or_requirements as sr ON sr.id = mcs.skills_or_requirements_id
+        WHERE mcs.mini_cvs_id = ?''',
+                      (mini_cv_id,))
+
+    result_pairs = [f'{row[1]};{row[2]}' for row in data]
 
     return result_pairs
-
 
 def filter_by_cv_salaries(job_ad_range, cvs_calculated_salaries):
     job_ad_min_salary = job_ad_range[0]
