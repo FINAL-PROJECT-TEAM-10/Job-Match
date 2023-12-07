@@ -138,6 +138,22 @@
                         if (key.toLowerCase().includes('status')) {
                             const isMatched = key.toLowerCase().includes('status');
                             valueElement.style.color = isMatched ? '#F4E406' : '#e74c3c';
+                        }else if (key.toLowerCase().includes('job ad id')) {
+                            valueElement.style.color = '#D72638'
+                        }else if (key.toLowerCase().includes('job ad description')) {
+                            valueElement.style.color = '#B8B8B8'
+                        }else if (key.toLowerCase().includes('minimal salary')) {
+                            valueElement.style.color = '#29BF12'
+                        }else if (key.toLowerCase().includes('maximum salary')) {
+                            valueElement.style.color = '#F21B3F'
+                        }else if (key.toLowerCase().includes('preferred location')) {
+                            valueElement.style.color = '#FF9914'
+                        }else if (key.toLowerCase().includes('ad created on')) {
+                            valueElement.style.color = '#FF9914'
+                        }else if (key.toLowerCase().includes('date of match request')) {
+                            valueElement.style.color = '#FF9914'
+                        }else if (key.toLowerCase().includes('sender')) {
+                            valueElement.style.color = '#067BC2'
                         }
 
                         pairContainer.appendChild(keyElement);

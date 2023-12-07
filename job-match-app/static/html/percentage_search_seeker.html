@@ -162,6 +162,20 @@
                             if (all_requirements) {
                                 valueElement.style.color = all_requirements ? '#2ecc71' : '#e74c3c';
                             }
+                        }else if (key.toLowerCase().includes('job ad id')) {
+                            valueElement.style.color = '#D72638'
+                        }else if (key.toLowerCase().includes('company')) {
+                            valueElement.style.color = '#067BC2'
+                        }else if (key.toLowerCase().includes('description')) {
+                            valueElement.style.color = '#B8B8B8'
+                        }else if (key.toLowerCase().includes('minimum salary')) {
+                            valueElement.style.color = '#29BF12'
+                        }else if (key.toLowerCase().includes('maximum salary')) {
+                            valueElement.style.color = '#F21B3F'
+                        }else if (key.toLowerCase().includes('prefered location')) {
+                            valueElement.style.color = '#FF9914'
+                        }else if (key.toLowerCase().includes('match percent based')) {
+                            valueElement.style.color = '#DC0073'
                         }
 
                         pairContainer.appendChild(keyElement);

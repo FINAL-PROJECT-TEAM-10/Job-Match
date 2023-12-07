@@ -72,8 +72,6 @@
                             const errorContainer = document.getElementById('errorContainer');
                                 errorContainer.innerHTML = `<p>${data.detail}</p>`;
                             return;
-                            }else{
-                                errorContainer.innerHTML = `<p>${data.detail}</p>`; 
                             }
                         localStorage.setItem('currentPage', '1');
                         displayJobAds(data);
@@ -134,13 +132,25 @@
                             const isPrivate = value.includes('Private')
                             const isHidden = value.includes('Hidden')
                             if (isActive) {
-                                valueElement.style.color = '#00FF00';
+                                valueElement.style.color = '#2ecc71';
                             } else if (isPrivate) {
                                 valueElement.style.color = '#FF0000';
                             } else if (isHidden) {
                                 valueElement.style.color = '#808080';
                             }
-                        }
+                        }else if (key.toLowerCase().includes('cv id')) {
+                            valueElement.style.color = '#067BC2'
+                        }else if (key.toLowerCase().includes('cv description')) {
+                            valueElement.style.color = '#B8B8B8'
+                        }else if (key.toLowerCase().includes('location')) {
+                            valueElement.style.color = '#FF9914'
+                        }else if (key.toLowerCase().includes('minimum salary')) {
+                            valueElement.style.color = '#29BF12'
+                        }else if (key.toLowerCase().includes('maximum salary')) {
+                            valueElement.style.color = '#F21B3F'
+                        }else if (key.toLowerCase().includes('date posted')) {
+                            valueElement.style.color = '#FF9914'
+                        } 
 
                         pairContainer.appendChild(keyElement);
                         pairContainer.appendChild(valueElement);
