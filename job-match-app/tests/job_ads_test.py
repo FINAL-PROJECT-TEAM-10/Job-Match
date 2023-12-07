@@ -6,6 +6,7 @@ from unittest.mock import Mock, patch
 import mariadb
 from fastapi.exceptions import HTTPException
 
+import common.percent_jobad_calculator
 import services.job_ads_services
 from services import job_ads_services
 from app_models.job_ads_models import Job_ad
@@ -580,9 +581,36 @@ class JobAdsServices_Should(unittest.TestCase):
         self.assertEqual('python;advanced', result[0])
         self.assertEqual('java;beginner', result[1])
 
-    @unittest.skip('CLOSE TO IMPOSSIBLE TO TEST, needs convoluted patching.')
+    @unittest.skip('CLOSE TO IMPOSSIBLE TO TEST, needs convoluted patching.\n'
+                   'The sprawling queries forced me to quit on testing.\n'
+                   'Insanity ensues.')
     def test_calculatePercentageCv_ReturnsCorrectPercentages(self):
-        pass
+        perms = 'Seeker'
+        salary_range = (1000, 2000)
+        sorting = 'Best'
+        with patch('services.job_ads_services.read_query') as read_query , \
+                patch('services.job_ads_services.calculate_cv_salaries') as calculate_cv_salaries, \
+                patch('services.job_ads_services.find_name_for_job_seeker') as fnjs_id, \
+                patch('services.job_ads_services.find_username_job_seeker') as fujs, \
+                patch('services.job_seeker_services.get_cv_location_name') as gcln, \
+                patch('services.job_seeker_services.get_cv_location_id') as gcli, \
+                patch('services.job_ads_services.get_main_cv_skills') as gmcs, \
+                patch('services.job_ads_services.get_current_job_ad') as gcja, \
+                patch('common.percent_jobad_calculator.find_matched') as find_matched, \
+                patch('common.percent_jobad_calculator.find_unmatched') as find_unmatched, \
+                patch('common.percent_jobad_calculator.percentage_calculator') as percentage_calculator:
+            percentage_calculator.return_value = 100
+            find_unmatched.return_value = 'Unmatched Skills'
+            find_matched.return_value = 'Matched Skills'
+            gmcs.return_value = 1
+            gcli.return_value = 1
+            gcja.return_value = 1
+            gcln.return_value = 1
+            fujs.return_value = 1
+            fnjs_id.return_value = 1
+            read_query.return_value = 1
+
+            calculate_cv_salaries.return_value = {1: (1000, 2000)}
 
     def test_GetSkillName_ReturnsString(self):
         skill_id = 1
@@ -631,23 +659,14 @@ class JobAdsServices_Should(unittest.TestCase):
 
         with patch('services.job_ads_services.read_query') as read_query:
             read_query.return_value = [
-                ('python', 'advanced'),
-                ('java', 'beginner')
+                (1, 'python', 'advanced'),
+                (2, 'java', 'beginner')
             ]
 
             result = job_ads_services.get_main_cv_skills(mini_cv_id)
 
         self.assertEqual('python;advanced', result[0])
         self.assertEqual('java;beginner', result[1])
-
-    def test_filterByCvSalaries_ReturnsListWithDicts(self):
-        pass
-
-    @unittest.skip("Currently this returns a JSONResponse.\n"
-                   "The logic would be identical for a HTTPException with a status code 200.\n"
-                   "Which can be used better by our front-end.")
-    def test_filterByCvSalaries_RaisesNotFoundException(self):
-        pass
 
     # Below two needs to be renamed in services and here
     def test_findNameForJobSeeker_ReturnsInteger(self):
