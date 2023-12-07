@@ -7,6 +7,7 @@ import bcrypt
 import jwt
 from jose import JWTError
 from passlib.context import CryptContext
+from fastapi.exceptions import HTTPException
 
 import services.authorization_services
 from app_models.admin_models import Admin
@@ -225,10 +226,11 @@ class AuthorizationServices_Should(unittest.TestCase):
         encoded_access = authorization_services.create_access_token(user_data)
         encoded_activation = authorization_services.create_activation_token(user_data)
 
-        with self.assertRaises(JWTError):
-            authorization_services.is_authenticated(encoded_activation)
-        with self.assertRaises(JWTError):
-            authorization_services.is_authenticated_custom(encoded_access)
+        with self.assertRaises(HTTPException):
+            with self.assertRaises(JWTError):
+                authorization_services.is_authenticated(encoded_activation)
+            with self.assertRaises(JWTError):
+                authorization_services.is_authenticated_custom(encoded_access)
 
     def test_isAuthenticatedReturnsMeaningfulToken(self):
         # I wrote this test out, but worth noting that DecodableToken test is very similar in logic

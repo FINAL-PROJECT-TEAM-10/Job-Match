@@ -418,22 +418,24 @@ class CompanyServices_Should(unittest.TestCase):
             with patch('services.job_seeker_services.find_location_by_city') as find_location_by_city:
                 find_location_by_city.return_value = True
 
-                company_services.edit_company_information(company.username,
-                                                          company.description,
-                                                          company.city,
-                                                          company.address,
-                                                          company.telephone)
+                with self.assertRaises(HTTPException):
+                    company_services.edit_company_information(company.username,
+                                                              company.description,
+                                                              company.city,
+                                                              company.address,
+                                                              company.telephone)
 
                 self.assertTrue(update_query.call_count == 3 or update_queries_transaction.call_count == 1)
 
             with patch('services.job_seeker_services.find_location_by_city') as find_location_by_city:
                 find_location_by_city.return_value = False
 
-                company_services.edit_company_information(company.username,
-                                                          company.description,
-                                                          company.city,
-                                                          company.address,
-                                                          company.telephone)
+                with self.assertRaises(HTTPException):
+                    company_services.edit_company_information(company.username,
+                                                              company.description,
+                                                              company.city,
+                                                              company.address,
+                                                              company.telephone)
 
                 # Update query below has to include both this cases calls and the previous cases calls
                 # That is where the magic number comes from instead of 3
@@ -461,11 +463,12 @@ class CompanyServices_Should(unittest.TestCase):
 
                 find_location_by_city.return_value = False
 
-                company_services.edit_company_information(company.username,
-                                                          company.description,
-                                                          company.city,
-                                                          company.address,
-                                                          company.telephone)
+                with self.assertRaises(HTTPException):
+                    company_services.edit_company_information(company.username,
+                                                              company.description,
+                                                              company.city,
+                                                              company.address,
+                                                              company.telephone)
 
             # Update query below has to include both this cases calls and the previous cases calls
             # That is where the magic number comes from instead of 3
