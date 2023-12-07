@@ -104,20 +104,59 @@ That way we ensure that the location-based part of our searches doesn't fail bec
 validation kicks during the creation of database entries such as users, CVs, and job ads.
 
 #### ☑️ Job Seeker Status Check ☑️
+Checks if a seeker has made a successful match.
+
+#### 📫 Mailing 📫
+Supports mailing functionality. Currently, supports four types of emails.
+One for password reset requests and one for confirming the new generated password,
+as well as two emails each of which handling pending matches.
+
+Users are notified when a complementary user sends them a pending match request.
 
 #### ➗ Separators Validator ➗
+Here skills and requirements are validated so that the database and the frontend
+can communicate.
+
+#### 🟰 Calculators 🟰
+Two important calculators are described in _common_: one that calculates the
+percentage match between skills, and one that can change salary threshold by a certain
+percent.
+
+Moreover, the percentage calculator is complemented by a sectioner that determines
+what is the exact cut-off for 'Best', 'Very good', 'Good', 'Bad', etc. matches are.
+This will give us flexibility to respond to user feedback.
+
+These are important for the flexibility of user experience.
 
 ### 🛤️ Routers 🛤️
-
+With close to 50 endpoints, we attempted to provide as much functionality as possible.
 #### 🎛️ Admin Routers 🎛️
+Allows for the aforementioned functionality of adding other admins, deleting tokens,
+changing skills/requirements.
 
 #### 🏛️ Company Routers 🏛️
+Allows for a company to view all companies, to view and edit its own information,
+to view the main cv of a job seeker.
 
 #### 📃 Job Ads Routers 📃
+Jobs can be created through here. A specific company's job ad can be seen.
+A company can see its own active or archived job ads and edit them.
 
 #### 👤 Job Seeker Routers 👤
+Allows for viewing all job seekers. A job seeker can view and edit their own professional
+info, as well as to get job ads from companies. Here, professionals can also create,
+view, and edit their CVs. Importantly, they can also select their main CV, which
+is to be used for matching
 
 #### 🪙 Token Router 🪙
+A hidden router that supports authentication and authorization.
+
+#### 💞🏛️ Company Matching Routers 🏛️💞
+Where the search, match, viewing pending, and cancelling matches magic happens.
+
+#### 💞👤 Job Seeker Matching Routers 👤💞
+Where the search, match, viewing pending, and cancelling matches magic happens.
+
 
 #### 📄 Further Documentation 📄
 Some of the routers accept dynamic variables in the body of requests in JSON format.
@@ -129,10 +168,12 @@ http://127.0.0.1:8000/docs. The automatic documentation supports authentication 
 functionality.
 
 ### ⚙️ Services ⚙️
-[To be finalized]
 #### 🎛️ Admin services  🎛️
+Supports basic admin functionality with a couple of crucial methods.
 
 #### 🗝️ Authorization Services 🗝️
+Authorization services are described in detail for those inclined towards security.
+
 | Method                                                                  | Parameters                        | Purpose                                                                                                                          |
 |-------------------------------------------------------------------------|-----------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
 | _verify_password_                                                       | text_password, hashed password    | verifies input password against hashed password in database                                                                      |
@@ -153,10 +194,36 @@ functionality.
 
 
 #### 🏛️ Company Services 🏛️
+Supports basic functionality as well as creating and editing a company.
 
 #### 📃 Job Ads Services 📃
+Supports both simple functionality such as selecting relevant bits of information from
+the database for job ads, as well as more advanced functionality, such as creating an ad,
+updating it, getting relevant CVs, and calculation logic to match with CVs, amongst others.
 
 #### 👤Job Seeker Services 👤
+Supports both simple functionality such as selecting relevant bits of information from
+the database for users, as well as more advanced functionality, such as creating a CV,
+updating the main CV, getting relevant job ads, and even calculation logic to match
+with job ads. Other methods are also present.
+
+### 💞🏛️ Company Matching Services 🏛️💞
+Hosts the method that sends pending matches and finalizes matches with CVs.
+Logic is that if the match does not exist in the junction table between job ads
+and CVs it is sent as pending, while if it is already at pending and the one who
+made it pending is a job seeker, the match is finalized.
+
+Contains additional helper methods.
+
+#### 💞👤 Job Seeker Matching Services 👤💞
+Complementary and similar to the method for matching CVs.
+Hosts the method that sends pending matches and finalizes matches with job ads.
+
+Contains additional helper methods.
+#### ⚽ Skills and Requirements Services ⚽
+Supports basic skills/requirements functionality. Also hosts more advanced functionality
+for admins such as deleting unused skills or force deleting skills from both their own
+database table and the any CVs or job ads that have them.
 
 #### 📤 Upload Services📤
 A routerless service file has been created to harbour upload functionality.
@@ -185,7 +252,7 @@ In addition, _private_details.py_ contains information about the
 Mailjet public and secret api keys as well as the sender email that
 Mailjet, an automated mailing solution, uses when sending emails through the app.
 
-[To be finalized: upload a censored image]
+![private_details.py](./images/private_details.png)
 
 ### 📅 Database Communication 📅
 Connections to the active database are described in _job-match-app/data/database.py_
