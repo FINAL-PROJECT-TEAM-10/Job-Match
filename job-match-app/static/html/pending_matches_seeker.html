@@ -88,6 +88,33 @@
                         console.error('Error fetching personal info:', error);
                     }
                 }
+
+
+                function showPage(page) {
+                    const itemsPerPage = 3;
+
+                    const allAds = document.querySelectorAll('.job-ad-card');
+                    allAds.forEach((ad) => {
+                        ad.style.display = 'none';
+                    });
+
+                    const start = (page - 1) * itemsPerPage;
+                    const end = start + itemsPerPage;
+
+                    const newAds = document.querySelectorAll(`.job-ad-card`);
+                    newAds.forEach((ad, index) => {
+                        if (index >= start && index < end) {
+                            ad.style.display = 'block';
+                        }
+                    });
+
+                    const paginationButtons = document.querySelectorAll('#pagination button');
+                    paginationButtons.forEach((button, index) => {
+                        button.classList.toggle('active', index + 1 === page);
+                    });
+
+                    localStorage.setItem('currentPage', page);
+                }
             
                 function displayJobAds(data) {
                 const showContainer = document.getElementById('show');
@@ -209,7 +236,7 @@
                             const url = `http://127.0.0.1:8000/seekers/match/cancel?job_ad_id=${jobId}`;
 
                             const response = await fetch(url, {
-                                method: 'POST',
+                                method: 'PUT',
                                 headers: {
                                     'Authorization': `Bearer ${access_token}`,
                                     'Content-Type': 'application/json',
