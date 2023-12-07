@@ -1,6 +1,6 @@
 import io
 from time import time
-from http.client import HTTPException
+from fastapi import HTTPException
 from fastapi import APIRouter, Depends, Query, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 from jose import ExpiredSignatureError
