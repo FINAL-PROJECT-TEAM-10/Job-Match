@@ -502,6 +502,8 @@ _requirements.txt_ file. [Will be uploaded at December 7th, the latest]
 ### 💿 Library Installation Code 💿
 
 ```
+pip install fastapi
+pip install uvicorn
 pip install opencage
 pip install python-jose[cryptography] 
 pip install passlib
